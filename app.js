@@ -117,64 +117,64 @@ const defaultScripts = [
 
 const webTools = [
   {
-    title: "Pipe Cutter Visualizer",
+    title: "Pipe Cutter 3D preview with DXF saddle templates",
     description:
-      "3D saddle-cut preview for pipe-to-pipe joints with adjustable wall thickness, offsets, and bevels.",
+      "Visualize intersecting pipes, tweak wall thickness or offsets, and export saddle outlines ready for CNC plasma cutters.",
     badge: "Pipe Cutter",
     link: "utilities/pipe-cutter/",
     standard: "ASME B31.3 · ISO 9606",
     metrics: ["Three.js preview", "DXF export"],
-    features: ["Live view of intersecting pipes", "Exports printable DXF templates"],
+    features: ["Real-time 3D viewport", "Printable DXF template"],
   },
   {
-    title: "Cylindrical Shell Rolling",
+    title: "Shell Rolling calculator for EN 13445 / ASME VIII jobs",
     description:
-      "Calculate roll offsets, bending allowance, and developed lengths for pressure vessel shells.",
+      "Determine roll spacing, bending allowance, and developed lengths for cylindrical shells that comply with EN and ASME pressure codes.",
     badge: "Shell Rolling",
     link: "utilities/cylindrical-shell-rolling/",
     standard: "EN 13445 · ASME VIII",
     metrics: ["Roll offsets", "Bend allowance"],
-    features: ["Supports EN/ASME inputs", "Exports offsets for shop packages"],
+    features: ["Supports EN/ASME inputs", "Exports shop-ready offsets"],
   },
   {
-    title: "Metal Bending Prototype",
+    title: "Sheet-metal bending sandbox with K-factor controls",
     description:
-      "K-factor playground for sheet-metal bend deductions to keep CAD and press brake aligned.",
+      "Experiment with K-factor, neutral axis, and bend deduction to match press brake behavior and keep SolidWorks configurations accurate.",
     badge: "Bend Lab",
     link: "utilities/metal-bending/",
     standard: "ISO 2768 · ANSI Y14.5",
     metrics: ["K-factor", "Bend deduction"],
-    features: ["Tune K-factor and neutral axis", "Outputs bend allowance + deduction"],
+    features: ["Interactive K-factor tuning", "Outputs allowance + deduction"],
   },
   {
-    title: "Interactive Thread Cheat Sheet",
+    title: "Thread atlas (ISO / UNC / UNF drill charts)",
     description:
-      "Browse ISO, UNC, and UNF threads, drill sizes, and callouts for drawings and travelers.",
+      "Search ISO metric coarse/fine, UNC, and UNF threads, preview recommended drill diameters, and copy callouts for drawings.",
     badge: "Thread Atlas",
     link: "utilities/interactive-thread/",
     standard: "ISO 965 · UNC/UNF",
     metrics: ["Metric & inch", "Drill sizes"],
-    features: ["Search across ISO/UNC/UNF tables", "Copy recommended drill diameters"],
+    features: ["Filterable tables", "Copy/paste ready callouts"],
   },
   {
-    title: "PDF Number Extractor",
+    title: "PDF number extractor for QA records",
     description:
-      "Extract part numbers or serial IDs from PDFs entirely offline for QA traceability.",
+      "Open QA reports or drawings, highlight numeric strings (serials, BOM IDs) and export them without sending files to external services.",
     badge: "Doc Parser",
     link: "utilities/pdf-number-extractor/",
     standard: "Offline",
     metrics: ["Regex filters", "CSV export"],
-    features: ["Drag-drop PDFs without uploads", "Highlight + export matched values"],
+    features: ["Drag-drop PDFs", "Highlight and export matches"],
   },
   {
-    title: "QR Nameplate Generator",
+    title: "QR nameplate generator with branding presets",
     description:
-      "Generate QR-enabled equipment tags with branding, multilingual text, and export to SVG/PNG.",
+      "Create serialized equipment tags with logos, safety info, and QR codes. Export as SVG/PNG for printing or laser marking.",
     badge: "QR Tags",
     link: "utilities/qr-nameplate/",
     standard: "ISO 3864 · Traceability",
     metrics: ["SVG/PNG", "Branding"],
-    features: ["Custom logo + palette", "Serial numbering and QR codes"],
+    features: ["Custom palette + logo", "Auto serial + QR"],
   },
 ];
 
