@@ -92,6 +92,8 @@ body.utility-shell {
   position: relative;
   width: min(1440px, calc(100vw - 64px));
   max-width: 1440px;
+  flex: 1 1 auto;
+  min-width: min(960px, 100%);
   margin: 0 auto;
   min-height: clamp(520px, 60vh, 1320px);
   border: 1px solid rgba(255, 255, 255, 0.08);
