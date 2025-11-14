@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CAD AutoScript • SolidWorks Макросы и Генераторы</title>
+    <title>CAD AutoScript • SolidWorks Macros & Calculators</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,32 +17,32 @@
       <div class="hero__content">
         <div class="hero__meta">
           <span class="logo">CAD AutoScript</span>
-          <span class="tagline">SolidWorks макросы, веб‑инструменты и отчеты</span>
+          <span class="tagline">SolidWorks macros, online tools, and report generators</span>
         </div>
         <div class="hero__text">
-          <h1>Центр макросов и расчетов SolidWorks</h1>
+          <h1>Automation hub for SolidWorks engineers</h1>
           <p>
-            Соберите свои макросы и вспомогательные web сервисы в одном месте.
-            Разделы по типам задач, быстрый поиск и возможность добавлять новые
-            скрипты и генераторы расчетов без разработки бэкенда.
+            Keep your custom macros, calculators, and QA reports together. Curated disciplines,
+            fast search, and the ability to add new scripts or generators without spinning up a
+            backend.
           </p>
           <div class="hero__actions">
-            <a class="button primary" href="#catalog">Каталог макросов</a>
-            <a class="button ghost" href="#tools">Web инструменты</a>
+            <a class="button primary" href="#catalog">Browse macro catalog</a>
+            <a class="button ghost" href="#tools">View web tools</a>
           </div>
         </div>
         <div class="hero__stats">
           <div class="stat-card">
             <strong id="stat-count">18</strong>
-            <span>готовых решений</span>
+            <span>ready automations</span>
           </div>
           <div class="stat-card">
-            <strong>5 категорий</strong>
-            <span>для SolidWorks</span>
+            <strong>5 disciplines</strong>
+            <span>for SolidWorks</span>
           </div>
           <div class="stat-card">
-            <strong>3 генератора</strong>
-            <span>отчетов и расчетов</span>
+            <strong>3 generators</strong>
+            <span>for reports & calcs</span>
           </div>
         </div>
       </div>
@@ -52,23 +52,23 @@
       <section class="panel" id="catalog">
         <div class="panel__header">
           <div>
-            <p class="eyebrow">Каталог макросов</p>
-            <h2>Готовые скрипты по разделам SolidWorks</h2>
+            <p class="eyebrow">Macro catalog</p>
+            <h2>SolidWorks scripts sorted by discipline</h2>
           </div>
           <div class="panel__actions">
             <label class="input input--icon">
-              <span>Поиск</span>
+              <span>Search</span>
               <input
                 id="search"
                 type="search"
-                placeholder="Например: листовой металл, pdf отчёт, BOM"
+                placeholder="Example: sheet metal DXF, PDF report, BOM"
               />
             </label>
-            <button class="button" id="reset-filter">Сбросить</button>
+            <button class="button" id="reset-filter">Reset</button>
           </div>
         </div>
         <div class="panel__filters">
-          <div class="filter-label">Разделы</div>
+          <div class="filter-label">Disciplines</div>
           <div class="filter-chips" id="category-filters"></div>
           <div class="filter-badges">
             <span class="badge">SolidWorks 2022+</span>
@@ -81,74 +81,69 @@
 
       <section class="panel panel--split" id="add-script">
         <div>
-          <p class="eyebrow">Конструктор</p>
-          <h2>Добавьте свой макрос или кейс</h2>
+          <p class="eyebrow">Submission form</p>
+          <h2>Add your macro or automation case</h2>
           <p>
-            Заполните форму и сохраните шаблон локально. Новые элементы
-            моментально появятся в каталоге и сохранятся в вашем браузере.
+            Fill in the form and keep the template locally. New entries appear in the catalog
+            instantly and stay in your browser storage.
           </p>
           <ul class="checklist">
-            <li>Поддержка новых разделов автоматически</li>
-            <li>Хранение локально, без серверной части</li>
-            <li>Ссылки на репозиторий, документацию и отчеты</li>
+            <li>New disciplines get generated automatically</li>
+            <li>Local storage, no backend or accounts</li>
+            <li>Links to Git repos, documentation, and report templates</li>
           </ul>
         </div>
         <form id="script-form" class="form">
           <label class="input">
-            <span>Название макроса</span>
-            <input name="title" type="text" required placeholder="Быстрый BOM PDF" />
+            <span>Macro title</span>
+            <input name="title" type="text" required placeholder="Fast BOM PDF" />
           </label>
           <label class="input">
-            <span>Описание</span>
+            <span>Description</span>
             <textarea
               name="description"
               rows="3"
               required
-              placeholder="Коротко о задаче, результат и формат данных"
+              placeholder="Briefly describe the task, output format, and toolchain"
             ></textarea>
           </label>
           <div class="form__row">
             <label class="input">
-              <span>Раздел</span>
-              <input
-                name="category"
-                type="text"
-                required
-                placeholder="Например: Чертежи"
-              />
+              <span>Discipline</span>
+              <input name="category" type="text" required placeholder="e.g. Drawings" />
             </label>
             <label class="input">
-              <span>Версия SolidWorks</span>
+              <span>SolidWorks version</span>
               <input name="version" type="text" placeholder="2024 SP1" />
             </label>
           </div>
           <label class="input">
-            <span>Теги</span>
-            <input name="tags" type="text" placeholder="pdf, bom, отчеты" />
+            <span>Tags</span>
+            <input name="tags" type="text" placeholder="pdf, bom, reports" />
           </label>
           <label class="input">
-            <span>Ссылка на репозиторий или документ</span>
+            <span>Repository or source link</span>
             <input name="link" type="url" placeholder="https://..." />
           </label>
           <label class="input">
-            <span>Документация</span>
+            <span>Documentation</span>
             <input name="doc" type="url" placeholder="https://..." />
           </label>
-          <button class="button primary" type="submit">Сохранить макрос</button>
+          <button class="button primary" type="submit">Save macro</button>
         </form>
       </section>
 
       <section class="panel" id="tools">
         <div class="panel__header">
           <div>
-            <p class="eyebrow">Web инструменты</p>
-            <h2>Генераторы расчетов и отчетов</h2>
+            <p class="eyebrow">Web utilities</p>
+            <h2>Calculators and report generators</h2>
             <p>
-              Онлайн калькуляторы, валидаторы спецификаций и шаблоны рапортов,
-              которые ускоряют подготовку производства.
+              Online calculators, specification validators, and templates built around EU EN/ISO and
+              US ASME standards to accelerate manufacturing deliverables.
             </p>
           </div>
-          <a class="button ghost" href="#add-script">Добавить свой генератор</a>
+          <a class="button ghost" href="#add-script">Submit a generator</a>
         </div>
         <div class="tools-grid" id="tool-list"></div>
       </section>
@@ -157,17 +152,17 @@
     <footer class="footer">
       <div>
         <strong>CAD AutoScript</strong>
-        <p>Песочница для SolidWorks макросов, отчетов и web калькуляторов.</p>
+        <p>Sandbox for SolidWorks macros, reports, and browser-based calculators.</p>
       </div>
       <div class="footer__links">
-        <a href="#catalog">Каталог макросов</a>
-        <a href="#tools">Генераторы расчетов</a>
-        <a href="#add-script">Добавить решение</a>
+        <a href="#catalog">Macro catalog</a>
+        <a href="#tools">Report generators</a>
+        <a href="#add-script">Submit automation</a>
       </div>
-      <div class="footer__note">Локальное хранение • Нет лишних зависимостей</div>
+      <div class="footer__note">Local storage • No extra dependencies</div>
     </footer>
 
-    <div id="snackbar" class="snackbar" role="status">Сохранено</div>
+    <div id="snackbar" class="snackbar" role="status">Saved</div>
 
     <script src="app.js" type="module"></script>
   </body>

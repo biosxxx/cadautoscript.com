@@ -3,150 +3,150 @@ const storageKey = "cadAutoScript:scripts";
 const defaultScripts = [
   {
     id: "bom-pdf",
-    title: "BOM в PDF + логотип",
+    title: "BOM to PDF with branding",
     description:
-      "Собирает спецификацию из сборки, добавляет логотип отдела и публикует PDF отчёт с подписью инженера.",
-    category: "Отчеты",
+      "Builds a bill of materials from an assembly, applies department branding, and exports a PDF packet aligned with EN ISO 16792 and ASME Y14.100 drawing practices.",
+    category: "Reports",
     tags: ["BOM", "PDF", "report"],
     version: "SolidWorks 2023",
     status: "stable",
     link: "https://example.com/bom-pdf",
     doc: "https://example.com/bom-doc",
-    complexity: "VBA • 40 строк",
-    updated: "Март 2024",
+    complexity: "VBA • 40 lines",
+    updated: "March 2024",
   },
   {
     id: "sheet-metal",
-    title: "Листовые развертки DXF",
+    title: "Sheet-metal DXF export",
     description:
-      "Автоматизирует экспорт разверток листовых деталей в DXF, именует файлы по номеру проекта и толщине.",
-    category: "Производство",
-    tags: ["DXF", "листовой металл", "CAM"],
+      "Automates flat pattern export to DXF with filenames based on project ID and thickness while following ISO 9013 tolerances for laser/plasma cutting.",
+    category: "Manufacturing",
+    tags: ["DXF", "sheet metal", "CAM"],
     version: "SolidWorks 2022",
     status: "stable",
     link: "https://example.com/sheet-metal",
     doc: "https://example.com/sheet-manual",
     complexity: "C# Add-in",
-    updated: "Январь 2024",
+    updated: "January 2024",
   },
   {
     id: "drawing-check",
-    title: "Проверка оформления чертежа",
+    title: "Drawing compliance checker",
     description:
-      "Сверяет оформление с ГОСТ: шрифты, размеры, заполнение основной надписи и наличие штампа изменений.",
-    category: "Чертежи",
-    tags: ["QC", "ГОСТ", "drafting"],
+      "Verifies title blocks, fonts, and revision tables against ISO 7200 / ASME Y14.35 workflows, highlighting anything that breaks company CAD governance.",
+    category: "Drawings",
+    tags: ["QC", "ISO 7200", "drafting"],
     version: "SolidWorks 2024",
     status: "beta",
     link: "https://example.com/drawing-check",
-    doc: "https://example.com/gost-guide",
-    complexity: "VSTA • 60 строк",
-    updated: "Апрель 2024",
+    doc: "https://example.com/iso-guide",
+    complexity: "VSTA • 60 lines",
+    updated: "April 2024",
   },
   {
     id: "configurator",
-    title: "Конфигуратор вариантов",
+    title: "Configuration builder",
     description:
-      "Формирует набор конфигураций по таблице Excel, создает выражения и экспортирует STEP комплекты.",
-    category: "Автоматизация",
+      "Generates configurations from Excel tables, drives equations, and publishes STEP bundles so purchasing can reference EN 10204 and ASTM certificates.",
+    category: "Automation",
     tags: ["config", "excel", "step"],
     version: "SolidWorks 2021",
     status: "stable",
     link: "https://example.com/configurator",
     doc: "https://example.com/config-doc",
-    complexity: "VBA • 55 строк",
-    updated: "Сентябрь 2023",
+    complexity: "VBA • 55 lines",
+    updated: "September 2023",
   },
   {
     id: "sim-report",
-    title: "Рапорт расчета Simulation",
+    title: "Simulation summary report",
     description:
-      "Собирает результаты расчета прочности, графики напряжений и формирует PDF рапорт для руководителя.",
-    category: "Аналитика",
-    tags: ["simulation", "прочность", "pdf"],
+      "Collects stress plots and creates a PDF summary referencing EN 13445 and ASME VIII design check sections for management review.",
+    category: "Analytics",
+    tags: ["simulation", "stress", "pdf"],
     version: "SolidWorks 2023",
     status: "stable",
     link: "https://example.com/sim-report",
     doc: "https://example.com/sim-doc",
     complexity: "C# + API",
-    updated: "Февраль 2024",
+    updated: "February 2024",
   },
   {
     id: "revision-pack",
-    title: "Пакет обновления ревизий",
+    title: "Revision deliverable pack",
     description:
-      "Перенумерует ревизии, обновляет штампы и собирает пакет PDF, DXF и STEP для выдачи технологам.",
-    category: "Производство",
+      "Renumbers revisions, updates stamps, and generates PDF/DXF/STEP deliverables for suppliers with EN 1090 traceability metadata.",
+    category: "Manufacturing",
     tags: ["revision", "pdf", "step"],
     version: "SolidWorks 2020",
     status: "stable",
     link: "https://example.com/revision-pack",
     doc: "https://example.com/revision-guide",
-    complexity: "VBA • 35 строк",
-    updated: "Декабрь 2023",
+    complexity: "VBA • 35 lines",
+    updated: "December 2023",
   },
   {
     id: "part-library",
-    title: "Создание библиотеки стандартных деталей",
+    title: "Standard part library builder",
     description:
-      "Загружает перечни крепежа из PLM и создает параметрические библиотеки с фильтром по стандарту.",
-    category: "Автоматизация",
+      "Imports fastener lists from PLM, builds parametric libraries with filters for DIN/ISO/ANSI codes, and syncs to shared vaults.",
+    category: "Automation",
     tags: ["library", "PLM", "CSV"],
     version: "SolidWorks 2024",
     status: "beta",
     link: "https://example.com/part-library",
     doc: "https://example.com/library-doc",
     complexity: "Python API",
-    updated: "Май 2024",
+    updated: "May 2024",
   },
   {
     id: "eco-dashboard",
-    title: "Экологический отчет изделия",
+    title: "Environmental impact dashboard",
     description:
-      "Вычисляет массу материалов, формирует Excel отчет по ISO 14040 и прикладывает ссылки на паспорта.",
-    category: "Отчеты",
+      "Calculates material mass, generates Excel reports aligned with ISO 14040, and links to REACH/RoHS compliance sheets.",
+    category: "Reports",
     tags: ["eco", "excel", "ISO"],
     version: "SolidWorks 2022",
     status: "stable",
     link: "https://example.com/eco",
     doc: "https://example.com/eco-doc",
     complexity: "Excel + VBA",
-    updated: "Ноябрь 2023",
+    updated: "November 2023",
   },
 ];
 
 const webTools = [
   {
-    title: "Генератор отчета по толерансам",
+    title: "Tolerance report generator",
     description:
-      "Строит PDF с контрольными размерами, допусками и QR-ссылкой на 3D модель.",
+      "Builds PDF inspection sheets with key characteristics, tolerances per ISO 286 / ASME Y14.5, and QR codes that link to 3D models.",
     badge: "Tolerance Lab",
     link: "https://example.com/tolerance",
-    metrics: ["5 мин на выпуск", "ГОСТ 25346"],
+    metrics: ["5 min release", "ISO 286"],
   },
   {
-    title: "Калькулятор массы сварных рам",
+    title: "Welded frame mass calculator",
     description:
-      "Онлайн расчет веса, см. центра масс и стоимости обработки для рам.",
+      "Estimates weight, center of gravity, and machining budgets for frames based on EN 1090 and AWS D1.1 load cases.",
     badge: "Fabrix Tool",
     link: "https://example.com/frame-mass",
-    metrics: ["Металл БСТ3", "CSV export"],
+    metrics: ["Structural steel", "CSV export"],
   },
   {
-    title: "Валидатор спецификаций ERP",
+    title: "ERP specification validator",
     description:
-      "Сверяет позиции c ERP, подсвечивает дубликаты и выгружает план закупок.",
+      "Compares BOM data with ERP, flags duplicates, and exports purchase plans while mapping UNSPSCs and ECCN attributes.",
     badge: "ERP Sync",
     link: "https://example.com/erp-sync",
     metrics: ["XML/JSON", "REST API"],
   },
   {
-    title: "Генератор рапортов испытаний",
+    title: "Test report generator",
     description:
-      "Заполняет шаблон Word, прикрепляет графики и публикует в Confluence.",
+      "Fills Word templates, attaches charts, and publishes findings to Confluence with EN ISO 7500-1 compliant traceability.",
     badge: "Test Pilot",
     link: "https://example.com/test-report",
-    metrics: ["Word DOCX", "API Atlassian"],
+    metrics: ["Word DOCX", "Atlassian API"],
   },
 ];
 
@@ -166,7 +166,7 @@ const loadScripts = () => {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.warn("Ошибка чтения localStorage", error);
+    console.warn("LocalStorage read error", error);
     return [];
   }
 };
@@ -175,7 +175,7 @@ const persistScripts = (items) => {
   try {
     localStorage.setItem(storageKey, JSON.stringify(items));
   } catch (error) {
-    console.warn("Ошибка записи localStorage", error);
+    console.warn("LocalStorage write error", error);
   }
 };
 
@@ -222,7 +222,7 @@ const createChip = (label, value) => {
 
 const renderFilters = () => {
   filtersEl.innerHTML = "";
-  filtersEl.appendChild(createChip("Все разделы", null));
+  filtersEl.appendChild(createChip("All disciplines", null));
   getCategories().forEach((category) => {
     filtersEl.appendChild(createChip(category, category));
   });
@@ -239,11 +239,11 @@ const createCardMarkup = (script) => {
   const statusClass = script.status === "beta" ? "status--beta" : "status--stable";
   const docLink =
     script.doc && script.doc.length
-      ? `<a class="button ghost" href="${script.doc}" target="_blank" rel="noopener">Документация</a>`
+      ? `<a class="button ghost" href="${script.doc}" target="_blank" rel="noopener">Docs</a>`
       : "";
   const actionLink =
     script.link && script.link.length
-      ? `<a class="button primary" href="${script.link}" target="_blank" rel="noopener">Открыть</a>`
+      ? `<a class="button primary" href="${script.link}" target="_blank" rel="noopener">Open</a>`
       : "";
 
   return `
@@ -286,8 +286,8 @@ const renderScripts = () => {
   if (!filtered.length) {
     scriptListEl.innerHTML = `
       <div class="empty-state">
-        <p>Нет макросов по выбранным фильтрам.</p>
-        <small>Попробуйте другой раздел или добавьте решение через форму.</small>
+        <p>No macros for the selected filters.</p>
+        <small>Try another discipline or add your macro through the form.</small>
       </div>
     `;
   } else {
@@ -306,7 +306,7 @@ const renderTools = () => {
           <div class="tool-meta">
             ${tool.metrics.map((metric) => `<span class="tag">${metric}</span>`).join("")}
           </div>
-          <a class="button primary" href="${tool.link}" target="_blank" rel="noopener">Открыть</a>
+          <a class="button primary" href="${tool.link}" target="_blank" rel="noopener">Open</a>
         </article>
       `
     )
@@ -345,14 +345,14 @@ formEl?.addEventListener("submit", (event) => {
     id: crypto.randomUUID ? crypto.randomUUID() : `macro-${Date.now()}`,
     title: (formData.get("title") || "").trim(),
     description: (formData.get("description") || "").trim(),
-    category: (formData.get("category") || "").trim() || "Прочее",
+    category: (formData.get("category") || "").trim() || "General",
     tags,
     version: (formData.get("version") || "SolidWorks").trim(),
     status: "beta",
     link: (formData.get("link") || "").trim(),
     doc: (formData.get("doc") || "").trim(),
     complexity: "Custom",
-    updated: new Intl.DateTimeFormat("ru-RU", { month: "long", year: "numeric" }).format(new Date()),
+    updated: new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date()),
   };
 
   scripts = [newScript, ...scripts];
@@ -361,7 +361,7 @@ formEl?.addEventListener("submit", (event) => {
   renderFilters();
   renderScripts();
   formEl.reset();
-  showSnackbar("Макрос сохранен локально");
+  showSnackbar("Macro stored locally");
 });
 
 renderFilters();
