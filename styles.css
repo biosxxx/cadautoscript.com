@@ -422,6 +422,27 @@ main {
   margin-top: 24px;
 }
 
+.utility-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 16px 0 0;
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+}
+
+.utility-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.utility-list li::before {
+  content: "•";
+  font-size: 1.1rem;
+  color: var(--accent-strong);
+}
+
 .tool-card {
   background: linear-gradient(135deg, rgba(22, 32, 56, 0.9), rgba(11, 14, 24, 0.95));
   border-radius: 24px;
