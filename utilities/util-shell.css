@@ -83,12 +83,13 @@ body.utility-shell {
 .utility-main {
   flex: 1;
   padding: 32px;
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
-.utility-card {
+.utility-card,
+.utility-about {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
@@ -96,6 +97,53 @@ body.utility-shell {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.utility-about {
+  position: relative;
+  transition: max-height 0.25s ease, opacity 0.25s ease, padding 0.25s ease, margin 0.25s ease;
+  overflow: hidden;
+}
+
+.utility-about.is-collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: -8px;
+  border-color: transparent;
+  opacity: 0;
+}
+
+.utility-about__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.utility-toggle {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f5f7ff;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.utility-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.utility-frame-wrapper {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
+  background: #050b1e;
+  overflow: hidden;
+  min-height: 70vh;
 }
 
 .utility-card h2 {
@@ -123,12 +171,11 @@ body.utility-shell {
 }
 
 .tool-frame {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
   width: 100%;
-  min-height: calc(100vh - 240px);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
-  background: #050b1e;
+  height: 100%;
+  min-height: calc(100vh - 300px);
+  border: none;
+  background: transparent;
 }
 
 .utility-note {
@@ -139,10 +186,10 @@ body.utility-shell {
 
 @media (max-width: 960px) {
   .utility-main {
-    grid-template-columns: 1fr;
+    padding: 24px;
   }
 
   .tool-frame {
-    min-height: 70vh;
+    min-height: 60vh;
   }
 }

@@ -115,76 +115,12 @@ const defaultScripts = [
   },
 ];
 
-const webTools = [
-  {
-    title: "Pipe Cutter 3D preview with DXF saddle templates",
-    description:
-      "Visualize intersecting pipes, tweak wall thickness or offsets, and export saddle outlines ready for CNC plasma cutters.",
-    badge: "Pipe Cutter",
-    link: "utilities/pipe-cutter/",
-    standard: "ASME B31.3 · ISO 9606",
-    metrics: ["Three.js preview", "DXF export"],
-    features: ["Real-time 3D viewport", "Printable DXF template"],
-  },
-  {
-    title: "Shell Rolling calculator for EN 13445 / ASME VIII jobs",
-    description:
-      "Determine roll spacing, bending allowance, and developed lengths for cylindrical shells that comply with EN and ASME pressure codes.",
-    badge: "Shell Rolling",
-    link: "utilities/cylindrical-shell-rolling/",
-    standard: "EN 13445 · ASME VIII",
-    metrics: ["Roll offsets", "Bend allowance"],
-    features: ["Supports EN/ASME inputs", "Exports shop-ready offsets"],
-  },
-  {
-    title: "Sheet-metal bending sandbox with K-factor controls",
-    description:
-      "Experiment with K-factor, neutral axis, and bend deduction to match press brake behavior and keep SolidWorks configurations accurate.",
-    badge: "Bend Lab",
-    link: "utilities/metal-bending/",
-    standard: "ISO 2768 · ANSI Y14.5",
-    metrics: ["K-factor", "Bend deduction"],
-    features: ["Interactive K-factor tuning", "Outputs allowance + deduction"],
-  },
-  {
-    title: "Thread atlas (ISO / UNC / UNF drill charts)",
-    description:
-      "Search ISO metric coarse/fine, UNC, and UNF threads, preview recommended drill diameters, and copy callouts for drawings.",
-    badge: "Thread Atlas",
-    link: "utilities/interactive-thread/",
-    standard: "ISO 965 · UNC/UNF",
-    metrics: ["Metric & inch", "Drill sizes"],
-    features: ["Filterable tables", "Copy/paste ready callouts"],
-  },
-  {
-    title: "PDF number extractor for QA records",
-    description:
-      "Open QA reports or drawings, highlight numeric strings (serials, BOM IDs) and export them without sending files to external services.",
-    badge: "Doc Parser",
-    link: "utilities/pdf-number-extractor/",
-    standard: "Offline",
-    metrics: ["Regex filters", "CSV export"],
-    features: ["Drag-drop PDFs", "Highlight and export matches"],
-  },
-  {
-    title: "QR nameplate generator with branding presets",
-    description:
-      "Create serialized equipment tags with logos, safety info, and QR codes. Export as SVG/PNG for printing or laser marking.",
-    badge: "QR Tags",
-    link: "utilities/qr-nameplate/",
-    standard: "ISO 3864 · Traceability",
-    metrics: ["SVG/PNG", "Branding"],
-    features: ["Custom palette + logo", "Auto serial + QR"],
-  },
-];
-
 const scriptListEl = document.getElementById("script-list");
 const filtersEl = document.getElementById("category-filters");
 const searchInput = document.getElementById("search");
 const resetBtn = document.getElementById("reset-filter");
 const statCountEl = document.getElementById("stat-count");
 const formEl = document.getElementById("script-form");
-const toolsEl = document.getElementById("tool-list");
 const snackbar = document.getElementById("snackbar");
 
 const loadScripts = () => {
@@ -323,37 +259,6 @@ const renderScripts = () => {
   }
 };
 
-const renderTools = () => {
-  toolsEl.innerHTML = webTools
-    .map(
-      (tool) => `
-        <article class="tool-card" data-theme="${tool.badge}">
-          <div class="tool-card__head">
-            <span class="badge">${tool.badge}</span>
-            <span class="pill">Web</span>
-          </div>
-          <strong>${tool.title}</strong>
-          <p>${tool.description}</p>
-          ${
-            tool.features
-              ? `<ul class="tool-card__features">${tool.features
-                  .map((feature) => `<li>${feature}</li>`)
-                  .join("")}</ul>`
-              : ""
-          }
-          <div class="tool-card__metrics">
-            ${tool.metrics.map((metric) => `<span class="tag">${metric}</span>`).join("")}
-          </div>
-          <div class="tool-card__footer">
-            <span class="tool-card__standard">${tool.standard || ""}</span>
-            <a class="button primary" href="${tool.link}" target="_blank" rel="noopener">Launch</a>
-          </div>
-        </article>
-      `
-    )
-    .join("");
-};
-
 const showSnackbar = (message) => {
   if (!snackbar) return;
   snackbar.textContent = message;
@@ -407,5 +312,4 @@ formEl?.addEventListener("submit", (event) => {
 
 renderFilters();
 renderScripts();
-renderTools();
 updateStatCount();

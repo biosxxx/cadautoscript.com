@@ -20,8 +20,11 @@
       </div>
     </header>
     <main class="utility-main">
-      <section class="utility-card">
-        <h2>About this tool</h2>
+      <aside class="utility-card utility-about" data-collapsible>
+        <div class="utility-about__header">
+          <h2>About this tool</h2>
+          <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
+        </div>
         <p>
           Quickly compare metric and imperial thread forms, pull recommended drill sizes, and copy
           callouts for CAD drawings or manufacturing travelers.
@@ -35,13 +38,16 @@
           Use search and filters inside the utility to jump between coarse, fine, or custom pitch
           values.
         </p>
-      </section>
-      <iframe
-        class="tool-frame"
-        src="app.html"
-        title="Interactive Thread Cheat Sheet"
-        loading="lazy"
-      ></iframe>
+      </aside>
+      <div class="utility-frame-wrapper">
+        <iframe
+          class="tool-frame"
+          src="app.html"
+          title="Interactive Thread Cheat Sheet"
+          loading="lazy"
+        ></iframe>
+      </div>
     </main>
+    <script src="../util-shell.js" type="module"></script>
   </body>
 </html>

@@ -184,7 +184,175 @@
             <a class="button ghost" href="#add-script">Submit a generator</a>
           </div>
         </div>
-        <div class="tools-grid" id="tool-list"></div>
+        <div class="tools-grid">
+          <article class="tool-card" data-theme="Pipe Cutter">
+            <div class="tool-card__head">
+              <span class="badge">Pipe Cutter</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Pipe Cutter 3D preview with DXF saddle templates</strong>
+            <p>
+              Visualize intersecting pipes, tweak wall thickness or offsets, and export saddle
+              outlines ready for CNC plasma cutters.
+            </p>
+            <ul class="tool-card__features">
+              <li>Real-time 3D viewport</li>
+              <li>Printable DXF template</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Three.js preview</span>
+              <span class="tag">DXF export</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ASME B31.3 · ISO 9606</span>
+              <a class="button primary" href="utilities/pipe-cutter/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Shell Rolling">
+            <div class="tool-card__head">
+              <span class="badge">Shell Rolling</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Shell Rolling calculator for EN 13445 / ASME VIII jobs</strong>
+            <p>
+              Determine roll spacing, bending allowance, and developed lengths for cylindrical
+              shells that comply with EN and ASME pressure codes.
+            </p>
+            <ul class="tool-card__features">
+              <li>Supports EN/ASME inputs</li>
+              <li>Exports shop-ready offsets</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Roll offsets</span>
+              <span class="tag">Bend allowance</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">EN 13445 · ASME VIII</span>
+              <a
+                class="button primary"
+                href="utilities/cylindrical-shell-rolling/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Bend Lab">
+            <div class="tool-card__head">
+              <span class="badge">Bend Lab</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Sheet-metal bending sandbox with K-factor controls</strong>
+            <p>
+              Experiment with K-factor, neutral axis, and bend deduction to match press brake
+              behavior and keep SolidWorks configurations accurate.
+            </p>
+            <ul class="tool-card__features">
+              <li>Interactive K-factor tuning</li>
+              <li>Outputs allowance + deduction</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">K-factor</span>
+              <span class="tag">Bend deduction</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 2768 · ANSI Y14.5</span>
+              <a class="button primary" href="utilities/metal-bending/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Thread Atlas">
+            <div class="tool-card__head">
+              <span class="badge">Thread Atlas</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Thread atlas (ISO / UNC / UNF drill charts)</strong>
+            <p>
+              Search ISO metric coarse/fine, UNC, and UNF threads, preview recommended drill
+              diameters, and copy callouts for drawings.
+            </p>
+            <ul class="tool-card__features">
+              <li>Filterable ISO/UNC/UNF tables</li>
+              <li>Copy/paste ready callouts</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Metric & inch</span>
+              <span class="tag">Drill sizes</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 965 · UNC/UNF</span>
+              <a
+                class="button primary"
+                href="utilities/interactive-thread/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Doc Parser">
+            <div class="tool-card__head">
+              <span class="badge">Doc Parser</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>PDF number extractor for QA records</strong>
+            <p>
+              Open QA reports or drawings, highlight numeric strings (serials, BOM IDs) and export
+              them without sending files to external services.
+            </p>
+            <ul class="tool-card__features">
+              <li>Drag-drop PDFs</li>
+              <li>Highlight and export matches</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Regex filters</span>
+              <span class="tag">CSV export</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">Offline</span>
+              <a
+                class="button primary"
+                href="utilities/pdf-number-extractor/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="QR Tags">
+            <div class="tool-card__head">
+              <span class="badge">QR Tags</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>QR nameplate generator with branding presets</strong>
+            <p>
+              Create serialized equipment tags with logos, safety info, and QR codes. Export as
+              SVG/PNG for printing or laser marking.
+            </p>
+            <ul class="tool-card__features">
+              <li>Custom palette + logo</li>
+              <li>Auto serial + QR</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">SVG/PNG</span>
+              <span class="tag">Branding</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 3864 · Traceability</span>
+              <a class="button primary" href="utilities/qr-nameplate/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+        </div>
       </section>
     </main>
 
