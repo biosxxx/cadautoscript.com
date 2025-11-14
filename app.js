@@ -119,20 +119,22 @@ const webTools = [
   {
     title: "Pipe Cutter Visualizer",
     description:
-      "3D saddle-cut preview with wall thickness, offset, and bevel controls for piping spools.",
+      "3D saddle-cut preview for pipe-to-pipe joints with adjustable wall thickness, offsets, and bevels.",
     badge: "Pipe Cutter",
     link: "utilities/pipe-cutter/",
     standard: "ASME B31.3 · ISO 9606",
     metrics: ["Three.js preview", "DXF export"],
+    features: ["Live view of intersecting pipes", "Exports printable DXF templates"],
   },
   {
     title: "Cylindrical Shell Rolling",
     description:
-      "Calculates roll offsets, bending allowance, and developed lengths for pressure shells.",
+      "Calculate roll offsets, bending allowance, and developed lengths for pressure vessel shells.",
     badge: "Shell Rolling",
     link: "utilities/cylindrical-shell-rolling/",
     standard: "EN 13445 · ASME VIII",
     metrics: ["Roll offsets", "Bend allowance"],
+    features: ["Supports EN/ASME inputs", "Exports offsets for shop packages"],
   },
   {
     title: "Metal Bending Prototype",
@@ -142,6 +144,7 @@ const webTools = [
     link: "utilities/metal-bending/",
     standard: "ISO 2768 · ANSI Y14.5",
     metrics: ["K-factor", "Bend deduction"],
+    features: ["Tune K-factor and neutral axis", "Outputs bend allowance + deduction"],
   },
   {
     title: "Interactive Thread Cheat Sheet",
@@ -151,6 +154,7 @@ const webTools = [
     link: "utilities/interactive-thread/",
     standard: "ISO 965 · UNC/UNF",
     metrics: ["Metric & inch", "Drill sizes"],
+    features: ["Search across ISO/UNC/UNF tables", "Copy recommended drill diameters"],
   },
   {
     title: "PDF Number Extractor",
@@ -160,6 +164,7 @@ const webTools = [
     link: "utilities/pdf-number-extractor/",
     standard: "Offline",
     metrics: ["Regex filters", "CSV export"],
+    features: ["Drag-drop PDFs without uploads", "Highlight + export matched values"],
   },
   {
     title: "QR Nameplate Generator",
@@ -169,6 +174,7 @@ const webTools = [
     link: "utilities/qr-nameplate/",
     standard: "ISO 3864 · Traceability",
     metrics: ["SVG/PNG", "Branding"],
+    features: ["Custom logo + palette", "Serial numbering and QR codes"],
   },
 ];
 
@@ -328,6 +334,13 @@ const renderTools = () => {
           </div>
           <strong>${tool.title}</strong>
           <p>${tool.description}</p>
+          ${
+            tool.features
+              ? `<ul class="tool-card__features">${tool.features
+                  .map((feature) => `<li>${feature}</li>`)
+                  .join("")}</ul>`
+              : ""
+          }
           <div class="tool-card__metrics">
             ${tool.metrics.map((metric) => `<span class="tag">${metric}</span>`).join("")}
           </div>

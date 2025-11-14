@@ -484,6 +484,31 @@ main {
   color: var(--muted);
 }
 
+.tool-card__features {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+}
+
+.tool-card__features li {
+  font-size: 0.9rem;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tool-card__features li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+}
+
 .tool-meta,
 .tool-card__metrics {
   display: flex;
