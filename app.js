@@ -1,4 +1,4 @@
-const storageKey = "cadAutoScript:scripts";
+const storageKey = "cadAutoScript:scripts:v2";
 
 const defaultScripts = [
   {
