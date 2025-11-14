@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прототип гибки металла v2 (с DXF разверткой)</title>
+    <!-- Подключение библиотек -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/dxf-writer-js@1.1.0/dist/dxf-writer.min.js"></script>
+    
+    <style>
+        body {
+            font-family: sans-serif;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        #controls {
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #controls h3 {
+            margin-top: 0;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input,
+        .input-group textarea {
+            width: calc(100% - 16px); /* Учет padding */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 120px;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.export {
+            background-color: #28a745;
+        }
+        button.export:hover {
+            background-color: #218838;
+        }
+        #visualization {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        canvas {
+            border: 1px solid #000;
+            background-color: #fdfdfd;
+        }
+        #flat-pattern-result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ (ВВОД ДАННЫХ) -->
+    <div id="controls">
+        <h3>Параметры</h3>
+        
+        <div class="input-group">
+            <label for="thickness">Толщина металла (T, мм):</label>
+            <input type="number" id="thickness" value="2.0" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="radius">Внутренний радиус гиба (R, мм):</label>
+            <input type="number" id="radius" value="2.0" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label for="k-factor">K-Фактор:</label>
+            <input type="number" id="k-factor" value="0.44" step="0.01">
+        </div>
+
+        <div class="input-group">
+            <label for="part-width">Ширина детали (для DXF, мм):</label>
+            <input type="number" id="part-width" value="100" step="1">
+        </div>
+
+        <div class="input-group">
+            <label for="bend-data">Данные гибки (Длина полки, Угол):</label>
+            <textarea id="bend-data" placeholder="Пример:&#10;50, 90&#10;30, -90&#10;40, 0">50, 90
+30, 90
+50, 0</textarea>
+            <small>Каждая строка: Длина, Угол (0 = конец).</small>
+        </div>
+
+        <button id="draw-button">1. Отрисовать и Рассчитать</button>
+        <button id="pdf-button" class="export">2. Экспорт PDF (Эскиз)</button>
+        <button id="dxf-button" class="export">3. Экспорт DXF (Развертка)</button>
+
+        <div id="flat-pattern-result">Длина развертки: 0.00 мм</div>
+    </div>
+
+    <!-- ОБЛАСТЬ ВИЗУАЛИЗАЦИИ -->
+    <div id="visualization">
+        <h3>2D Профиль (Эскиз)</h3>
+        <canvas id="sketch-canvas" width="600" height="400"></canvas>
+    </div>
+
+    <script>
+        // Инициализация jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // Элементы DOM
+        const canvas = document.getElementById('sketch-canvas');
+        const ctx = canvas.getContext('2d');
+        const drawBtn = document.getElementById('draw-button');
+        const pdfBtn = document.getElementById('pdf-button');
+        const dxfBtn = document.getElementById('dxf-button');
+        const resultEl = document.getElementById('flat-pattern-result');
+        const partWidthEl = document.getElementById('part-width');
+
+        // Глобальные переменные для хранения расчетов
+        let calculatedFlatLength = 0;
+        let flatSegments = []; // Массив сегментов развертки [{type: 'flange'/'bend', length: X}, ...]
+
+        // Обработчики событий
+        drawBtn.addEventListener('click', drawApp);
+        pdfBtn.addEventListener('click', exportPDF);
+        dxfBtn.addEventListener('click', generateAndDownloadDXF); // ИЗМЕНЕНО
+
+        function drawApp() {
+            // 1. Отрисовка профиля (визуализация)
+            drawProfile();
+            // 2. Расчет и сохранение данных развертки
+            calculateAndStoreFlatPattern();
+        }
+
+        /**
+         * Парсит данные из textarea
+         */
+        function parseInput() {
+            const data = document.getElementById('bend-data').value;
+            return data.trim().split('\n')
+                .map(line => {
+                    const parts = line.split(',');
+                    if (parts.length === 2) {
+                        const len = parseFloat(parts[0].trim()); // Длина полки (предполагаем, что это OSL - Outer Flange Length)
+                        const angle = parseFloat(parts[1].trim());
+                        
+                        // ИСПРАВЛЕНИЕ: Проверка на NaN при парсинге
+                        if (isNaN(len) || isNaN(angle)) {
+                            return null;
+                        }
+
+                        return { len, angle };
+                    }
+                    return null;
+                })
+                .filter(Boolean); // Отфильтровать некорректные строки и NaN
+        }
+
+        /**
+         * Отрисовывает 2D-профиль (с острыми углами) на Canvas
+         */
+        function drawProfile() {
+            const segments = parseInput();
+            const thickness = parseFloat(document.getElementById('thickness').value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Начальные координаты (с отступом от края)
+            let x = 50;
+            let y = 150;
+            let currentAngleDeg = 0; // Начинаем горизонтально (0 градусов)
+
+            // Рисуем внешнюю линию
+            drawPath(segments, x, y, currentAngleDeg, 'blue', 3);
+            
+            // Рисуем внутреннюю линию (упрощенный сдвиг)
+            drawPath(segments, x, y + thickness, currentAngleDeg, 'lightblue', 1);
+        }
+
+        /**
+         * Вспомогательная функция для отрисовки пути
+         */
+        function drawPath(segments, startX, startY, startAngleDeg, color, lineWidth) {
+            let x = startX;
+            let y = startY;
+            let currentAngleDeg = startAngleDeg;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            for (const segment of segments) {
+                const angleRad = currentAngleDeg * Math.PI / 180;
+                const len = segment.len; 
+
+                x += len * Math.cos(angleRad);
+                y += len * Math.sin(angleRad);
+                
+                ctx.lineTo(x, y);
+                
+                // Применяем угол гиба для следующего сегмента
+                currentAngleDeg += segment.angle;
+            }
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
+
+        /**
+         * Расчет и сохранение данных развертки (Flat Pattern)
+         * Этот метод вычисляет каждый сегмент развертки (полки и допуски на изгиб)
+         */
+        function calculateAndStoreFlatPattern() {
+            const segments = parseInput(); // parseInput теперь фильтрует NaN
+            const T = parseFloat(document.getElementById('thickness').value);
+            const R = parseFloat(document.getElementById('radius').value);
+            const K = parseFloat(document.getElementById('k-factor').value);
+
+            // Очищаем предыдущие расчеты
+            flatSegments = [];
+            calculatedFlatLength = 0;
+
+            // ИСПРАВЛЕНИЕ: Улучшенная проверка на NaN и допустимые диапазоны
+            if (isNaN(T) || isNaN(R) || isNaN(K) || T <= 0 || R < 0 || K < 0 || K > 1 || segments.length === 0) {
+                resultEl.textContent = 'Ошибка: Неверные параметры (T > 0, R >= 0, 0 <= K <= 1)';
+                return;
+            }
+
+            let setbacks = []; // Отступы (Setback)
+            let bas = [];      // Допуски на изгиб (Bend Allowance)
+            let hasError = false;
+
+            // 1. Предварительный расчет BA и Setback для каждого гиба
+            for (const segment of segments) {
+                const angleDeg = Math.abs(segment.angle);
+                if (angleDeg > 0) {
+                    
+                    // ИСПРАВЛЕНИЕ: Защита от угла 180 градусов (tan(90) = Infinity)
+                    if (angleDeg >= 180) {
+                        // Обработка 180-градусного гиба (hem) требует другой формулы.
+                        // Для этого прототипа мы просто сообщим об ошибке.
+                        hasError = true;
+                        break; 
+                    }
+
+                    const angleRad = angleDeg * Math.PI / 180;
+                    
+                    // Допуск на Изгиб (Bend Allowance - BA)
+                    // Длина нейтральной оси в изгибе
+                    const BA = angleRad * (R + (K * T));
+                    bas.push(BA);
+
+                    // Отступ (Setback / OSL)
+                    // (R + T) * tan(Угол / 2)
+                    const setback = (R + T) * Math.tan(angleRad / 2);
+                    setbacks.push(setback);
+                } else {
+                    // Это не гиб (последний сегмент)
+                    bas.push(0);
+                    setbacks.push(0);
+                }
+            }
+
+            if (hasError) {
+                resultEl.textContent = 'Ошибка: Углы 180° и более не поддерживаются.';
+                return;
+            }
+
+            // 2. Строим массив сегментов развертки
+            const n = segments.length;
+            for (let i = 0; i < n; i++) {
+                const segment = segments[i];
+                let flangeLength;
+
+                if (i === 0) {
+                    // Первая полка
+                    flangeLength = segment.len - setbacks[0];
+                } else if (i === n - 1) {
+                    // Последняя полка
+                    // Сначала добавляем предыдущий гиб
+                    if (bas[i-1] > 0) {
+                        flatSegments.push({ type: 'bend', length: bas[i-1] });
+                    }
+                    flangeLength = segment.len - setbacks[i-1];
+                } else {
+                    // Промежуточная полка
+                    // Сначала добавляем предыдущий гиб
+                    if (bas[i-1] > 0) {
+                        flatSegments.push({ type: 'bend', length: bas[i-1] });
+                    }
+                    flangeLength = segment.len - setbacks[i-1] - setbacks[i];
+                }
+                
+                flatSegments.push({ type: 'flange', length: flangeLength });
+            }
+
+            // 3. Считаем общую длину
+            calculatedFlatLength = flatSegments.reduce((sum, seg) => sum + seg.length, 0);
+
+            // ИСПРАВЛЕНИЕ: Финальная проверка на NaN, если что-то пошло не так
+            if (isNaN(calculatedFlatLength)) {
+                resultEl.textContent = 'Ошибка: Не удалось рассчитать (NaN).';
+                flatSegments = [];
+                calculatedFlatLength = 0;
+                return;
+            }
+
+            resultEl.textContent = `Длина развертки: ${calculatedFlatLength.toFixed(2)} мм`;
+        }
+
+
+        /**
+         * Экспорт Canvas (Эскиза) в PDF
+         */
+        function exportPDF() {
+            // Проверяем, существует ли jsPDF (из-за ошибки в другом месте)
+            if (typeof jsPDF === 'undefined') {
+                alert('Ошибка: Библиотека jsPDF не загружена.');
+                return;
+            }
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save('2d-profile-sketch.pdf');
+        }
+
+        /**
+         * Генерирует DXF-строку (контур + линии гиба)
+         * Возвращает строку DXF или "" в случае ошибки
+         */
+        function generateDXFString() {
+            // Проверяем, существует ли dxfwriter
+            if (typeof dxfwriter === 'undefined') {
+                alert('Ошибка: Библиотека dxfwriter не загружена.');
+                return "";
+            }
+
+            // ИСПРАВЛЕНИЕ: Улучшенная проверка на NaN и 0
+            if (isNaN(calculatedFlatLength) || calculatedFlatLength <= 0 || flatSegments.length === 0) {
+                alert("Сначала рассчитайте развертку. (Нажмите 'Отрисовать и Рассчитать'). Убедитесь, что нет ошибок.");
+                return "";
+            }
+            
+            const partWidth = parseFloat(partWidthEl.value);
+            // ИСПРАВЛЕНИЕ: Улучшенная проверка на NaN и 0
+            if (isNaN(partWidth) || partWidth <= 0) {
+                alert("Ширина детали для DXF должна быть > 0.");
+                return "";
+            }
+
+            // ИСПРАВЛЕНИЕ: Глобальный объект - 'dxfwriter' (строчные).
+            // Класс ВНУТРИ него - 'DxfWriter' (верблюжий регистр).
+            const d = new dxfwriter.DxfWriter();
+
+            // Определяем типы линий (LType)
+            // 'CENTER' - хороший тип для линий гиба
+            d.addLType('CENTER', 'Center ____ _ ____ _ ____', [0.75, -0.25, 0.25, -0.25]);
+            // ИСПРАВЛЕНИЕ: Мы также должны определить 'CONTINUOUS', прежде чем использовать его.
+            d.addLType('CONTINUOUS', 'Solid line', []);
+
+            // Создаем слои
+            // ИСПРАВЛЕНИЕ: 'colors' - это статическое свойство класса DxfWriter, а не глобального объекта dxfwriter
+            d.addLayer('OUTLINE', dxfwriter.DxfWriter.colors.AciWhite, 'CONTINUOUS');
+            d.addLayer('BEND_LINES', dxfwriter.DxfWriter.colors.AciRed, 'CENTER');
+
+            // 1. Рисуем контур (OUTLINE)
+            d.setActiveLayer('OUTLINE');
+            const totalLength = calculatedFlatLength;
+            // Рисуем замкнутый прямоугольник (полилиния)
+            d.drawPolyline([
+                [0, 0, 0],
+                [totalLength, 0, 0],
+                [totalLength, partWidth, 0],
+                [0, partWidth, 0],
+                [0, 0, 0] // Замыкаем
+            ]);
+
+            // 2. Рисуем линии гиба (BEND_LINES)
+            d.setActiveLayer('BEND_LINES');
+            let currentX = 0;
+
+            // Проходим по сегментам развертки
+            for (const segment of flatSegments) {
+                if (segment.type === 'flange') {
+                    // Это полка, просто двигаем курсор
+                    currentX += segment.length;
+                } else if (segment.type === 'bend') {
+                    // Это сегмент гиба (BA). Линия гиба должна быть в его центре.
+                    const bendLineX = currentX + (segment.length / 2);
+                    d.drawLine(bendLineX, 0, 0, bendLineX, partWidth, 0);
+                    
+                    // Двигаем курсор на всю длину сегмента гиба
+                    currentX += segment.length;
+                }
+            }
+
+            // Генерируем DXF-строку и возвращаем ее
+            return d.toDxfString();
+        }
+
+        /**
+         * НОВАЯ ФУНКЦИЯ (по вашему примеру)
+         * Генерирует и скачивает DXF файл
+         */
+        function generateAndDownloadDXF() {
+            // --- 1. Генерируем DXF ---
+            const dxfData = generateDXFString();
+
+            // --- 2. Проверка результата расчета ---
+            if (dxfData === "") {
+                // Ошибка уже была показана alert-ом из generateDXFString
+                return;
+            }
+            
+            // --- 3. Генерируем имя файла ---
+            const T = parseFloat(document.getElementById('thickness').value);
+            const R = parseFloat(document.getElementById('radius').value);
+            const L = calculatedFlatLength.toFixed(2);
+            const W = parseFloat(partWidthEl.value);
+            const filename = `flat_pattern_L-${L}_W-${W}_T-${T}_R-${R}.dxf`;
+
+            // --- 4. Создаем Blob и ссылку для скачивания ---
+            const blob = new Blob([dxfData], { type: 'application/dxf' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Очистка
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
+        // Первоначальный запуск при загрузке
+        drawApp();
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+

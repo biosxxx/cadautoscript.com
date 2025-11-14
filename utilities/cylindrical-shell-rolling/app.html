@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор развертки обечайки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .label-3d {
+            color: #1f2937; /* text-gray-800 */
+            font-size: 14px;
+            pointer-events: none;
+            user-select: none;
+            text-align: center;
+            line-height: 1.2;
+        }
+        #visualization-3d canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Калькулятор развертки обечайки</h1>
+            <p class="mt-2 text-gray-600">Введите параметры для расчета развертки и создания DXF файла.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Inputs and Outputs -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="space-y-6">
+                    <!-- Input Section -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2">Входные параметры</h2>
+                        <div class="space-y-4">
+                            <!-- Diameter Specification -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Расчет по диаметру</label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <button id="spec-od-btn" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-blue-600 text-white text-sm font-medium z-10">Внешнему (OD)</button>
+                                    <button id="spec-id-btn" class="relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50">Внутреннему (ID)</button>
+                                </div>
+                            </div>
+
+                            <!-- Diameter Value -->
+                            <div>
+                                <label id="diameter-label" for="diameter" class="block text-sm font-medium text-gray-700">Внешний диаметр (OD)</label>
+                                <input type="number" name="diameter" id="diameter" value="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+
+                            <!-- Material Thickness -->
+                            <div>
+                                <label for="thickness" class="block text-sm font-medium text-gray-700">Толщина материала</label>
+                                <input type="number" name="thickness" id="thickness" value="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+
+                            <!-- Shell Width -->
+                            <div>
+                                <label for="width" class="block text-sm font-medium text-gray-700">Ширина обечайки (Высота)</label>
+                                <input type="number" name="width" id="width" value="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+
+                            <!-- K-Factor -->
+                            <div>
+                                <label for="k-factor" class="block text-sm font-medium text-gray-700">K-Фактор</label>
+                                <input type="number" name="k-factor" id="k-factor" value="0.44" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            
+                            <!-- Welding Gap -->
+                            <div>
+                                <label for="gap" class="block text-sm font-medium text-gray-700">Зазор под сварку (Gap)</label>
+                                <input type="number" name="gap" id="gap" value="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2">Расчетные значения</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label id="calculated-diameter-label" class="block text-sm font-medium text-gray-500">Расчетный внутренний диаметр (ID)</label>
+                                <p id="calculated-diameter-value" class="mt-1 text-lg font-semibold text-blue-700 p-2 bg-gray-100 rounded-md"></p>
+                            </div>
+                             <div>
+                                <label class="block text-sm font-medium text-gray-500">Длина развертки (с учетом зазора)</label>
+                                <p id="flat-pattern-length" class="mt-1 text-lg font-semibold text-blue-700 p-2 bg-gray-100 rounded-md"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <div class="pt-4">
+                         <button id="download-dxf" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            Скачать DXF
+                        </button>
+                        <p id="error-message" class="text-red-600 text-sm mt-2 text-center"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visualizations -->
+            <div class="space-y-8">
+                <!-- 3D Visualization -->
+                <div class="bg-white p-4 rounded-lg shadow-md min-h-[300px]">
+                    <h3 class="text-lg font-semibold mb-2 text-center">Визуализация обечайки</h3>
+                    <div id="visualization-3d" class="w-full h-80 rounded-md bg-white relative border"></div>
+                </div>
+
+                <!-- 2D Visualization -->
+                <div class="bg-white p-4 rounded-lg shadow-md min-h-[300px]">
+                    <h3 class="text-lg font-semibold mb-2 text-center">Развертка</h3>
+                    <div id="visualization-2d" class="w-full h-80 flex items-center justify-center p-4">
+                        <div id="flat-pattern-svg-container" class="relative w-full h-full">
+                           <!-- SVG will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- DOM ELEMENTS ---
+        const specOdBtn = document.getElementById('spec-od-btn');
+        const specIdBtn = document.getElementById('spec-id-btn');
+        const diameterLabel = document.getElementById('diameter-label');
+        const diameterInput = document.getElementById('diameter');
+        const thicknessInput = document.getElementById('thickness');
+        const widthInput = document.getElementById('width');
+        const kFactorInput = document.getElementById('k-factor');
+        const gapInput = document.getElementById('gap');
+        const calculatedDiameterLabel = document.getElementById('calculated-diameter-label');
+        const calculatedDiameterValue = document.getElementById('calculated-diameter-value');
+        const flatPatternLengthValue = document.getElementById('flat-pattern-length');
+        const downloadBtn = document.getElementById('download-dxf');
+        const errorMessage = document.getElementById('error-message');
+        const viz3dContainer = document.getElementById('visualization-3d');
+        const viz2dContainer = document.getElementById('flat-pattern-svg-container');
+
+        // --- STATE ---
+        let state = {
+            specType: 'OD', // 'OD' or 'ID'
+            diameter: 100,
+            thickness: 3,
+            width: 150,
+            kFactor: 0.44,
+            gap: 0,
+            calculated: {
+                od: 100,
+                id: 94,
+                finalFlatLength: 0
+            },
+            isValid: true
+        };
+
+        // --- 3D VISUALIZATION SETUP (THREE.JS) ---
+        let scene, camera, renderer, labelRenderer, controls, cylinderOutline, odIdLabel, widthLabel;
+
+        function init3D() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff); // white background
+
+            // Camera (Orthographic)
+            const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
+            const frustumSize = 300;
+            camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 1000);
+            camera.position.set(0, 0, 100);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            viz3dContainer.appendChild(renderer.domElement);
+            
+            // Label Renderer
+            labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            viz3dContainer.appendChild(labelRenderer.domElement);
+
+            // Controls
+            controls = new OrbitControls(camera, labelRenderer.domElement);
+            controls.enableRotate = false; // Disable rotation for 2D look
+            controls.enablePan = true;
+            controls.enableZoom = true;
+            controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: null };
+            controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+
+            // Initial Cylinder Outline
+            const geometry = new THREE.CylinderGeometry(1, 1, 1, 64, 1, false);
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x374151 }); // gray-700
+            cylinderOutline = new THREE.LineSegments(edges, lineMaterial);
+            scene.add(cylinderOutline);
+
+            // 3D Labels
+            const odIdDiv = document.createElement('div');
+            odIdDiv.className = 'label-3d';
+            odIdLabel = new CSS2DObject(odIdDiv);
+            scene.add(odIdLabel);
+
+            const widthDiv = document.createElement('div');
+            widthDiv.className = 'label-3d';
+            widthLabel = new CSS2DObject(widthDiv);
+            scene.add(widthLabel);
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+                labelRenderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', onWindowResize, false);
+            function onWindowResize() {
+                if (!viz3dContainer.clientWidth) return;
+                const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
+                camera.left = -camera.right * aspect;
+                camera.right = camera.right * aspect;
+                camera.updateProjectionMatrix();
+                renderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
+                labelRenderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            specOdBtn.addEventListener('click', () => setSpecType('OD'));
+            specIdBtn.addEventListener('click', () => setSpecType('ID'));
+            [diameterInput, thicknessInput, widthInput, kFactorInput, gapInput].forEach(input => {
+                input.addEventListener('input', updateCalculations);
+            });
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        function setSpecType(type) {
+            state.specType = type;
+            if (type === 'OD') {
+                specOdBtn.classList.add('bg-blue-600', 'text-white', 'z-10');
+                specOdBtn.classList.remove('bg-white', 'text-gray-700');
+                specIdBtn.classList.add('bg-white', 'text-gray-700');
+                specIdBtn.classList.remove('bg-blue-600', 'text-white', 'z-10');
+                diameterLabel.textContent = 'Внешний диаметр (OD)';
+                calculatedDiameterLabel.textContent = 'Расчетный внутренний диаметр (ID)';
+            } else {
+                specIdBtn.classList.add('bg-blue-600', 'text-white', 'z-10');
+                specIdBtn.classList.remove('bg-white', 'text-gray-700');
+                specOdBtn.classList.add('bg-white', 'text-gray-700');
+                specOdBtn.classList.remove('bg-blue-600', 'text-white', 'z-10');
+                diameterLabel.textContent = 'Внутренний диаметр (ID)';
+                calculatedDiameterLabel.textContent = 'Расчетный внешний диаметр (OD)';
+            }
+            updateCalculations();
+        }
+
+        // --- CORE CALCULATION LOGIC ---
+        function updateCalculations() {
+            // 1. Read inputs
+            const diameter = parseFloat(diameterInput.value);
+            const thickness = parseFloat(thicknessInput.value);
+            const width = parseFloat(widthInput.value);
+            const kFactor = parseFloat(kFactorInput.value);
+            const gap = parseFloat(gapInput.value);
+
+            // 2. Validate inputs
+            errorMessage.textContent = '';
+            state.isValid = true;
+            if (isNaN(diameter) || isNaN(thickness) || isNaN(width) || isNaN(kFactor) || isNaN(gap) || diameter <= 0 || thickness <= 0 || width <= 0 || kFactor <= 0 || gap < 0) {
+                state.isValid = false;
+                errorMessage.textContent = 'Все значения должны быть положительными числами (зазор может быть 0).';
+            }
+
+            let od, id;
+            if (state.specType === 'OD') {
+                od = diameter;
+                id = od - (2 * thickness);
+                if (id <= 0) {
+                    state.isValid = false;
+                    errorMessage.textContent = 'Внешний диаметр должен быть больше двойной толщины.';
+                }
+            } else { // 'ID'
+                id = diameter;
+                od = id + (2 * thickness);
+            }
+            
+            const neutralAxisDiameter = id + (kFactor * thickness);
+            const flatLength = neutralAxisDiameter * Math.PI;
+            const finalFlatLength = flatLength - gap;
+
+            if (finalFlatLength <= 0) {
+                state.isValid = false;
+                errorMessage.textContent = 'Длина развертки не может быть отрицательной. Проверьте зазор.';
+            }
+            
+            if (!state.isValid) {
+                calculatedDiameterValue.textContent = '---';
+                flatPatternLengthValue.textContent = '---';
+                downloadBtn.disabled = true;
+                return; // FIX: Stop execution if inputs are invalid
+            }
+
+            // 4. Update state
+            state.diameter = diameter;
+            state.thickness = thickness;
+            state.width = width;
+            state.kFactor = kFactor;
+            state.gap = gap;
+            state.calculated.od = od;
+            state.calculated.id = id;
+            state.calculated.finalFlatLength = finalFlatLength;
+
+            // 5. Update UI display
+            const otherDiameter = state.specType === 'OD' ? id : od;
+            calculatedDiameterValue.textContent = `${otherDiameter.toFixed(3)}`;
+            flatPatternLengthValue.textContent = `${finalFlatLength.toFixed(3)}`;
+            downloadBtn.disabled = false;
+            
+            // 6. Update Visualizations
+            update3DVisual();
+            update2DVisual();
+        }
+
+        // --- VISUALIZATION UPDATE FUNCTIONS ---
+        function update3DVisual() {
+            if (!cylinderOutline) return;
+            // FIX: Get width from main state, not calculated state
+            const { od, id } = state.calculated;
+            const { width } = state; 
+            
+            const radius = od / 2;
+            
+            // Update cylinder geometry
+            cylinderOutline.geometry.dispose();
+            const newGeom = new THREE.CylinderGeometry(radius, radius, width, 64, 1, false);
+            cylinderOutline.geometry = new THREE.EdgesGeometry(newGeom);
+            cylinderOutline.position.set(0, 0, 0);
+
+            // Update labels
+            odIdLabel.element.innerHTML = `OD: ${od.toFixed(2)}<br>ID: ${id.toFixed(2)}`;
+            odIdLabel.position.set(radius + 10, 0, 0);
+            
+            widthLabel.element.textContent = `Width: ${width.toFixed(2)}`;
+            widthLabel.position.set(0, -width / 2 - 20, 0);
+
+            // Adjust orthographic camera to fit object
+            const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
+            const maxDim = Math.max(od, width);
+            const padding = 1.6;
+            
+            camera.zoom = 1; // Reset zoom
+            camera.left = (maxDim * aspect / -2) * padding;
+            camera.right = (maxDim * aspect / 2) * padding;
+            camera.top = (maxDim / 2) * padding;
+            camera.bottom = (maxDim / -2) * padding;
+            camera.updateProjectionMatrix();
+            controls.target.set(0,0,0);
+        }
+
+        function update2DVisual() {
+            const { finalFlatLength } = state.calculated;
+            const { width } = state;
+            
+            const containerW = viz2dContainer.clientWidth;
+            const containerH = viz2dContainer.clientHeight;
+            const padding = 40;
+
+            const availableW = containerW - 2 * padding;
+            const availableH = containerH - 2 * padding;
+
+            let rectW, rectH;
+            const aspectRatio = finalFlatLength / width;
+
+            if (availableW / availableH > aspectRatio) {
+                rectH = availableH;
+                rectW = rectH * aspectRatio;
+            } else {
+                rectW = availableW;
+                rectH = rectW / aspectRatio;
+            }
+            
+            const x = (containerW - rectW) / 2;
+            const y = (containerH - rectH) / 2;
+
+            const svg = `
+                <svg width="100%" height="100%" viewBox="0 0 ${containerW} ${containerH}">
+                    <rect x="${x}" y="${y}" width="${rectW}" height="${rectH}" fill="#93c5fd" stroke="#2563eb" stroke-width="2" />
+                    
+                    <line x1="${x}" y1="${y + rectH + 15}" x2="${x + rectW}" y2="${y + rectH + 15}" stroke="#374151" stroke-width="1" />
+                    <line x1="${x}" y1="${y + rectH + 10}" x2="${x}" y2="${y + rectH + 20}" stroke="#374151" stroke-width="1" />
+                    <line x1="${x + rectW}" y1="${y + rectH + 10}" x2="${x + rectW}" y2="${y + rectH + 20}" stroke="#374151" stroke-width="1" />
+                    <text x="${x + rectW / 2}" y="${y + rectH + 30}" font-family="Inter" font-size="12" fill="#374151" text-anchor="middle">
+                        Длина: ${finalFlatLength.toFixed(2)}
+                    </text>
+
+                    <line x1="${x - 15}" y1="${y}" x2="${x - 15}" y2="${y + rectH}" stroke="#374151" stroke-width="1" />
+                    <line x1="${x - 10}" y1="${y}" x2="${x - 20}" y2="${y}" stroke="#374151" stroke-width="1" />
+                    <line x1="${x - 10}" y1="${y + rectH}" x2="${x - 20}" y2="${y + rectH}" stroke="#374151" stroke-width="1" />
+                    <text x="${x - 25}" y="${y + rectH / 2}" font-family="Inter" font-size="12" fill="#374151" text-anchor="middle" transform="rotate(-90, ${x - 25}, ${y + rectH / 2})">
+                        Ширина: ${width.toFixed(2)}
+                    </text>
+                </svg>
+            `;
+            viz2dContainer.innerHTML = svg;
+        }
+
+
+        // --- DXF GENERATION & DOWNLOAD ---
+        function generateDxfContent() {
+            if (!state.isValid) return null;
+
+            const length = state.calculated.finalFlatLength;
+            const width = state.width;
+
+            // DXF template for a closed polyline (rectangle) at origin
+            const dxf = `0
+SECTION
+2
+ENTITIES
+0
+POLYLINE
+8
+0
+66
+1
+70
+1
+0
+VERTEX
+8
+0
+10
+0.0
+20
+0.0
+0
+VERTEX
+8
+0
+10
+${length.toFixed(4)}
+20
+0.0
+0
+VERTEX
+8
+0
+10
+${length.toFixed(4)}
+20
+${width.toFixed(4)}
+0
+VERTEX
+8
+0
+10
+0.0
+20
+${width.toFixed(4)}
+0
+SEQEND
+0
+ENDSEC
+0
+EOF
+`;
+            return dxf;
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const dxfContent = generateDxfContent();
+            if (!dxfContent) {
+                errorMessage.textContent = 'Невозможно создать DXF из-за неверных данных.';
+                return;
+            }
+
+            const blob = new Blob([dxfContent], { type: 'application/dxf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'flat_pattern.dxf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            init3D();
+            setupEventListeners();
+            updateCalculations(); // Initial calculation on load
+        });
+
+    </script>
+</body>
+</html>

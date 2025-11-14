@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конфигуратор таблички с QR-кодом (UI-тюнинг полей ввода)</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- Three.js -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== ТЕМА (без @apply - работает с CDN) ===== */
+        :root {
+            --bg-900: #111827; /* gray-900 */
+            --bg-800: #1f2937; /* gray-800 */
+            --bg-700: #374151; /* gray-700 */
+            --bg-600: #4b5563; /* gray-600 */
+            --text-50: #f9fafb; /* gray-50 */
+            --text-200: #e5e7eb; /* gray-200 */
+            --text-400: #9ca3af; /* gray-400 */
+            --brand: #3b82f6; /* blue-500 */
+            --brand-ring: rgba(59,130,246,0.35);
+            --danger: #dc2626; /* red-600 */
+            --danger-hover: #b91c1c; /* red-700 */
+        }
+
+        html, body { height: 100%; }
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: var(--bg-900);
+            color: var(--text-50);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* ====== ХАК для Chrome Autofill ====== */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-text-fill-color: var(--text-50) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-700) inset !important;
+            caret-color: var(--text-50) !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* ====== ОБНОВЛЕНО: поля ввода - темнее, скруглённее, контрастнее ====== */
+        .form-input,
+        .form-input-num,
+        select.form-input,
+        textarea.form-input {
+            width: 100%;
+            height: 44px; /* h-11 */
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            font-size: 16px; /* исключает зум на iOS */
+            color: var(--text-50);
+            background: var(--bg-700);
+            border: 1.5px solid var(--bg-600);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+            outline: none;
+            transition: box-shadow .2s ease, border-color .2s ease, background-color .2s ease, transform .05s ease;
+            caret-color: var(--text-50);
+        }
+        textarea.form-input { height: auto; min-height: 120px; resize: vertical; }
+
+        .form-input::placeholder,
+        .form-input-num::placeholder,
+        textarea.form-input::placeholder {
+            color: var(--text-400);
+            opacity: 1;
+        }
+
+        .form-input:focus,
+        .form-input-num:focus,
+        select.form-input:focus,
+        textarea.form-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-ring);
+        }
+
+        .form-input:disabled,
+        .form-input-num:disabled { opacity: .7; cursor: not-allowed; }
+
+        /* Убираем спиннеры у number */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        label { color: var(--text-400); font-weight: 600; margin-bottom: .5rem; display: block; }
+        h1 { font-size: clamp(1.5rem, 2.5vw, 2.25rem); font-weight: 800; color: #fff; margin-bottom: .5rem; }
+        h2.section-header { font-size: 1.5rem; font-weight: 800; color: #fff; border-bottom: 2px solid #374151; padding-bottom: .75rem; margin-bottom: 1rem; }
+
+        /* ====== КНОПКИ ВЫБОРА МАТЕРИАЛА (без @apply) ====== */
+        .option-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 100%;
+            padding: .5rem 1.25rem;
+            border-radius: .75rem;
+            border: 2px solid var(--bg-600);
+            background: var(--bg-700);
+            color: #d1d5db; /* gray-300 */
+            cursor: pointer;
+            transition: transform .1s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,.35);
+        }
+        .option-btn:hover { background: #4b5563; color: #fff; border-color: #6b7280; box-shadow: 0 6px 16px rgba(0,0,0,.35); }
+        .option-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--brand-ring); }
+        .option-btn.active { background: #2563eb; color: #fff; border-color: #3b82f6; transform: scale(1.02); box-shadow: 0 8px 20px rgba(37,99,235,.4); }
+
+        /* ====== ЧЕКБОКС «Добавить рамку» как кнопка ====== */
+        #add-border { display: none; }
+        #add-border-label {
+            display: flex; align-items: center; justify-content: center;
+            padding: .875rem; border-radius: .75rem;
+            border: 2px solid var(--bg-600); background: var(--bg-700);
+            color: #d1d5db; cursor: pointer; font-weight: 600;
+            transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .1s ease, box-shadow .2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,.35);
+        }
+        #add-border-label:hover { background: #4b5563; color: #fff; border-color: #6b7280; box-shadow: 0 6px 16px rgba(0,0,0,.35); }
+        #add-border:checked + span { color: #93c5fd; }
+        #add-border-label.active { background: #2563eb; color: #fff; border-color: #3b82f6; box-shadow: 0 8px 20px rgba(37,99,235,.4); transform: scale(1.02); }
+
+        /* ====== КНОПКА «Сгенерировать» ====== */
+        .generate-btn {
+            width: 100%; margin-top: 2rem; padding: 1rem 1.5rem;
+            border-radius: .75rem; background: var(--danger); color: #fff;
+            font-weight: 800; font-size: 1.125rem; letter-spacing: .05em; text-transform: uppercase;
+            cursor: pointer; transition: transform .05s ease, box-shadow .2s ease, background-color .2s ease;
+            box-shadow: 0 10px 25px rgba(220,38,38,.35);
+        }
+        .generate-btn:hover { background: var(--danger-hover); box-shadow: 0 16px 40px rgba(185,28,28,.45); transform: translateY(-2px); }
+        .generate-btn:active { transform: scale(.98); }
+        .generate-btn:disabled { background: #374151; color: #9ca3af; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        /* Canvas */
+        #plaque-canvas { width: 100% !important; height: 100% !important; display: block; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-50 font-sans p-4 sm:p-6 lg:p-8">
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center mb-12">
+            <h1>Конфигуратор кастомной таблички</h1>
+            <p class="text-base sm:text-lg text-gray-400">Создайте свой уникальный дизайн с QR-кодом</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Панель настроек -->
+            <div class="lg:col-span-1 bg-gray-800 p-8 rounded-2xl shadow-xl">
+                <div class="space-y-6">
+
+                    <h2 class="section-header">Гравировка</h2>
+
+                    <div>
+                        <label for="plaque-text">Текст для гравировки</label>
+                        <input type="text" id="plaque-text" class="form-input" value="Название" placeholder="Ваш заголовок..." />
+                    </div>
+
+                    <div>
+                        <label for="qr-url">Ссылка для QR-кода</label>
+                        <input type="url" id="qr-url" class="form-input" value="https://google.com/" placeholder="https://example.com/info" />
+                    </div>
+
+                    <h2 class="section-header mt-6">Основа</h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="plaque-width">Ширина (мм)</label>
+                            <input type="number" id="plaque-width" class="form-input-num" value="150" placeholder="150" />
+                        </div>
+                        <div>
+                            <label for="plaque-height">Высота (мм)</label>
+                            <input type="number" id="plaque-height" class="form-input-num" value="150" placeholder="150" />
+                        </div>
+                        <div>
+                            <label for="plaque-depth">Толщина (мм)</label>
+                            <input type="number" id="plaque-depth" class="form-input-num" value="5" placeholder="5" />
+                        </div>
+                        <div>
+                            <label for="plaque-radius">Радиус (мм)</label>
+                            <input type="number" id="plaque-radius" class="form-input-num" value="5" placeholder="5" />
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <label id="add-border-label" for="add-border">
+                            <input type="checkbox" id="add-border" class="mr-2" />
+                            <span class="text-sm font-medium">Добавить рамку</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>Материал</label>
+                        <div id="material-options" class="flex flex-col gap-3">
+                            <button class="option-btn active" data-material="steel">Нержавеющая сталь</button>
+                            <button class="option-btn" data-material="copper">Медь</button>
+                            <button class="option-btn" data-material="black-granite">Черный гранит</button>
+                        </div>
+                    </div>
+
+                    <button id="generate-btn" class="generate-btn">Сгенерировать 3D Модель</button>
+                </div>
+            </div>
+
+            <!-- Превью -->
+            <div class="lg:col-span-2 h-[400px] lg:h-[600px] flex items-center justify-center bg-gray-900 rounded-2xl shadow-inner relative">
+                <canvas id="plaque-canvas" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрытый canvas для генерации текстур -->
+    <canvas id="engraving-map-canvas" style="display:none;"></canvas>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+        import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+        // --- Селекторы UI ---
+        const plaqueTextEl = document.getElementById('plaque-text');
+        const qrUrlEl = document.getElementById('qr-url');
+        const materialOptionsEl = document.getElementById('material-options');
+        const plaqueCanvas = document.getElementById('plaque-canvas');
+        const engravingMapCanvas = document.getElementById('engraving-map-canvas');
+        const generateBtn = document.getElementById('generate-btn');
+
+        const plaqueWidthEl = document.getElementById('plaque-width');
+        const plaqueHeightEl = document.getElementById('plaque-height');
+        const plaqueDepthEl = document.getElementById('plaque-depth');
+        const plaqueRadiusEl = document.getElementById('plaque-radius');
+        const addBorderEl = document.getElementById('add-border');
+        const addBorderLabel = document.getElementById('add-border-label');
+
+        // --- Состояние ---
+        let currentSize = { w: 15, h: 15, d: 0.5, radius: 0.5 };
+        let currentMaterialType = 'steel';
+        let currentEngraving = { text: 'Название', url: 'https://google.com/', border: false };
+
+        let plaqueMesh; let scene, camera, renderer, controls;
+        let qrCodeInstance = null; let engravingMapTexture = null;
+        const TEXTURE_RESOLUTION = 1024;
+
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, plaqueCanvas.clientWidth / plaqueCanvas.clientHeight, 0.1, 1000);
+            camera.position.set(25, 25, 25); camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: plaqueCanvas, antialias: true, alpha: true });
+            renderer.setSize(plaqueCanvas.clientWidth, plaqueCanvas.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setClearColor(0x000000, 0);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1; renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; controls.dampingFactor = 0.05; controls.screenSpacePanning = false; controls.minDistance = 10; controls.maxDistance = 100;
+
+            new RGBELoader().setPath('https://threejs.org/examples/textures/equirectangular/').load('venice_sunset_1k.hdr', (texture) => {
+                texture.mapping = THREE.EquirectangularReflectionMapping; scene.environment = texture; handleGenerateClick();
+            });
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(1,1,1).normalize(); scene.add(dl);
+
+            createPlaqueMesh();
+            animate();
+        }
+
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+
+        function createPlaqueMesh() {
+            const geometry = new RoundedBoxGeometry(currentSize.w, currentSize.h, currentSize.d, 8, currentSize.radius);
+            const material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+            plaqueMesh = new THREE.Mesh(geometry, material); scene.add(plaqueMesh);
+        }
+
+        function updatePlaqueGeometry() {
+            if (plaqueMesh) {
+                plaqueMesh.geometry.dispose();
+                plaqueMesh.geometry = new RoundedBoxGeometry(currentSize.w, currentSize.h, currentSize.d, 8, currentSize.radius);
+                plaqueMesh.position.set(0, 0, 0);
+            }
+            const cameraDistance = Math.max(currentSize.w, currentSize.h) * 1.5;
+            camera.position.set(cameraDistance, cameraDistance, cameraDistance);
+            camera.lookAt(0, 0, 0); controls.target.set(0, 0, 0); controls.update();
+        }
+
+        async function updatePlaqueMaterial() {
+            if (engravingMapTexture) { engravingMapTexture.dispose(); engravingMapTexture = null; }
+
+            let completedEngravingCanvas;
+            try { completedEngravingCanvas = await generateEngravingMap(currentEngraving.text, currentEngraving.url, currentEngraving.border); }
+            catch (e) { console.error(e); completedEngravingCanvas = engravingMapCanvas; }
+
+            engravingMapTexture = new THREE.CanvasTexture(completedEngravingCanvas);
+            engravingMapTexture.magFilter = THREE.NearestFilter; engravingMapTexture.minFilter = THREE.NearestFilter;
+
+            const bumpScale = 0.05;
+            let material;
+            if (currentMaterialType === 'copper') {
+                material = new THREE.MeshPhysicalMaterial({ color: 0xB87333, metalness: 0.9, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.2, roughnessMap: engravingMapTexture, metalnessMap: engravingMapTexture, bumpMap: engravingMapTexture, bumpScale, envMapIntensity: 1 });
+                material.roughnessMap.magFilter = THREE.NearestFilter; material.roughnessMap.minFilter = THREE.NearestFilter;
+                material.metalnessMap.magFilter = THREE.NearestFilter; material.metalnessMap.minFilter = THREE.NearestFilter;
+            } else if (currentMaterialType === 'steel') {
+                material = new THREE.MeshPhysicalMaterial({ color: 0xC0C0C0, metalness: 1.0, roughness: 0.2, clearcoat: 0.3, clearcoatRoughness: 0.1, roughnessMap: engravingMapTexture, metalnessMap: engravingMapTexture, bumpMap: engravingMapTexture, bumpScale, envMapIntensity: 1 });
+                material.roughnessMap.magFilter = THREE.NearestFilter; material.roughnessMap.minFilter = THREE.NearestFilter;
+                material.metalnessMap.magFilter = THREE.NearestFilter; material.metalnessMap.minFilter = THREE.NearestFilter;
+            } else {
+                const graniteTexture = createGraniteTexture();
+                material = new THREE.MeshPhysicalMaterial({ color: 0x303030, metalness: 0.05, roughness: 0.8, map: combineTextures(graniteTexture, completedEngravingCanvas, true), bumpMap: engravingMapTexture, bumpScale: -bumpScale, clearcoat: 0.1, clearcoatRoughness: 0.5, envMapIntensity: 0.5 });
+                graniteTexture.dispose();
+            }
+
+            if (plaqueMesh) {
+                if (Array.isArray(plaqueMesh.material)) {
+                    plaqueMesh.material.forEach(mat => { if (mat.map) mat.map.dispose(); if (mat.bumpMap) mat.bumpMap.dispose(); if (mat.roughnessMap) mat.roughnessMap.dispose(); mat.dispose(); });
+                } else if (plaqueMesh.material) {
+                    if (plaqueMesh.material.map) plaqueMesh.material.map.dispose();
+                    if (plaqueMesh.material.bumpMap) plaqueMesh.material.bumpMap.dispose();
+                    if (plaqueMesh.material.roughnessMap) plaqueMesh.material.roughnessMap.dispose();
+                    plaqueMesh.material.dispose();
+                }
+
+                if (currentMaterialType === 'copper' || currentMaterialType === 'steel') {
+                    const baseMaterial = material.clone();
+                    baseMaterial.roughnessMap = null; baseMaterial.metalnessMap = null; baseMaterial.bumpMap = null;
+                    plaqueMesh.material = [
+                        baseMaterial.clone(), baseMaterial.clone(), baseMaterial.clone(), baseMaterial.clone(),
+                        material, baseMaterial.clone()
+                    ];
+                } else {
+                    plaqueMesh.material = material;
+                }
+            }
+            renderer && renderer.render(scene, camera);
+        }
+
+        function createGraniteTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = TEXTURE_RESOLUTION; canvas.height = TEXTURE_RESOLUTION;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#303030'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < 2000; i++) {
+                const x = Math.random() * canvas.width; const y = Math.random() * canvas.height;
+                const radius = Math.random() * 3 + 0.5; const opacity = Math.random() * 0.3 + 0.05;
+                ctx.fillStyle = `rgba(180, 180, 180, ${opacity})`; ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(2, 2);
+            return texture;
+        }
+
+        function generateEngravingMap(text, url, border) {
+            return new Promise((resolve, reject) => {
+                const canvas = engravingMapCanvas; canvas.width = TEXTURE_RESOLUTION; canvas.height = TEXTURE_RESOLUTION;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'black'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white'; ctx.strokeStyle = 'white'; ctx.lineWidth = 15;
+
+                if (border) {
+                    ctx.strokeRect(ctx.lineWidth, ctx.lineWidth, canvas.width - (ctx.lineWidth * 2), canvas.height - (ctx.lineWidth * 2));
+                }
+
+                const engravingText = text || 'Ваш заголовок...';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                let fontSize = 150; ctx.font = `bold ${fontSize}px sans-serif`;
+                let metrics = ctx.measureText(engravingText);
+                while (metrics.width > TEXTURE_RESOLUTION * 0.8 && fontSize > 10) { fontSize -= 5; ctx.font = `bold ${fontSize}px sans-serif`; metrics = ctx.measureText(engravingText); }
+                // ИЗМЕНЕНО: Сдвигаем текст с 25% на 20%
+                ctx.fillText(engravingText, canvas.width / 2, canvas.height * 0.20);
+
+                const qrUrl = (url && url.trim()) ? url.trim() : 'https://example.com/info';
+                const qrSize = TEXTURE_RESOLUTION * 0.5;
+                const tempQrDiv = document.createElement('div');
+                tempQrDiv.style.width = `${qrSize}px`; tempQrDiv.style.height = `${qrSize}px`;
+                tempQrDiv.style.position = 'absolute'; tempQrDiv.style.left = '-9999px'; tempQrDiv.style.top = '0px';
+                document.body.appendChild(tempQrDiv);
+
+                try {
+                    if (qrCodeInstance) { qrCodeInstance.clear(); qrCodeInstance = null; }
+                    qrCodeInstance = new QRCode(tempQrDiv, { text: qrUrl, width: qrSize, height: qrSize, colorDark: 'white', colorLight: 'black', correctLevel: QRCode.CorrectLevel.M });
+                    let attempts = 0; const maxAttempts = 60; // 3s
+                    const poll = () => {
+                        attempts++;
+                        const img = tempQrDiv.querySelector('img');
+                        const qrCanvas = tempQrDiv.querySelector('canvas');
+                        let drawn = false;
+                        if (qrCanvas) {
+                            // ИЗМЕНЕНО: Сдвигаем QR-код с 45% на 35%
+                            ctx.drawImage(qrCanvas, (TEXTURE_RESOLUTION - qrSize) / 2, canvas.height * 0.35, qrSize, qrSize);
+                            drawn = true;
+                        } else if (img) {
+                            if (img.complete) {
+                                // ИЗМЕНЕНО: Сдвигаем QR-код с 45% на 35%
+                                ctx.drawImage(img, (TEXTURE_RESOLUTION - qrSize) / 2, canvas.height * 0.35, qrSize, qrSize);
+                                drawn = true;
+                            } else {
+                                img.onload = () => {
+                                    // ИЗМЕНЕНО: Сдвигаем QR-код с 45% на 35%
+                                    ctx.drawImage(img, (TEXTURE_RESOLUTION - qrSize) / 2, canvas.height * 0.35, qrSize, qrSize);
+                                    document.body.contains(tempQrDiv) && document.body.removeChild(tempQrDiv);
+                                    resolve(canvas);
+                                };
+                                img.onerror = (err) => { document.body.contains(tempQrDiv) && document.body.removeChild(tempQrDiv); reject(err); };
+                                return;
+                            }
+                        }
+                        if (drawn) { document.body.contains(tempQrDiv) && document.body.removeChild(tempQrDiv); resolve(canvas); }
+                        else if (attempts < maxAttempts) { setTimeout(poll, 50); }
+                        else { console.error('QR timeout'); document.body.contains(tempQrDiv) && document.body.removeChild(tempQrDiv); resolve(canvas); }
+                    };
+                    poll();
+                } catch (e) { console.error(e); document.body.contains(tempQrDiv) && document.body.removeChild(tempQrDiv); reject(e); }
+            });
+        }
+
+        function combineTextures(baseTexture, engravingCanvas, forGranite = false) {
+            const canvas = document.createElement('canvas'); canvas.width = TEXTURE_RESOLUTION; canvas.height = TEXTURE_RESOLUTION;
+            const ctx = canvas.getContext('2d'); if (baseTexture.image) ctx.drawImage(baseTexture.image, 0, 0, canvas.width, canvas.height);
+            if (engravingCanvas && forGranite) {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data; const engravingData = engravingCanvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const v = engravingData[i]; if (v > 128) { pixels[i] = Math.min(255, pixels[i] + 50); pixels[i+1] = Math.min(255, pixels[i+1] + 50); pixels[i+2] = Math.min(255, pixels[i+2] + 50); }
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        async function handleGenerateClick() {
+            generateBtn.disabled = true; generateBtn.textContent = 'Генерация...';
+            currentSize.w = parseFloat(plaqueWidthEl.value) / 10 || 15;
+            currentSize.h = parseFloat(plaqueHeightEl.value) / 10 || 15;
+            currentSize.d = parseFloat(plaqueDepthEl.value) / 10 || 0.5;
+            currentSize.radius = parseFloat(plaqueRadiusEl.value) / 10 || 0.5;
+            currentEngraving.text = plaqueTextEl.value; currentEngraving.url = qrUrlEl.value; currentEngraving.border = addBorderEl.checked;
+            const activeMaterial = materialOptionsEl.querySelector('.option-btn.active'); if (activeMaterial) currentMaterialType = activeMaterial.dataset.material;
+            updatePlaqueGeometry(); await updatePlaqueMaterial();
+            generateBtn.disabled = false; generateBtn.textContent = 'Сгенерировать 3D Модель';
+        }
+
+        materialOptionsEl.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                materialOptionsEl.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active'); currentMaterialType = e.target.dataset.material;
+            }
+        });
+        addBorderEl.addEventListener('change', () => { addBorderLabel.classList.toggle('active', addBorderEl.checked); });
+        generateBtn.addEventListener('click', handleGenerateClick);
+
+        window.addEventListener('resize', () => {
+            if (camera && renderer && plaqueCanvas.clientWidth > 0 && plaqueCanvas.clientHeight > 0) {
+                camera.aspect = plaqueCanvas.clientWidth / plaqueCanvas.clientHeight; camera.updateProjectionMatrix();
+                renderer.setSize(plaqueCanvas.clientWidth, plaqueCanvas.clientHeight); renderer.render(scene, camera);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => { initThreeJS(); addBorderLabel.classList.toggle('active', addBorderEl.checked); });
+    </script>
+</body>
+</html>
+

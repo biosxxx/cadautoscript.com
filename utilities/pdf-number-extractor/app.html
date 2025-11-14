@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Number Extractor</title>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js";
+    }
+  </script>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' };</script>
+
+  <!-- UI font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    body { font-family:'Inter',sans-serif; }
+    .loader{border:5px solid #f3f3f3;border-top:5px solid #3498db;border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite}
+    .mini-loader{width:16px;height:16px;border:2px solid #f3f3f3;border-top:2px solid #3b82f6;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    #capture-preview{position:relative;border:2px dashed #9ca3af;background:#f9fafb;transition:all .2s;--pos-x:30%;--pos-y:50%}
+    html.dark #capture-preview{background:#1f2937;border-color:#4b5563}
+    #capture-preview::before,#capture-preview::after{content:'';position:absolute;background:#ef4444}
+    #capture-preview::before{left:var(--pos-x);top:0;width:2px;height:100%}
+    #capture-preview::after{top:var(--pos-y);left:0;width:100%;height:2px}
+    #capture-preview-text{position:absolute;top:var(--pos-y);left:var(--pos-x);transform:translate(-50%,-50%);font-size:10px;color:#ef4444;background:rgba(255,255,255,.7);padding:0 2px;white-space:nowrap}
+    html.dark #capture-preview-text{background:rgba(31,41,55,.7)}
+    input[type=range]{-webkit-appearance:none;width:100%;background:transparent}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:16px;width:16px;border-radius:50%;background:#3b82f6;cursor:pointer;margin-top:-6px}
+    input[type=range]::-webkit-slider-runnable-track{width:100%;height:4px;background:#d1d5db;border-radius:5px}
+    html.dark input[type=range]::-webkit-slider-runnable-track{background:#4b5563}
+    .lang-btn.active{background:#3b82f6;color:#fff}
+    html.dark .lang-btn.active{background:#2563eb}
+    .result-item.excluded{opacity:.4}
+    .result-item:hover .exclude-btn{opacity:1}
+    #file-drop-container.has-files{padding:1rem;align-items:flex-start}
+    #file-drop-container.no-files{padding:2rem;align-items:center}
+  </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+<div class="container mx-auto p-4 sm:p-6 md:p-8">
+  <header class="text-center mb-4 relative">
+    <div class="absolute top-0 right-0 flex items-center gap-4">
+      <!-- Help -->
+      <button id="help-btn" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600" aria-label="Open help">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </button>
+      <!-- Lang -->
+      <div id="lang-switcher" class="flex items-center text-sm font-medium rounded-lg bg-gray-200 dark:bg-gray-700 p-1">
+        <button class="lang-btn px-3 py-1 rounded-md" data-lang-code="en">EN</button>
+        <button class="lang-btn px-3 py-1 rounded-md" data-lang-code="et">ET</button>
+        <button class="lang-btn px-3 py-1 rounded-md" data-lang-code="ru">RU</button>
+      </div>
+      <!-- Theme -->
+      <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600" aria-label="Toggle theme">
+        <svg id="theme-toggle-dark-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+        <svg id="theme-toggle-light-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+    <h1 class="text-3xl font-bold" data-lang="appTitle">PDF Number Extractor</h1>
+    <p class="text-md text-gray-600 dark:text-gray-400" data-lang="appSubtitle">Extract prefixed numbers up to a specified length</p>
+  </header>
+
+  <main class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+    <!-- Step 1 -->
+    <div id="main-section">
+      <h2 class="text-xl font-semibold mb-4" data-lang="step1Title">Step 1: Add Files & Set Options</h2>
+
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-lg font-semibold" data-lang="yourFiles">Your Files:</h3>
+        <div class="flex gap-2">
+          <button id="add-files-btn" class="text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg" data-lang="addMoreFiles">Add More Files</button>
+          <button id="clear-files-btn" class="text-sm bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold py-1 px-3 rounded-lg disabled:opacity-50" disabled data-lang="clearList">Clear List</button>
+        </div>
+      </div>
+
+      <!-- Dropzone -->
+      <div id="file-drop-container" class="mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 flex flex-col justify-center min-h-[150px]">
+        <input type="file" id="pdf-upload" accept="application/pdf" class="hidden" multiple>
+        <div id="file-list-content" class="w-full text-left max-h-60 overflow-y-auto"></div>
+      </div>
+
+      <!-- Options -->
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 items-start">
+        <!-- Left column -->
+        <div class="space-y-3 flex flex-col items-start">
+          <div class="flex items-center">
+            <label for="prefix-input" class="block text-sm font-medium mr-3" data-lang="prefixChar">Prefix:</label>
+            <input type="text" id="prefix-input" value="W" maxlength="5" class="h-8 w-24 text-center border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <!-- NEW: Max length input -->
+          <div class="flex items-center">
+            <label for="length-input" class="block text-sm font-medium mr-3" data-lang="maxLength">Max length:</label>
+            <input type="number" id="length-input" value="6" min="1" class="h-8 w-24 text-center border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <div class="flex items-center pt-2">
+            <input type="checkbox" id="filter-revisions-checkbox" class="h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+            <label for="filter-revisions-checkbox" class="ml-2 block text-sm" data-lang="processLatest">Process only latest revision (_rXX_ or _XX_)</label>
+          </div>
+
+          <div class="flex items-center">
+            <input type="checkbox" id="include-revision-checkbox" class="h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+            <label for="include-revision-checkbox" class="ml-2 block text-sm" data-lang="includeRevision">Include revision in reports</label>
+          </div>
+
+          <div class="flex items-center">
+            <input type="checkbox" id="filter-csv-duplicates-checkbox" class="h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+            <label for="filter-csv-duplicates-checkbox" class="ml-2 block text-sm" data-lang="removeDuplicates">Remove duplicates in CSV (keep longest text)</label>
+          </div>
+
+          <div class="flex items-center">
+            <input type="checkbox" id="prefill-comments-checkbox" checked class="h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+            <label for="prefill-comments-checkbox" class="ml-2 block text-sm" data-lang="prefillComments">Prefill Comments with drawing name</label>
+          </div>
+        </div>
+
+        <!-- Right column: screenshot settings -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium" data-lang="screenshotSize">Screenshot Size (pixels):</label>
+            <div class="flex items-center gap-4 mt-1">
+              <div>
+                <label for="capture-width" class="text-xs text-gray-600 dark:text-gray-400" data-lang="width">Width</label>
+                <input type="number" id="capture-width" value="400" step="10" class="h-8 w-24 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              <div>
+                <label for="capture-height" class="text-xs text-gray-600 dark:text-gray-400" data-lang="height">Height</label>
+                <input type="number" id="capture-height" value="175" step="10" class="h-8 w-24 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" data-lang="textPosition">Text Position in Screenshot:</label>
+            <div class="mt-1 space-y-2">
+              <div>
+                <label for="position-x" class="text-xs text-gray-600 dark:text-gray-400"><span data-lang="horizontal">Horizontal (X)</span>: <span id="position-x-label">30</span>%</label>
+                <input type="range" id="position-x" min="0" max="100" value="30" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+              </div>
+              <div>
+                <label for="position-y" class="text-xs text-gray-600 dark:text-gray-400"><span data-lang="vertical">Vertical (Y)</span>: <span id="position-y-label">50</span>%</label>
+                <input type="range" id="position-y" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+          </div>
+          <div id="capture-preview" class="mt-2">
+            <div id="capture-preview-text" data-lang="text">Text</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 text-center">
+        <button id="run-analysis-btn" class="bg-red-600 text-white font-bold py-3 px-10 rounded-lg shadow-md hover:bg-red-700 text-lg" data-lang="runAnalysis">Run Analysis</button>
+      </div>
+    </div>
+
+    <!-- Processing -->
+    <div id="processing-section" class="hidden text-center py-8">
+      <div class="loader mx-auto"></div>
+      <p id="status" class="mt-4 text-lg" data-lang="processing">Processing…</p>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="results-section" class="hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold" data-lang="step2Title">Step 2: Results & Export</h2>
+        <button id="back-to-main-btn" class="text-sm bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold py-1 px-3 rounded-lg" data-lang="backToSettings">← Back to Settings</button>
+      </div>
+
+      <p id="result-summary" class="mb-6 text-gray-600 dark:text-gray-400"></p>
+
+      <div id="image-results-header" class="hidden md:flex items-center px-4 pb-2 border-b dark:border-gray-700">
+        <div class="w-1/3 font-semibold" data-lang="preview">Preview</div>
+        <div class="w-2/3 font-semibold" data-lang="comments">Comments</div>
+      </div>
+      <div id="image-results" class="space-y-4 mt-4 max-h-[60vh] overflow-y-auto"></div>
+
+      <div class="text-center flex flex-wrap justify-center gap-3 mt-6">
+        <button id="generate-report" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700" data-lang="downloadPdf">Download PDF Report</button>
+        <button id="export-txt" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-700" data-lang="exportTxt">Export TXT (Unique)</button>
+        <button id="export-csv" class="bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-yellow-600" data-lang="exportCsv">Export CSV</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center mt-8 text-sm text-gray-500 dark:text-gray-500">
+    <p>&copy; ESTANC-2025 PDF Number Extractor v0.35.0</p>
+    <p>Yurii Milienin</p>
+  </footer>
+</div>
+
+<!-- PDF Viewer Modal -->
+<div id="pdf-viewer-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full h-full flex flex-col">
+    <div class="p-2 border-b dark:border-gray-700 flex justify-between items-center bg-gray-100 dark:bg-gray-900">
+      <h3 id="pdf-viewer-title" class="text-lg font-semibold truncate">PDF Viewer</h3>
+      <button id="close-viewer-btn" class="text-2xl font-bold text-gray-600 dark:text-gray-300 hover:text-red-500 px-2" aria-label="Close viewer">&times;</button>
+    </div>
+    <iframe id="pdf-viewer-iframe" class="w-full flex-grow"></iframe>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="help-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+    <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+      <h3 id="help-modal-title" class="text-xl font-semibold" data-lang="helpTitle">Help / Instructions</h3>
+      <button id="close-help-btn" class="text-2xl font-bold text-gray-600 dark:text-gray-300 hover:text-red-500 px-2" aria-label="Close help">&times;</button>
+    </div>
+    <div id="help-modal-content" class="p-6 overflow-y-auto space-y-4"></div>
+  </div>
+</div>
+
+<script>
+  // --- DOM refs ---
+  const mainSection = document.getElementById('main-section');
+  const fileDropContainer = document.getElementById('file-drop-container');
+  const fileListContent = document.getElementById('file-list-content');
+  const processingSection = document.getElementById('processing-section');
+  const resultsSection = document.getElementById('results-section');
+  const pdfUpload = document.getElementById('pdf-upload');
+  const statusDisplay = document.getElementById('status');
+  const resultSummary = document.getElementById('result-summary');
+  const imageResults = document.getElementById('image-results');
+  const imageResultsHeader = document.getElementById('image-results-header');
+  const generateReportBtn = document.getElementById('generate-report');
+  const exportTxtBtn = document.getElementById('export-txt');
+  const exportCsvBtn = document.getElementById('export-csv');
+  const filterRevisionsCheckbox = document.getElementById('filter-revisions-checkbox');
+  const includeRevisionCheckbox = document.getElementById('include-revision-checkbox');
+  const filterCsvDuplicatesCheckbox = document.getElementById('filter-csv-duplicates-checkbox');
+  const prefillCommentsCheckbox = document.getElementById('prefill-comments-checkbox');
+  const runAnalysisBtn = document.getElementById('run-analysis-btn');
+  const clearFilesBtn = document.getElementById('clear-files-btn');
+  const addFilesBtn = document.getElementById('add-files-btn');
+  const backToMainBtn = document.getElementById('back-to-main-btn');
+  const prefixInput = document.getElementById('prefix-input');
+  const lengthInput = document.getElementById('length-input'); // <-- NEW
+  const captureWidthInput = document.getElementById('capture-width');
+  const captureHeightInput = document.getElementById('capture-height');
+  const capturePreview = document.getElementById('capture-preview');
+  const positionXInput = document.getElementById('position-x');
+  const positionYInput = document.getElementById('position-y');
+  const positionXLabel = document.getElementById('position-x-label');
+  const positionYLabel = document.getElementById('position-y-label');
+  const pdfViewerModal = document.getElementById('pdf-viewer-modal');
+  const pdfViewerTitle = document.getElementById('pdf-viewer-title');
+  const pdfViewerIframe = document.getElementById('pdf-viewer-iframe');
+  const closeViewerBtn = document.getElementById('close-viewer-btn');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+  const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+  const langSwitcher = document.getElementById('lang-switcher');
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const helpModalContent = document.getElementById('help-modal-content');
+  const closeHelpBtn = document.getElementById('close-help-btn');
+
+  let capturedImages = [];
+  let allUploadedFiles = [];
+  let currentViewerObjectUrl = null;
+
+  // --- i18n ---
+  const translations = {
+    en: {
+      appTitle: "PDF Number Extractor",
+      appSubtitle: "Extract prefixed numbers up to a specified length",
+      step1Title: "Step 1: Add Files & Set Options",
+      yourFiles: "Your Files:",
+      addMoreFiles: "Add More Files",
+      clearList: "Clear List",
+      clickToUpload: "Click to upload",
+      orDragAndDrop: "or drag and drop",
+      pdfFilesOnly: "PDF files only",
+      prefixChar: "Prefix:",
+      maxLength: "Max length:", // <-- NEW
+      processLatest: "Process only latest revision (_rXX_ or _XX_)",
+      includeRevision: "Include revision in reports",
+      removeDuplicates: "Remove duplicates in CSV (keep longest text)",
+      prefillComments: "Prefill Comments with drawing name",
+      screenshotSize: "Screenshot Size (pixels):",
+      width: "Width",
+      height: "Height",
+      textPosition: "Text Position in Screenshot:",
+      horizontal: "Horizontal (X)",
+      vertical: "Vertical (Y)",
+      text: "Text",
+      runAnalysis: "Run Analysis",
+      processing: "Processing…",
+      step2Title: "Step 2: Results & Export",
+      backToSettings: "← Back to Settings",
+      downloadPdf: "Download PDF Report",
+      exportTxt: "Export TXT (Unique)",
+      exportCsv: "Export CSV",
+      preview: "Preview",
+      comments: "Comments",
+      commentsPlaceholder: "Enter comments here...",
+      noMatches: "No matches found.",
+      foundMatches: (count, unique) => `Found ${count} matches (${unique} unique). Review results below.`,
+      foundMatchesFile: (total, unique) => `Found ${total} matches (${unique} unique)`,
+      analyzingFile: (name, page, total) => `Analyzing ${name} (page ${page} of ${total})...`,
+      errorFile: (name) => `Error with file ${name}. Skipping.`,
+      helpTitle: "Help / Instructions",
+      helpContent: `<h4 class="text-lg font-semibold">1. Adding Files</h4><p>Click "Add More Files" or drag and drop PDF files into the designated area. The file names are clickable and will open in a viewer. Your files are processed locally and are not uploaded anywhere.</p><h4 class="text-lg font-semibold">2. Setting Options</h4><p>Before analysis, set the prefix, max length, and other processing options.</p><h4 class="text-lg font-semibold">3. Screenshot Customization</h4><p>Adjust width, height and position of the found text within the screenshot. The preview shows the capture frame.</p><h4 class="text-lg font-semibold">4. Analysis and Export</h4><p>Run the analysis. Then export a visual PDF report, a unique TXT list, or a detailed CSV.</p>`
+    },
+    et: {
+      appTitle: "PDF Numbri Ekstraktor",
+      appSubtitle: "Eesliitega numbrite eraldamine kuni määratud pikkuseni",
+      step1Title: "1. samm: Failide lisamine ja seadistamine",
+      yourFiles: "Teie failid:",
+      addMoreFiles: "Lisa faile juurde",
+      clearList: "Tühjenda nimekiri",
+      clickToUpload: "Klõpsa üleslaadimiseks",
+      orDragAndDrop: "või lohista ja aseta",
+      pdfFilesOnly: "Ainult PDF-failid",
+      prefixChar: "Eesliide:",
+      maxLength: "Max pikkus:", // <-- NEW
+      processLatest: "Töötle ainult viimane redaktsioon (_rXX_ või _XX_)",
+      includeRevision: "Lisa redakatsioon aruannetesse",
+      removeDuplicates: "Eemalda duplikaadid CSV-s (säilita pikim tekst)",
+      prefillComments: "Täida Comments joonise nimega",
+      screenshotSize: "Kuvatõmmise suurus (pikslites):",
+      width: "Laius",
+      height: "Kõrgus",
+      textPosition: "Teksti asukoht kuvatõmmisel:",
+      horizontal: "Horisontaalne (X)",
+      vertical: "Vertikaalne (Y)",
+      text: "Tekst",
+      runAnalysis: "Käivita analüüs",
+      processing: "Töötlemine…",
+      step2Title: "2. samm: Tulemused ja eksport",
+      backToSettings: "← Tagasi seadistustesse",
+      downloadPdf: "Laadi alla PDF-aruanne",
+      exportTxt: "Ekspordi TXT (unikaalsed)",
+      exportCsv: "Ekspordi CSV",
+      preview: "Eelvaade",
+      comments: "Kommentaarid",
+      commentsPlaceholder: "Sisestage kommentaarid siia...",
+      noMatches: "Vasteid ei leitud.",
+      foundMatches: (count, unique) => `Leiti ${count} vastet (${unique} unikaalset). Vaadake tulemusi allpool.`,
+      foundMatchesFile: (total, unique) => `Leitud ${total} vastet (${unique} unikaalset)`,
+      analyzingFile: (name, page, total) => `Analüüsin faili ${name} (leht ${page}/${total})...`,
+      errorFile: (name) => `Viga failiga ${name}. Jätan vahele.`,
+      helpTitle: "Abi / Juhised",
+      helpContent: `<h4 class="text-lg font-semibold">1. Failide lisamine</h4><p>Lisage PDF-failid. Failinimed on klikitavad ja avanevad eelvaates.</p><h4 class="text-lg font-semibold">2. Seadistused</h4><p>Määrake eesliide, maksimaalne pikkus ja muud valikud.</p><h4 class="text-lg font-semibold">3. Kuvatõmmise seaded</h4><p>Reguleerige mõõte ja positsiooni.</p><h4 class="text-lg font-semibold">4. Analüüs ja eksport</h4><p>Käivitage analüüs ja eksportige PDF/TXT/CSV.</p>`
+    },
+    ru: {
+      appTitle: "PDF Extractor Номеров",
+      appSubtitle: "Извлечение номеров с префиксом до указанной длины",
+      step1Title: "Шаг 1: Добавьте файлы и настройте параметры",
+      yourFiles: "Ваши файлы:",
+      addMoreFiles: "Добавить ещё",
+      clearList: "Очистить список",
+      clickToUpload: "Нажмите для загрузки",
+      orDragAndDrop: "или перетащите файлы",
+      pdfFilesOnly: "Только PDF файлы",
+      prefixChar: "Префикс:",
+      maxLength: "Макс. длина:", // <-- NEW
+      processLatest: "Обрабатывать только последнюю ревизию (_rXX_ или _XX_)",
+      includeRevision: "Включать ревизию в отчёты",
+      removeDuplicates: "Удалять дубликаты в CSV (сохранять самый длинный текст)",
+      prefillComments: "Автозаполнять Comments именем чертежа",
+      screenshotSize: "Размер скриншота (пиксели):",
+      width: "Ширина",
+      height: "Высота",
+      textPosition: "Позиция текста на скриншоте:",
+      horizontal: "По горизонтали (X)",
+      vertical: "По вертикали (Y)",
+      text: "Текст",
+      runAnalysis: "Запустить анализ",
+      processing: "Обработка…",
+      step2Title: "Шаг 2: Результаты и экспорт",
+      backToSettings: "← Назад к настройкам",
+      downloadPdf: "Скачать PDF отчёт",
+      exportTxt: "Экспорт TXT (уникальные)",
+      exportCsv: "Экспорт CSV",
+      preview: "Превью",
+      comments: "Комментарии",
+      commentsPlaceholder: "Введите комментарий…",
+      noMatches: "Совпадений не найдено.",
+      foundMatches: (count, unique) => `Найдено ${count} совпадений (${unique} уникальных).`,
+      foundMatchesFile: (total, unique) => `Найдено ${total} совпадений (${unique} уникальных)`,
+      analyzingFile: (name, page, total) => `Анализ файла ${name} (страница ${page} из ${total})...`,
+      errorFile: (name) => `Ошибка с файлом ${name}. Пропускаю.`,
+      helpTitle: "Справка / Инструкция",
+      helpContent: `<h4 class="text-lg font-semibold">1. Добавление файлов</h4><p>Добавьте PDF‑файлы. Имена кликабельны и откроются в просмотрщике.</p><h4 class="text-lg font-semibold">2. Параметры</h4><p>Задайте префикс, максимальную длину и другие параметры обработки.</p><h4 class="text-lg font-semibold">3. Скриншот</h4><p>Настройте размеры и позицию.</p><h4 class="text-lg font-semibold">4. Анализ и экспорт</h4><p>Запустите анализ и экспортируйте PDF/TXT/CSV.</p>`
+    }
+  };
+
+  // --- Events ---
+  fileDropContainer.addEventListener('click', () => { if (allUploadedFiles.length === 0) pdfUpload.click(); });
+  fileDropContainer.addEventListener('dragover', e => { e.preventDefault(); fileDropContainer.classList.add("border-blue-500","bg-gray-50","dark:bg-gray-700"); });
+  fileDropContainer.addEventListener('dragleave', () => fileDropContainer.classList.remove("border-blue-500","bg-gray-50","dark:bg-gray-700"));
+  fileDropContainer.addEventListener('drop', e => { e.preventDefault(); fileDropContainer.classList.remove("border-blue-500","bg-gray-50","dark:bg-gray-700"); if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files); });
+  pdfUpload.addEventListener('change', e => { if (e.target.files.length > 0) handleFiles(e.target.files); });
+  filterRevisionsCheckbox.addEventListener('change', renderFileList);
+  runAnalysisBtn.addEventListener('click', runAnalysis);
+  clearFilesBtn.addEventListener('click', clearFileListUI);
+  addFilesBtn.addEventListener('click', () => pdfUpload.click());
+  backToMainBtn.addEventListener('click', () => { resultsSection.classList.add('hidden'); mainSection.classList.remove('hidden'); });
+  captureWidthInput.addEventListener('input', updateCapturePreview);
+  captureHeightInput.addEventListener('input', updateCapturePreview);
+  positionXInput.addEventListener('input', updateCapturePreview);
+  positionYInput.addEventListener('input', updateCapturePreview);
+  closeViewerBtn.addEventListener('click', closePdfViewer);
+  helpBtn.addEventListener('click', openHelpModal);
+  closeHelpBtn.addEventListener('click', closeHelpModal);
+  helpModal.addEventListener('click', (e) => { if (e.target === helpModal) closeHelpModal(); });
+
+  themeToggleBtn.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeIcons(isDark);
+  });
+  langSwitcher.addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON') setLanguage(e.target.dataset.langCode, true); });
+
+  function updateThemeIcons(isDark) {
+    if (isDark) { themeToggleDarkIcon.classList.remove('hidden'); themeToggleLightIcon.classList.add('hidden'); }
+    else { themeToggleDarkIcon.classList.add('hidden'); themeToggleLightIcon.classList.remove('hidden'); }
+  }
+
+  function setLanguage(lang, fromClick = false) {
+    document.querySelectorAll('[data-lang]').forEach(el => {
+      const key = el.getAttribute('data-lang');
+      if (translations[lang] && translations[lang][key] && typeof translations[lang][key] !== 'function') {
+        el.textContent = translations[lang][key];
+      }
+    });
+    localStorage.setItem('language', lang);
+    document.documentElement.lang = lang;
+    langSwitcher.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === lang));
+    if (fromClick) {
+      renderFileList();
+      document.querySelectorAll('#image-results textarea').forEach(t => t.placeholder = translations[lang].commentsPlaceholder);
+    }
+  }
+
+  // --- Helpers ---
+  function getPrefix(){ return prefixInput.value || 'W'; }
+
+  function getSearchRegex(isGlobal = false){
+    const escapedPrefix = getPrefix().replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
+    const pattern = `${escapedPrefix}(\\d+)`;
+    return new RegExp(pattern, isGlobal ? 'g' : '');
+  }
+
+  function getBaseNumberRegex(){
+    const escapedPrefix = getPrefix().replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
+    return new RegExp(`${escapedPrefix}\\d+`);
+  }
+
+  function updateCapturePreview(){
+    const width = parseInt(captureWidthInput.value) || 400;
+    const height = parseInt(captureHeightInput.value) || 175;
+    const posX = positionXInput.value, posY = positionYInput.value;
+    const previewScale = 0.25;
+    capturePreview.style.width = `${Math.max(20, width*previewScale)}px`;
+    capturePreview.style.height = `${Math.max(20, height*previewScale)}px`;
+    capturePreview.style.setProperty('--pos-x', `${posX}%`);
+    capturePreview.style.setProperty('--pos-y', `${posY}%`);
+    positionXLabel.textContent = posX; positionYLabel.textContent = posY;
+  }
+
+  function openPdfViewer(file, pageNumber=null, searchText=null){
+    if (currentViewerObjectUrl) { URL.revokeObjectURL(currentViewerObjectUrl); currentViewerObjectUrl = null; }
+    currentViewerObjectUrl = URL.createObjectURL(file);
+    const parts=[]; if (pageNumber) parts.push(`page=${pageNumber}`); if (searchText) parts.push(`search=${encodeURIComponent(searchText)}`);
+    pdfViewerIframe.src = currentViewerObjectUrl + (parts.length ? `#${parts.join('&')}` : '');
+    pdfViewerTitle.textContent = file.name;
+    pdfViewerModal.classList.remove('hidden');
+  }
+  function closePdfViewer(){
+    pdfViewerModal.classList.add('hidden');
+    pdfViewerIframe.src = '';
+    if (currentViewerObjectUrl) { URL.revokeObjectURL(currentViewerObjectUrl); currentViewerObjectUrl = null; }
+  }
+  function openHelpModal(){ const lang = localStorage.getItem('language') || 'en'; helpModalContent.innerHTML = translations[lang].helpContent; helpModal.classList.remove('hidden'); }
+  function closeHelpModal(){ helpModal.classList.add('hidden'); }
+
+  // --- Files handling ---
+  async function handleFiles(files){
+    const newFileObjects = [...files]
+      .filter(file => ((file.type === "application/pdf") || /\.pdf$/i.test(file.name)) && !allUploadedFiles.some(f => f.name === file.name))
+      .map(file => ({ file, name:file.name, scanResult:'scanning' }));
+    if (newFileObjects.length === 0) return;
+    allUploadedFiles.push(...newFileObjects);
+    renderFileList();
+    for (const fileObj of newFileObjects) { 
+        fileObj.scanResult = await quickScanFile(fileObj.file); 
+        renderFileList(); 
+    }
+  }
+
+  async function quickScanFile(file){
+    const searchRegexGlobal = getSearchRegex(true);
+    const baseNumberRegex = getBaseNumberRegex();
+    const maxLength = parseInt(lengthInput.value, 10) || 6; // <-- NEW
+    let matches = [];
+    try{
+        const data = new Uint8Array(await file.arrayBuffer());
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
+        for (let i = 1; i <= pdf.numPages; i++){
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            
+            for (const item of textContent.items) {
+                let match;
+                searchRegexGlobal.lastIndex = 0; 
+                while ((match = searchRegexGlobal.exec(item.str)) !== null) {
+                    if (match[1].length <= maxLength) { // <-- MODIFIED
+                        matches.push(match[0]);
+                    }
+                }
+            }
+        }
+        const filePrefix = file.name.toUpperCase().startsWith('EST-') ? file.name.substring(4,10) : file.name.substring(0,10);
+        const uniqueNumbers = new Set(matches.map(text => {
+            const baseNumber = (text.match(baseNumberRegex) || [text])[0];
+            return `${filePrefix}${baseNumber}`;
+        }));
+        return { total: matches.length, unique: uniqueNumbers.size, matches: matches };
+    }catch(err){
+        console.error(`Quick scan error for ${file.name}:`, err);
+        return { total:'Error', unique:'' };
+    }
+  }
+
+  function getFilesToProcess(){
+    const files = allUploadedFiles.map(obj => obj.file);
+    if (!filterRevisionsCheckbox.checked) return files;
+    const fileGroups = {};
+    const revisionRegex = /(.+?)(?:_r?(\d+))(.*)$/i;
+    files.forEach(file=>{
+      const m=file.name.match(revisionRegex);
+      let baseName,rev;
+      if (m){ baseName=(m[1]||'')+(m[3]||''); rev=parseInt(m[2],10); }
+      else { baseName=file.name; rev=-1; }
+      if (!fileGroups[baseName] || rev > fileGroups[baseName].revisionNumber) fileGroups[baseName]={file, revisionNumber:rev};
+    });
+    return Object.values(fileGroups).map(g=>g.file);
+  }
+
+  function renderFileList(){
+    const filesToProcess = getFilesToProcess();
+    const names = new Set(filesToProcess.map(f=>f.name));
+    const lang = localStorage.getItem('language') || 'en';
+
+    if (allUploadedFiles.length === 0){
+      fileDropContainer.classList.remove('has-files'); fileDropContainer.classList.add('no-files');
+      fileListContent.innerHTML = `
+        <div class="text-center">
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-medium text-blue-600 dark:text-blue-400" data-lang="clickToUpload">${translations[lang].clickToUpload}</span>
+            <span data-lang="orDragAndDrop">${translations[lang].orDragAndDrop}</span>
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-500" data-lang="pdfFilesOnly">${translations[lang].pdfFilesOnly}</p>
+        </div>`;
+      clearFilesBtn.disabled = true; return;
+    }
+
+    fileDropContainer.classList.add('has-files'); fileDropContainer.classList.remove('no-files');
+    clearFilesBtn.disabled = false; fileListContent.innerHTML = '';
+
+    allUploadedFiles.forEach((fileObj, index)=>{
+      const isIncluded = names.has(fileObj.name);
+      const item = document.createElement('div');
+      item.id=`file-item-${index}`;
+      item.className=`p-2 rounded flex justify-between items-center ${isIncluded?'':'opacity-40'}`;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = fileObj.name;
+      nameSpan.className='cursor-pointer text-blue-600 dark:text-blue-400 hover:underline truncate';
+      if (!isIncluded) nameSpan.classList.add('line-through');
+      nameSpan.onclick = () => openPdfViewer(fileObj.file);
+
+      const right = document.createElement('div'); right.className='flex items-center gap-4 flex-shrink-0 ml-4';
+      const resultSpan = document.createElement('span'); resultSpan.className='file-result-span text-sm text-gray-500 dark:text-gray-400';
+
+      if (fileObj.scanResult === 'scanning') {
+        resultSpan.innerHTML = `<div class="mini-loader"></div>`;
+      } else if (fileObj.scanResult && typeof fileObj.scanResult === 'object'){
+        if (fileObj.scanResult.total === 'Error'){ 
+            resultSpan.textContent='Error'; 
+            resultSpan.className+=' text-red-500'; 
+        } else {
+            resultSpan.textContent = translations[lang].foundMatchesFile(fileObj.scanResult.total, fileObj.scanResult.unique);
+            if (fileObj.scanResult.total > 0) {
+                resultSpan.classList.add('cursor-pointer', 'hover:underline', 'text-green-600', 'dark:text-green-400');
+                resultSpan.onclick = () => generateSingleFileCsv(fileObj);
+            }
+        }
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent='✕';
+      delBtn.className='text-red-500 hover:text-red-700 font-bold px-2';
+      delBtn.onclick = ()=>{ allUploadedFiles.splice(index,1); renderFileList(); };
+
+      const wrap = document.createElement('div'); wrap.className='flex items-center min-w-0'; wrap.appendChild(nameSpan);
+      right.appendChild(resultSpan); right.appendChild(delBtn);
+      item.appendChild(wrap); item.appendChild(right);
+      fileListContent.appendChild(item);
+    });
+  }
+
+  function clearFileListUI(){ allUploadedFiles=[]; pdfUpload.value=''; renderFileList(); }
+
+  // --- Analysis ---
+  function runAnalysis(){
+    const filesToProcess = getFilesToProcess();
+    if (filesToProcess.length === 0){
+      const lang = localStorage.getItem('language') || 'en';
+      alert(lang==='ru'?'Нет файлов для обработки.':lang==='et'?'Töödeldavaid faile pole.':'No files to process.');
+      return;
+    }
+    mainSection.classList.add('hidden'); processingSection.classList.remove('hidden');
+    processFiles(filesToProcess);
+  }
+
+  function isCanvasBlank(canvas){
+    if (!canvas || canvas.width===0 || canvas.height===0) return true;
+    const ctx = canvas.getContext('2d');
+    const buf = new Uint32Array(ctx.getImageData(0,0,canvas.width,canvas.height).data.buffer);
+    return buf.every(c => c === buf[0]);
+  }
+
+  async function processFiles(files){
+    capturedImages=[]; imageResults.innerHTML='';
+    const lang = localStorage.getItem('language') || 'en';
+
+    for (const file of files){
+      try{
+        const filePrefix = file.name.toUpperCase().startsWith('EST-') ? file.name.substring(4,10) : file.name.substring(0,10);
+        const revMatch = file.name.match(/_r?(\d+)/i);
+        const revision = revMatch ? `r${revMatch[1]}` : null;
+
+        const data = new Uint8Array(await file.arrayBuffer());
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
+
+        for (let i=1;i<=pdf.numPages;i++){
+          statusDisplay.textContent = translations[lang].analyzingFile(file.name, i, pdf.numPages);
+          const page = await pdf.getPage(i);
+          await analyzePage(page, i, filePrefix, revision, file);
+        }
+      }catch(err){
+        console.error(`Error processing ${file.name}:`, err);
+        statusDisplay.textContent = translations[lang].errorFile(file.name);
+        await new Promise(res=>setTimeout(res,2000));
+      }
+    }
+    processingSection.classList.add('hidden'); resultsSection.classList.remove('hidden');
+    displayResults();
+  }
+
+  async function analyzePage(page, pageNum, filePrefix, revision, sourceFile){
+    const textContent = await page.getTextContent();
+    const searchRegexGlobal = getSearchRegex(true);
+    const maxLength = parseInt(lengthInput.value, 10) || 6; // <-- NEW
+
+    const potential = [];
+    for (const item of textContent.items) {
+        let match;
+        searchRegexGlobal.lastIndex = 0;
+        while ((match = searchRegexGlobal.exec(item.str)) !== null) {
+            if (match[1].length <= maxLength) { // <-- MODIFIED
+                const newItem = { ...item };
+                newItem.str = match[0];
+                potential.push(newItem);
+            }
+        }
+    }
+
+    if (potential.length === 0) return;
+
+    const originalViewport = page.getViewport({ scale:1.0 });
+    const GRID_COLS=10, GRID_ROWS=10;
+    const cellWidth = originalViewport.width/GRID_COLS;
+    const cellHeight = originalViewport.height/GRID_ROWS;
+
+    const scale = 3.0;
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width=viewport.width; canvas.height=viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext:ctx, viewport }).promise;
+
+    const captureWidth = parseInt(captureWidthInput.value) || 400;
+    const captureHeight = parseInt(captureHeightInput.value) || 175;
+    const posX = parseInt(positionXInput.value) || 30;
+    const posY = parseInt(positionYInput.value) || 50;
+
+    for (const item of potential){
+      const textX = item.transform[4], textY = item.transform[5];
+      if (textX<0 || textX>originalViewport.width || textY<0 || textY>originalViewport.height) continue;
+
+      const colIndex = Math.min(GRID_COLS-1, Math.floor(textX / cellWidth));
+      const rowIndex = Math.min(GRID_ROWS-1, Math.floor((originalViewport.height - textY) / cellHeight));
+      const gridCoord = `${String.fromCharCode('A'.charCodeAt(0)+colIndex)}${rowIndex+1}`;
+
+      const tr = pdfjsLib.Util.transform(viewport.transform, item.transform);
+      const canvasX = tr[4], canvasY = tr[5];
+      const sx = canvasX - (captureWidth * (posX/100));
+      const sy = canvasY - (captureHeight * (posY/100));
+
+      const shot = document.createElement('canvas');
+      shot.width=captureWidth; shot.height=captureHeight;
+      shot.getContext('2d').drawImage(canvas, sx, sy, captureWidth, captureHeight, 0, 0, captureWidth, captureHeight);
+      if (isCanvasBlank(shot)) continue;
+
+      const defaultDrawingName = sourceFile.name.replace(/\.pdf$/i,'');
+      capturedImages.push({
+        dataUrl: shot.toDataURL('image/png'),
+        text: item.str,
+        page: pageNum,
+        gridCoord,
+        filePrefix,
+        revision,
+        sourceFile,
+        excluded: false,
+        comment: prefillCommentsCheckbox.checked ? defaultDrawingName : ''
+      });
+    }
+  }
+
+  // --- Results & Export ---
+  function updateResultSummary(){
+    const lang = localStorage.getItem('language') || 'en';
+    const active = capturedImages.filter(img => !img.excluded);
+    if (capturedImages.length === 0){ resultSummary.textContent = translations[lang].noMatches; return; }
+    const unique = new Set(active.map(img => {
+      const base = (img.text.match(getBaseNumberRegex()) || [img.text])[0];
+      return `${img.filePrefix}${base}`;
+    }));
+    resultSummary.textContent = translations[lang].foundMatches(active.length, unique.size);
+  }
+
+  function toggleExclude(index, el){ capturedImages[index].excluded = !capturedImages[index].excluded; el.classList.toggle('excluded'); updateResultSummary(); }
+
+  function displayResults(){
+    const baseNumberRegex = getBaseNumberRegex();
+    const sortRegex = getSearchRegex(false);
+    capturedImages.sort((a,b)=>{
+      const fc = a.filePrefix.localeCompare(b.filePrefix); if (fc !== 0) return fc;
+      const ma=a.text.match(sortRegex), mb=b.text.match(sortRegex);
+      const na = ma?parseInt(ma[1],10):Number.MAX_SAFE_INTEGER;
+      const nb = mb?parseInt(mb[1],10):Number.MAX_SAFE_INTEGER;
+      return na-nb;
+    });
+
+    imageResults.innerHTML=''; imageResultsHeader.classList.toggle('hidden', capturedImages.length===0);
+    const lang = localStorage.getItem('language') || 'en';
+
+    capturedImages.forEach((imgData, index)=>{
+      const row = document.createElement('div');
+      row.className='result-item flex flex-col md:flex-row items-center gap-4 p-2 border-b dark:border-gray-700';
+
+      const left = document.createElement('div');
+      left.className='relative border dark:border-gray-700 rounded-lg p-2 shadow-sm bg-gray-50 dark:bg-gray-900/50 flex flex-col items-center group w-full md:w-1/3';
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className='cursor-pointer';
+      imgWrap.onclick = () => openPdfViewer(imgData.sourceFile, imgData.page, imgData.text);
+
+      const numSpan = document.createElement('span');
+      numSpan.textContent = `${index+1}.`;
+      numSpan.className='absolute top-2 left-2 text-xs font-bold text-gray-500 dark:text-gray-400';
+
+      const excl = document.createElement('button');
+      excl.innerHTML='&times;';
+      excl.className='exclude-btn absolute top-1 right-1 text-xl font-bold text-red-500 hover:text-red-700 bg-white/50 dark:bg-gray-800/50 rounded-full h-6 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity';
+      excl.onclick = (e)=>{ e.stopPropagation(); toggleExclude(index, row); };
+
+      const img = document.createElement('img');
+      img.src = imgData.dataUrl; img.className='rounded-md border border-gray-200 dark:border-gray-700 mb-2';
+      imgWrap.append(img);
+
+      const p = document.createElement('p');
+      p.className='text-sm font-medium break-all text-center';
+      const baseNumber = (imgData.text.match(baseNumberRegex) || [imgData.text])[0];
+      p.textContent = `${imgData.filePrefix}${baseNumber} ( page ${imgData.page} )`;
+
+      const rev = document.createElement('span');
+      rev.className='text-xs text-red-500 font-semibold';
+      if (includeRevisionCheckbox.checked && imgData.revision) rev.textContent = imgData.revision;
+
+      const label = document.createElement('div');
+      label.className='flex items-center justify-center gap-2';
+      label.append(p, rev);
+
+      left.append(numSpan, excl, imgWrap, label);
+
+      const ta = document.createElement('textarea');
+      ta.className='w-full md:w-2/3 h-24 p-2 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500';
+      ta.placeholder = translations[lang].commentsPlaceholder;
+      ta.value = imgData.comment || '';
+      ta.oninput = ()=>{ capturedImages[index].comment = ta.value; };
+
+      row.append(left, ta);
+      imageResults.appendChild(row);
+    });
+
+    updateResultSummary();
+  }
+
+  function downloadFile(content, fileName, mimeType, withBOM=false){
+    const BOM = '\uFEFF';
+    const blob = new Blob(withBOM ? [BOM,content] : [content], { type:mimeType });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fileName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+  
+  function generateSingleFileCsv(fileObj) {
+    const activeMatches = fileObj.scanResult.matches;
+    if (!activeMatches || activeMatches.length === 0) return;
+
+    const baseNumberRegex = getBaseNumberRegex();
+    const sortRegex = getSearchRegex(false);
+
+    const revMatch = fileObj.name.match(/_r?(\d+)/i);
+    const revision = revMatch ? `r${revMatch[1]}` : null;
+    const filePrefix = fileObj.name.toUpperCase().startsWith('EST-') ? fileObj.name.substring(4,10) : fileObj.name.substring(0,10);
+
+    let dataForCsv = activeMatches.map(matchText => ({
+        text: matchText,
+        filePrefix: filePrefix,
+        revision: revision,
+        comment: '' // No comment available from quick scan
+    }));
+    
+    // Sort the data
+    dataForCsv.sort((a, b) => {
+        const fullNumberA = `${a.filePrefix}${ (a.text.match(baseNumberRegex) || [a.text])[0] }`;
+        const fullNumberB = `${b.filePrefix}${ (b.text.match(baseNumberRegex) || [b.text])[0] }`;
+        return fullNumberA.localeCompare(fullNumberB, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
+    if (filterCsvDuplicatesCheckbox.checked) {
+        const map = new Map();
+        dataForCsv.forEach(img => {
+            const base = (img.text.match(baseNumberRegex) || [img.text])[0];
+            const key = `${img.filePrefix}${base}`;
+            if (!map.has(key) || img.text.length > map.get(key).text.length) {
+                map.set(key, img);
+            }
+        });
+        dataForCsv = [...map.values()];
+    }
+
+    let csv = [
+      "Esliide", "Jrk nr.", "Revision", "Job", "Repaired", "Liide", "WPS nr.", "WPAR / WPQR nr.",
+      "Keevitus protsess", "Keevitaja ID", "Keevituse tüüp", "Märkused", "Keevitaja 1",
+      "Keevitaja 2", "IP 100%", "F/P/W", "Kuupäev", "RT %", "MT %", "PT %",
+      "PMI QTY", "Fin.Qty", "Preheat", "PWHT"
+    ].join(',') + '\n';
+
+    dataForCsv.forEach(img => {
+        const base = (img.text.match(baseNumberRegex) || [img.text])[0];
+        const fullNumber = `${img.filePrefix}${base}`;
+
+        let esliide = `"${fullNumber}"`;
+        let jrkNr = "";
+
+        const match = fullNumber.match(/^(.*?)(\d+)$/);
+        if (match) {
+            esliide = `"${match[1]}"`;
+            jrkNr = `"${match[2]}"`;
+        }
+
+        const revisionCsv = `"${(includeRevisionCheckbox.checked && img.revision) ? img.revision : ''}"`;
+        const comment = `""`; // Empty comment
+
+        const row = [
+            esliide, jrkNr, revisionCsv,
+            "", "", "", "", "", "", "", "", comment, "", "", "", "", "", "", "", "", "", "", "", ""
+        ];
+
+        csv += row.join(',') + "\n";
+    });
+    
+    const fileName = `report_${getPrefix()}_${fileObj.name.replace(/\.pdf$/i, '')}.csv`;
+    downloadFile(csv, fileName, 'text/csv;charset=utf-8;', true);
+  }
+
+  // --- Export buttons ---
+  generateReportBtn.addEventListener('click', async ()=>{
+    const active = capturedImages.filter(img => !img.excluded);
+    if (active.length === 0) return;
+
+    const baseNumberRegex = getBaseNumberRegex();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', format:'a4' });
+
+    doc.setFont('Helvetica','normal');
+
+    const margin=10, pageHeight=doc.internal.pageSize.getHeight(), pageWidth=doc.internal.pageSize.getWidth();
+    let y = margin + 5;
+
+    doc.setFontSize(16);
+    doc.text("PDF Analysis Report", pageWidth/2, y, { align:'center' });
+    y += 15;
+
+    const captureWidth = parseInt(captureWidthInput.value) || 400;
+    const captureHeight = parseInt(captureHeightInput.value) || 175;
+    const imgWidth = 45;
+    const imgHeight = (imgWidth / captureWidth) * captureHeight;
+
+    active.forEach((imgData, index)=>{
+      const baseNumber = (imgData.text.match(baseNumberRegex) || [imgData.text])[0];
+      let label = `${imgData.filePrefix}${baseNumber} ( page ${imgData.page} )`;
+      if (includeRevisionCheckbox.checked && imgData.revision) label += ` ${imgData.revision}`;
+
+      const commentLines = doc.splitTextToSize(imgData.comment || '', pageWidth - margin*2 - imgWidth - 25);
+      const textHeight = (commentLines.length + 2) * 4;
+      const rowHeight = Math.max(imgHeight, textHeight) + 10;
+
+      if (y + rowHeight > pageHeight - margin){ doc.addPage(); doc.setFont('Helvetica','normal'); y = margin; }
+
+      doc.setDrawColor(150,150,150);
+      doc.rect(margin, y, pageWidth - margin*2, rowHeight);
+
+      doc.setFontSize(10);
+      doc.text(`${index+1}.`, margin+3, y + rowHeight/2 + 3);
+
+      const imgX = margin + 10, imgY = y + (rowHeight - imgHeight)/2;
+      doc.addImage(imgData.dataUrl, 'PNG', imgX, imgY, imgWidth, imgHeight);
+      
+      let textY = y + 7;
+      doc.setFontSize(10).text(label, margin + 20 + imgWidth, textY);
+      textY += 6;
+      doc.setFontSize(9).text(commentLines, margin + 20 + imgWidth, textY);
+
+      y += rowHeight;
+    });
+
+    const totalPages = doc.internal.getNumberOfPages();
+    const footerText = document.querySelector('footer p').textContent; 
+
+    for (let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFont('Helvetica','normal');
+      doc.setFontSize(8);
+
+      // App info on the left
+      doc.text(footerText, margin, pageHeight - (margin/2));
+
+      // Page number on the right
+      const pageNumText = `Page ${i} of ${totalPages}`;
+      const textWidth = doc.getStringUnitWidth(pageNumText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      doc.text(pageNumText, pageWidth - margin - textWidth, pageHeight - (margin/2));
+    }
+
+    doc.save('pdf_analysis_report.pdf');
+  });
+
+  exportTxtBtn.addEventListener('click', ()=>{
+    const active = capturedImages.filter(img => !img.excluded);
+    if (active.length === 0) return;
+    const baseNumberRegex = getBaseNumberRegex();
+    const unique = [...new Set(active.map(img=>{
+      const base = (img.text.match(baseNumberRegex) || [img.text])[0];
+      return `${img.filePrefix}${base}`;
+    }))].sort((a,b)=>a.localeCompare(b));
+    downloadFile(unique.join('\n'), 'prefixed_numbers_unique.txt', 'text/plain;charset=utf-8;', true);
+  });
+
+  exportCsvBtn.addEventListener('click', ()=>{
+    const active = capturedImages.filter(img => !img.excluded);
+    if (active.length === 0) return;
+    const baseNumberRegex = getBaseNumberRegex();
+
+    let dataForCsv = active;
+    if (filterCsvDuplicatesCheckbox.checked){
+      const map = new Map();
+      active.forEach(img=>{
+        const base = (img.text.match(baseNumberRegex) || [img.text])[0];
+        const key = `${img.filePrefix}${base}`;
+        if (!map.has(key) || img.text.length > map.get(key).text.length) map.set(key, img);
+      });
+      dataForCsv = [...map.values()];
+    }
+
+    let csv = [
+    "Esliide", "Jrk nr.", "Revision", "Job", "Repaired", "Liide", "WPS nr.", "WPAR / WPQR nr.",
+    "Keevitus protsess", "Keevitaja ID", "Keevituse tüüp", "Märkused", "Keevitaja 1",
+    "Keevitaja 2", "IP 100%", "F/P/W", "Kuupäev", "RT %", "MT %", "PT %",
+    "PMI QTY", "Fin.Qty", "Preheat", "PWHT"
+].join(';') + '\n'; // <-- Заменено здесь
+
+dataForCsv.forEach(img => {
+    const base = (img.text.match(baseNumberRegex) || [img.text])[0];
+    const fullNumber = `${img.filePrefix}${base}`;
+
+    let esliide = `"${fullNumber}"`;
+    let jrkNr = "";
+
+    const match = fullNumber.match(/^(.*?)(\d+)$/);
+    if (match) {
+        esliide = `"${match[1]}"`;
+        jrkNr = `"${match[2]}"`;
+    }
+
+    const revision = `"${(includeRevisionCheckbox.checked && img.revision) ? img.revision : ''}"`;
+    const comment = `"${(img.comment || '').replace(/"/g, '""')}"`;
+
+    const row = [
+        esliide, jrkNr, revision,
+        "", "", "", "", "", "", "", "", comment, "", "", "", "", "", "", "", "", "", "", "", ""
+    ];
+
+    csv += row.join(';') + "\n"; // <-- И здесь
+});
+
+// Добавляем BOM (Byte Order Mark) к вашим данным
+const csvWithBom = '\uFEFF' + csv;
+
+// Используем исходный вызов функции с utf-8
+downloadFile(csvWithBom, 'welding_report_export.csv', 'text/csv;charset=utf-8;', true);
+
+    /* downloadFile(csv, 'welding_report_export.csv', 'text/csv;charset=windows-1251;', true); */
+  });
+
+  // --- Init ---
+  window.onload = async ()=>{
+    const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', isDark); updateThemeIcons(isDark);
+
+    const savedLang = localStorage.getItem('language') || 'ru'; // Default to Russian
+    setLanguage(savedLang);
+
+    updateCapturePreview(); renderFileList();
+  };
+</script>
+</body>
+</html>

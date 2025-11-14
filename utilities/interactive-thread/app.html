@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Совместимость трубных резьб</title>
+    <!-- 1. Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Подключение Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Дополнительные стили для имитации shadcn/ui и prose */
+        body {
+            background-color: #f8fafc; /* bg-slate-50 */
+            color: #0f172a; /* bg-slate-900 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0; /* border-slate-200 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05); /* shadow-sm */
+        }
+        .select-trigger {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            border: 1px solid #cbd5e1; /* border-slate-300 */
+            border-radius: 0.375rem;
+            background-color: white;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        .alert {
+            position: relative;
+            padding: 1rem;
+            padding-left: 2.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid;
+        }
+        .alert-icon {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            border-width: 1px;
+        }
+        .tabs-list {
+            display: inline-flex;
+            height: 2.5rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            background-color: #f1f5f9; /* bg-slate-200 */
+            padding: 0.25rem;
+        }
+        .tab-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: #475569; /* text-slate-600 */
+        }
+        .tab-trigger[data-state="active"] {
+            background-color: white;
+            color: #0f172a; /* text-slate-900 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .tab-content {
+            display: none;
+            padding-top: 1rem;
+        }
+        .tab-content[data-state="active"] {
+            display: block;
+        }
+        .prose {
+            color: #334155; /* text-slate-700 */
+            line-height: 1.6;
+        }
+        .prose h3 {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .prose p {
+            margin-bottom: 1rem;
+        }
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .prose li {
+            margin-bottom: 0.25rem;
+        }
+        .prose b {
+            font-weight: 600;
+        }
+        /* Стили для переключателя языка */
+        .lang-switcher {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            border: 1px solid #cbd5e1; /* border-slate-300 */
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .lang-switcher[data-state="active"] {
+            background-color: #0f172a; /* bg-slate-900 */
+            color: white;
+            border-color: #0f172a;
+        }
+        .lang-switcher:hover:not([data-state="active"]) {
+            background-color: #f1f5f9; /* bg-slate-100 */
+        }
+
+        /* Стили для визуализации резьбы */
+        .thread-visual-container {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc; /* bg-slate-50 */
+            border-radius: 0.25rem;
+            border: 1px solid #e2e8f0; /* border-slate-200 */
+            padding: 0.5rem;
+            overflow: hidden;
+        }
+        .thread-visual-container svg {
+            max-height: 100%;
+            width: auto;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <!-- Заголовок -->
+        <div class="flex flex-col gap-1">
+            <h1 id="main-title" class="text-2xl font-semibold tracking-tight"></h1>
+            <p id="main-subtitle" class="text-sm text-slate-500"></p>
+        </div>
+
+        <!-- Языковой переключатель -->
+        <div class="flex justify-center gap-2 mb-4">
+            <button class="lang-switcher" data-lang="en">English</button>
+            <button class="lang-switcher" data-lang="et">Eesti</button>
+            <button class="lang-switcher" data-lang="ru">Русский</button>
+        </div>
+
+        <!-- Главная карточка с выбором -->
+        <div class="card shadow-sm">
+            <div class="p-4 grid grid-cols-1 gap-4">
+                <!-- Легенда -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span id="legend-title" class="text-sm text-slate-500"></span>
+                    <span id="legend-ok" class="badge"></span>
+                    <span id="legend-caution" class="badge"></span>
+                    <span id="legend-no" class="badge"></span>
+                </div>
+
+                <!-- Выбор -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+                    <!-- Левая колонка (Male) -->
+                    <div class="card p-4 grid grid-cols-1 gap-3 lg:col-span-2">
+                        <div id="male-title" class="text-sm font-medium"></div>
+                        <div id="left-image-container" class="thread-visual-container mt-2"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                            <select id="left-standard" class="select-trigger"></select>
+                            <select id="left-size" class="select-trigger"></select>
+                        </div>
+                    </div>
+
+                    <!-- Средняя колонка (Результат) -->
+                    <div class="hidden lg:flex items-center justify-center pt-16 lg:col-span-1">
+                        <div id="result-image-container" class="w-24 h-24"></div>
+                    </div>
+
+                    <!-- Правая колонка (Female) -->
+                    <div class="card p-4 grid grid-cols-1 gap-3 lg:col-span-2">
+                        <div id="female-title" class="text-sm font-medium"></div>
+                        <div id="right-image-container" class="thread-visual-container mt-2"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                            <select id="right-standard" class="select-trigger"></select>
+                            <select id="right-size" class="select-trigger"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Результат -->
+                <div id="result-details" class="space-y-3 mt-4">
+                    <div class="flex items-center gap-2">
+                        <span id="result-badge" class="badge"></span>
+                        <span id="result-pair" class="text-sm text-slate-500"></span>
+                    </div>
+
+                    <div id="result-notes" class="alert" style="display: none;">
+                        <i class="alert-icon" data-lucide="info"></i>
+                        <h5 id="notes-title" class="font-medium mb-1"></h5>
+                        <div class="text-sm" id="result-notes-list"></div>
+                    </div>
+
+                    <div id="result-seal" class="card border-dashed" style="display: none;">
+                        <div class="p-4 space-y-2">
+                            <div id="seal-title" class="text-sm font-medium"></div>
+                            <ul class="list-disc ml-4 space-y-1 text-sm" id="result-seal-list"></ul>
+                        </div>
+                    </div>
+                    
+                    <div id="result-adapters" class="card border-dashed" style="display: none;">
+                        <div class="p-4 space-y-2">
+                            <div id="adapters-title" class="text-sm font-medium"></div>
+                            <ul class="list-disc ml-4 space-y-1 text-sm" id="result-adapters-list"></ul>
+                        </div>
+                    </div>
+
+                    <div id="result-standards" class="flex flex-wrap gap-2 items-center" style="display: none;">
+                        <span id="standards-title" class="text-sm text-slate-500"></span>
+                        <div id="result-standards-list" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Табы -->
+        <div>
+            <div class="tabs-list">
+                <button id="tab-matrix" class="tab-trigger" data-tab="matrix" data-state="active"></button>
+                <button id="tab-help" class="tab-trigger" data-tab="help" data-state="inactive"></button>
+            </div>
+            
+            <!-- Контент таба 1: Матрица -->
+            <div id="content-matrix" class="tab-content" data-state="active">
+                <div class="overflow-auto card p-4">
+                    <table class="w-full border text-sm min-w-[600px]">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th id="matrix-header" class="px-2 py-1 border text-left font-medium text-slate-800"></th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">R</th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">Rp</th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">Rc</th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">G</th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">NPT</th>
+                                <th class="px-2 py-1 border font-medium text-slate-800">NPTF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-body">
+                            <!-- Тело таблицы будет сгенерировано JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Контент таба 2: Пояснения -->
+            <div id="content-help" class="tab-content" data-state="inactive">
+                <!-- Содержимое будет сгенерировано JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3. JavaScript-логика -->
+    <script>
+        // --- 1. Глобальные данные ---
+        
+        // Размеры не переводятся
+        const SIZES = [
+            "1/8", "1/4", "3/8", "1/2", "3/4", "1", "1-1/4", "1-1/2", "2",
+        ];
+
+        let currentLang = 'en'; // Язык по умолчанию
+
+        // --- 2. Визуализации (SVG) ---
+        const VISUALS = {
+            // --- BSP (55°) ---
+            'G_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 V 30 H 30 M 30 35 H 70 M 30 40 H 70 M 30 45 H 70 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (G)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° ||</text></svg>`,
+            'G_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 V 80 M 40 25 H 60 M 40 30 H 60 M 40 35 H 60 M 40 40 H 60 M 40 45 H 60 M 40 50 H 60 M 40 55 H 60 M 40 60 H 60 M 40 65 H 60 M 40 70 H 60 M 40 75 H 60"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (G)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° ||</text></svg>`,
+            'R_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 L 65 30 H 30 M 30 35 H 66.5 M 30 40 H 68 M 30 45 H 69.5 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (R)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° /\\</text></svg>`,
+            'Rp_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 V 80 M 40 25 H 60 M 40 30 H 60 M 40 35 H 60 M 40 40 H 60 M 40 45 H 60 M 40 50 H 60 M 40 55 H 60 M 40 60 H 60 M 40 65 H 60 M 40 70 H 60 M 40 75 H 60"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (Rp)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° ||</text></svg>`,
+            'Rc_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 L 65 80 M 40 25 H 60.5 M 40 30 H 61 M 40 35 H 61.5 M 40 40 H 62 M 40 45 H 62.5 M 40 50 H 63 M 40 55 H 63.5 M 40 60 H 64 M 40 65 H 64.5 M 40 70 H 65 M 40 75 H 65"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (Rc)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° /\\</text></svg>`,
+            
+            // --- NPT (60°) ---
+            'NPT_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 L 65 30 H 30 M 30 35 H 66.5 M 30 40 H 68 M 30 45 H 69.5 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (NPT)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
+            'NPT_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 L 65 80 M 40 25 H 60.5 M 40 30 H 61 M 40 35 H 61.5 M 40 40 H 62 M 40 45 H 62.5 M 40 50 H 63 M 40 55 H 63.5 M 40 60 H 64 M 40 65 H 64.5 M 40 70 H 65 M 40 75 H 65"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (NPT)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
+            'NPTF_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 L 65 30 H 30 M 30 35 H 66.5 M 30 40 H 68 M 30 45 H 69.5 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (NPTF)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
+            'NPTF_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 L 65 80 M 40 25 H 60.5 M 40 30 H 61 M 40 35 H 61.5 M 40 40 H 62 M 40 45 H 62.5 M 40 50 H 63 M 40 55 H 63.5 M 40 60 H 64 M 40 65 H 64.5 M 40 70 H 65 M 40 75 H 65"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (NPTF)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
+            'default_svg': `<svg viewBox="0 0 100 100"><text x="50" y="50" font-size="12" fill="#888" text-anchor="middle">Select</text></svg>`,
+
+            // --- Результаты ---
+            'result_ok': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" class="text-green-500" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="3"/><path d="M30 50 L 45 65 L 70 35" class="text-green-600" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            'result_caution': `<svg viewBox="0 0 100 100"><path d="M50 20 L 85 80 L 15 80 Z" class="text-yellow-500" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="3"/><path d="M50 45 V 60 M 50 70 V 72" class="text-yellow-600" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>`,
+            'result_no': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" class="text-red-500" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="3"/><path d="M35 35 L 65 65 M 65 35 L 35 65" class="text-red-600" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>`,
+        };
+
+
+        // --- 3. Объект переводов ---
+        
+        const translations = {
+            // --- АНГЛИЙСКИЙ (EN) ---
+            en: {
+                // Статический UI
+                title: "Pipe Thread Compatibility",
+                h1: "Pipe Thread Compatibility: BSP/BSPT/NPT",
+                subtitle: "Build your pair (male → female) and get compatibility, sealing, and adapter recommendations.",
+                statuses: "Statuses:",
+                maleThread: "Male Thread",
+                femaleThread: "Female Thread",
+                notes: "Notes",
+                recSeal: "Recommended Sealing",
+                ifNoPair: "If Assembly is Not Possible",
+                standardsRef: "Standards/References:",
+                tabMatrix: "Compatibility Matrix",
+                tabHelp: "Explanation",
+                matrixHeader: "Male → Female",
+                helpContent: `
+                    <div class="card p-4 prose prose-sm max-w-none">
+                        <h3>Key Principles</h3>
+                        <ul>
+                            <li><b>BSPT (R/Rc)</b> – Tapered; seals on the threads.</li>
+                            <li><b>R → Rp</b> – Permitted pair (tapered male into parallel female) per ISO 7-1, requires sealant.</li>
+                            <li><b>BSPP (G)</b> – Parallel; seals via a gasket/washer/O-ring on a face, not on the threads.</li>
+                            <li><b>NPT/NPTF</b> – Tapered 60°; compatible within their own system. NPTF is a dryseal thread.</li>
+                            <li><b>NPT ↔ BSP</b> – Different angles (60° vs 55°) and pitches; adapters must be used.</li>
+                        </ul>
+                        <h3>Typical Size Designations</h3>
+                        <p>R1, G1, 1/2, etc., are nominal thread sizes, not the actual outer diameter of the pipe.</p>
+                        <h3>Note on Sealants</h3>
+                        <ul>
+                            <li>For Tapered Threads: PTFE tape, paste, liquid anaerobic sealants.</li>
+                            <li>For Parallel Threads: Flat gaskets, bonded seals, O-rings on sealing faces.</li>
+                        </ul>
+                    </div>
+                `,
+                // Динамические данные
+                ALL_STANDARDS: [ // <--- ПЕРЕИМЕНОВАНО
+                    { code: "G", name: "BSPP (ISO 228) – parallel" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – internal parallel (pressure-tight on thread)" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – external taper" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – internal taper" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – taper" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – taper dry seal" },
+                ],
+                // --- НОВЫЕ СПИСКИ ---
+                MALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – parallel" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – external taper" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – taper" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – taper dry seal" },
+                ],
+                FEMALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – parallel" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – internal parallel (pressure-tight on thread)" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – internal taper" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – taper" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – taper dry seal" },
+                ],
+                // --- КОНЕЦ НОВЫХ СПИСКОВ ---
+                LEVELS: {
+                    ok: { label: "Compatible", tone: "ok", icon: "check-circle-2", badgeClass: "bg-green-100 text-green-900 border-green-300", alertClass: "bg-green-50 border-green-300 text-green-900" },
+                    caution: { label: "Compatible (with caution)", tone: "caution", icon: "alert-triangle", badgeClass: "bg-yellow-100 text-yellow-900 border-yellow-300", alertClass: "bg-yellow-50 border-yellow-300 text-yellow-900" },
+                    no: { label: "Incompatible", tone: "no", icon: "x-circle", badgeClass: "bg-red-100 text-red-900 border-red-300", alertClass: "bg-red-50 border-red-300 text-red-900" },
+                },
+                // Динамический UI
+                selectedPair: "Selected pair:",
+                maleShort: "male",
+                femaleShort: "female",
+                matrixLabel: (label) => label.split(" ")[0].replace("Compatible", "Comp.").replace("Incompatible", "Incomp."),
+                // Логика правил
+                evaluateCompatibility: function(male, female) {
+                    const { standard: mStd, gender: mGen, size: mSize } = male;
+                    const { standard: fStd, gender: fGen, size: fSize } = female;
+
+                    // NEW SIZE CHECK
+                    if (mSize !== fSize) {
+                        return {
+                            level: "no",
+                            notes: [`Size mismatch: ${mSize}" male cannot be connected to ${fSize}" female.`],
+                            seal: [], adapters: [], standards: []
+                        };
+                    }
+
+                    if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Internal error: Invalid gender specified."], seal: [], adapters: [], standards: [] }; }
+                    const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
+                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Standard BSPT taper pair: R (male) → Rc (female)"], ["Seal on thread: hemp/paste, PTFE tape, or sealant."], [], ["ISO 7-1"] ); }
+                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Allowed by ISO 7-1: R (taper) → Rp (parallel) with sealing on thread."], ["Seal on thread: PTFE/paste/tape."], [], ["ISO 7-1"] ); }
+                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Parallel BSPP: thread centers, sealing is not on the thread.", "Requires a flat gasket, bonded seal, or face seal/O-ring on the male part."], ["Flat gasket, copper/alum. washer, bonded seal, integrated O-ring (BSPP swivel/banjo, etc.)."], ["If no sealing surface – use adapter G→R/Rp."], ["ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Thread engagement is possible, but sealing is not on the thread.", "Requires a face seal/gasket on the port face (if provided)."], ["Flat gasket/washer, bonded seal, O-ring in port chamfer."], ["If no seat is present – use G male → R male adapter."], ["ISO 228-1", "ISO 7-1 (limited)"] ); }
+                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Mechanically engages (55°), but G (ISO 228) is not intended for sealing on the thread.", "Sealing is only possible if a face and gasket/seal are present."], ["Gasket/washer, bonded seal, if port has a flat face and chamfer."], ["Preferable to use Rp instead of G, or use an adapter."], ["ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Standard NPT taper pair."], ["Seal on thread: PTFE tape/paste/sealant."], [], ["ASME B1.20.1"] ); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["NPTF (Dryseal) pair – metal-to-metal seal without sealant when correctly machined."], ["No sealant per standard; minimal lubricant for assembly is allowed."], [], ["SAE J476", "ASME B1.20.3"] ); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Engages. Dry seal not guaranteed; use sealant."], ["PTFE tape/sealant."], [], ["SAE Practice"] ); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Engages. Sealant is recommended; dry seal is not achieved."], ["PTFE tape/sealant."], [], ["SAE Practice"] ); }
+                    const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) and BSP(55°) have different thread angles and pitches; partial engagement is possible, but seal and strength are not to standard."], ["Use an NPT ↔ BSP adapter (converter)."], ["Adapter NPT male ↔ R/Rp/G female or vice versa."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) and NPT(60°) are incompatible by standard; partial engagement without a seal is possible."], ["Use a BSP ↔ NPT adapter."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-parallel male with Rc-taper female: non-standard pair – does not provide a seal."], ["Use adapter G→R or an insert with a face seal."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"] ); }
+                    return res( "no", ["No standard pair for the selected combination or case not described."], ["Consider an adapter or changing the pair."], [], [] );
+                }
+            },
+            
+            // --- РУССКИЙ (RU) ---
+            ru: {
+                // Статический UI
+                title: "Совместимость трубных резьб",
+                h1: "Совместимость трубных резьб: BSP/BSPT/NPT",
+                subtitle: "Соберите свою пару (наружная → внутренняя) и получите оценку совместимости, рекомендации по уплотнению и переходникам.",
+                statuses: "Статусы:",
+                maleThread: "Наружная резьба (male)",
+                femaleThread: "Внутренняя резьба (female)",
+                notes: "Примечания",
+                recSeal: "Рекомендуемая герметизация",
+                ifNoPair: "Если пару собрать нельзя",
+                standardsRef: "Нормативы/ссылки:",
+                tabMatrix: "Матрица совместимости",
+                tabHelp: "Пояснения",
+                matrixHeader: "Наружная → Внутренняя",
+                helpContent: `
+                    <div class="card p-4 prose prose-sm max-w-none">
+                        <h3>Ключевые принципы</h3>
+                        <ul>
+                            <li><b>BSPT (R/Rc)</b> – конические; герметизация по резьбе.</li>
+                            <li><b>R → Rp</b> – допустимая пара (коническая наружная в параллельную внутреннюю) по ISO 7-1 с герметиком.</li>
+                            <li><b>BSPP (G)</b> – параллельные; герметизация вне резьбы (торец/прокладка/O-ring).</li>
+                            <li><b>NPT/NPTF</b> – конические 60°; совместимы внутри своей системы. NPTF – dryseal.</li>
+                            <li><b>NPT ↔ BSP</b> – разные углы профиля и шаги; использовать переходники.</li>
+                        </ul>
+                        <h3>Типовые обозначения размеров</h3>
+                        <p>R1, G1, 1/2 и т.п. – это номинальные дюймовые размеры резьбы, не равные фактическому наружному диаметру трубы.</p>
+                        <h3>Примечание по герметикам</h3>
+                        <ul>
+                            <li>Для конических резьб: PTFE-лента, паста, жидкие анаэробные герметики.</li>
+                            <li>Для параллельных резьб: плоские прокладки, кольца с уплотнением (bonded seal), O-ring на торцевых седлах.</li>
+                        </ul>
+                    </div>
+                `,
+                // Динамические данные
+                ALL_STANDARDS: [ // <--- ПЕРЕИМЕНОВАНО
+                    { code: "G", name: "BSPP (ISO 228) – параллельная" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – внутр. параллельная (гермет. по резьбе)" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – наружная коническая" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – внутренняя коническая" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – коническая" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – коническая сухое уплотнение" },
+                ],
+                // --- НОВЫЕ СПИСКИ ---
+                MALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – параллельная" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – наружная коническая" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – коническая" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – коническая сухое уплотнение" },
+                ],
+                FEMALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – параллельная" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – внутр. параллельная (гермет. по резьбе)" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – внутренняя коническая" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – коническая" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – коническая сухое уплотнение" },
+                ],
+                // --- КОНЕЦ НОВЫХ СПИСКОВ ---
+                LEVELS: {
+                    ok: { label: "Совместимо", tone: "ok", icon: "check-circle-2", badgeClass: "bg-green-100 text-green-900 border-green-300", alertClass: "bg-green-50 border-green-300 text-green-900" },
+                    caution: { label: "Совместимо с оговорками", tone: "caution", icon: "alert-triangle", badgeClass: "bg-yellow-100 text-yellow-900 border-yellow-300", alertClass: "bg-yellow-50 border-yellow-300 text-yellow-900" },
+                    no: { label: "Несовместимо", tone: "no", icon: "x-circle", badgeClass: "bg-red-100 text-red-900 border-red-300", alertClass: "bg-red-50 border-red-300 text-red-900" },
+                },
+                // Динамический UI
+                selectedPair: "Выбранная пара:",
+                maleShort: "наруж.",
+                femaleShort: "внутр.",
+                matrixLabel: (label) => label.split(" ")[0].replace("Совместимо", "Совм."),
+                // Логика правил (Оригинальная)
+                evaluateCompatibility: function(male, female) {
+                    const { standard: mStd, gender: mGen, size: mSize } = male;
+                    const { standard: fStd, gender: fGen, size: fSize } = female;
+
+                    // NEW SIZE CHECK
+                    if (mSize !== fSize) {
+                        return {
+                            level: "no",
+                            notes: [`Несовпадение размеров: ${mSize}" (наружная) не может быть соединена с ${fSize}" (внутренняя).`],
+                            seal: [], adapters: [], standards: []
+                        };
+                    }
+
+                    if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Внутренняя ошибка: указан неверный тип (gender)."], seal: [], adapters: [], standards: [] }; }
+                    const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
+                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Стандартная коническая пара BSPT: R (наруж.) → Rc (внутр.)"], ["Герметизация по резьбе: лен/паста, PTFE-лента или герметик."], [], ["ISO 7-1"] ); }
+                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Допускается по ISO 7-1: R (коническая) → Rp (параллельная) с герметизацией по резьбе."], ["Герметизация по резьбе: PTFE/паста/лен."], [], ["ISO 7-1"] ); }
+                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Параллельная BSPP: резьба центрирует, герметизация не по резьбе.", "Нужна плоская прокладка, шайба с уплотнением (bonded seal) или торцевое уплотнение/O-ring на штуцере."], ["Плоская прокладка, медное/алюм. кольцо, bonded seal, встроенный O-ring (BSPP swivel/banjo и т.п.)."], ["Если нет уплотнительной поверхности – использовать переходник G→R/Rp."], ["ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Резьбовое сопряжение возможно, но герметизация не по резьбе.", "Требуется торцевое уплотнение/прокладка на плоскости корпуса (если предусмотрено)."], ["Плоская прокладка/washer, bonded seal, O-ring в фаске корпуса."], ["При отсутствии посадочного места – переходник G male → R male."], ["ISO 228-1", "ISO 7-1 (огранич.)"] ); }
+                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Механически свинчивается (55°), но G (ISO 228) сама по себе не предназначена для герметизации по резьбе.", "Возможна герметизация только при наличии плоскости и прокладки/уплотнения."], ["Прокладка/washer, bonded seal, если корпус имеет плоскость и фаску."], ["Предпочтительно использовать Rp вместо G или переходник."], ["ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Стандартная коническая пара NPT."], ["Герметизация по резьбе: PTFE-лента/паста/герметик."], [], ["ASME B1.20.1"] ); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["Пара NPTF (Dryseal) – металл-металл без герметика при корректном исполнении."], ["Без герметика по стандарту; допускается минимальная смазка для сборки."], [], ["SAE J476", "ASME B1.20.3"] ); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Свинчивается. Сухое уплотнение не гарантируется; использовать герметик."], ["PTFE-лента/герметик."], [], ["Практика SAE"] ); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Свинчивается. Рекомендуется герметик; сухое уплотнение не обеспечивается."], ["PTFE-лента/герметик."], [], ["Практика SAE"] ); }
+                    const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) и BSP(55°) различаются по углу профиля и шагам; возможна частичная посадка, но герметичность и прочность не по стандарту."], ["Используйте переходник NPT ↔ BSP (конвертер)."], ["Переходник NPT male ↔ R/Rp/G female или наоборот."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) и NPT(60°) несовместимы по стандарту; возможна частичная посадка без герметичности."], ["Переходник BSP ↔ NPT."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-параллельная наружная с Rc-конусной внутренней: нестандартная пара – не обеспечивает герметизацию."], ["Переходник G→R или вставка с уплотнением по торцу."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"] ); }
+                    return res( "no", ["Нет стандартной пары для выбранной комбинации или случай не описан."], ["Рассмотрите переходник или изменение пары."], [], [] );
+                }
+            },
+
+            // --- ЭСТОНСКИЙ (ET) ---
+            et: {
+                // Статический UI
+                title: "Torukeermete ühilduvus",
+                h1: "Torukeermete ühilduvus: BSP/BSPT/NPT",
+                subtitle: "Koostage oma paar (isane → emane) ja saate ühilduvuse, tihendamise ja adapteri soovitusi.",
+                statuses: "Olekud:",
+                maleThread: "Isane keere (male)",
+                femaleThread: "Emane keere (female)",
+                notes: "Märkused",
+                recSeal: "Soovitatav tihendus",
+                ifNoPair: "Kui kokkupanek pole võimalik",
+                standardsRef: "Standardid/Viited:",
+                tabMatrix: "Ühilduvusmaatriks",
+                tabHelp: "Selgitus",
+                matrixHeader: "Isane → Emane",
+                helpContent: `
+                    <div class="card p-4 prose prose-sm max-w-none">
+                        <h3>Põhiprintsiibid</h3>
+                        <ul>
+                            <li><b>BSPT (R/Rc)</b> – Koonilised; tihendamine keermel.</li>
+                            <li><b>R → Rp</b> – Lubatud paar (kooniline isane paralleelsesse emasesse) vastavalt ISO 7-1, vajab hermeetikut.</li>
+                            <li><b>BSPP (G)</b> – Paralleelsed; tihendamine tihendi/seibi/O-rõnga abil pinnal, mitte keermel.</li>
+                            <li><b>NPT/NPTF</b> – Koonilised 60°; ühilduvad oma süsteemi piires. NPTF on kuivtihend.</li>
+                            <li><b>NPT ↔ BSP</b> – Erinevad nurgad (60° vs 55°) ja sammud; tuleb kasutada adaptereid.</li>
+                        </ul>
+                        <h3>Tüüpilised suuruse tähistused</h3>
+                        <p>R1, G1, 1/2 jne on nominaalsed keermemõõdud, mis ei võrdu toru tegeliku välisläbimõõduga.</p>
+                        <h3>Märkus hermeetikute kohta</h3>
+                        <ul>
+                            <li>Koonilistele keermetele: PTFE-teip, pasta, vedelad anaeroobsed hermeetikud.</li>
+                            <li>Paralleelsetele keermetele: Lamedad tihendid, bonded-tihendid, O-rõngad tihenduspindadel.</li>
+                        </ul>
+                    </div>
+                `,
+                // Динамические данные
+                ALL_STANDARDS: [ // <--- ПЕРЕИМЕНОВАНО
+                    { code: "G", name: "BSPP (ISO 228) – paralleel" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – sisemine paralleel (keermel tihe)" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – väline kooniline" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – sisemine kooniline" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – kooniline" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – kooniline kuivtihend" },
+                ],
+                // --- НОВЫЕ СПИСКИ ---
+                MALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – paralleel" },
+                    { code: "R", name: "BSPT (ISO 7-1 R) – väline kooniline" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – kooniline" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – kooniline kuivtihend" },
+                ],
+                FEMALE_STANDARDS: [
+                    { code: "G", name: "BSPP (ISO 228) – paralleel" },
+                    { code: "Rp", name: "BSPP (ISO 7-1 Rp) – sisemine paralleel (keermel tihe)" },
+                    { code: "Rc", name: "BSPT (ISO 7-1 Rc) – sisemine kooniline" },
+                    { code: "NPT", name: "NPT (ASME B1.20.1) – kooniline" },
+                    { code: "NPTF", name: "NPTF (Dryseal) – kooniline kuivtihend" },
+                ],
+                // --- КОНЕЦ НОВЫХ СПИСКОВ ---
+                LEVELS: {
+                    ok: { label: "Ühilduv", tone: "ok", icon: "check-circle-2", badgeClass: "bg-green-100 text-green-900 border-green-300", alertClass: "bg-green-50 border-green-300 text-green-900" },
+                    caution: { label: "Ühilduv (piirangutega)", tone: "caution", icon: "alert-triangle", badgeClass: "bg-yellow-100 text-yellow-900 border-yellow-300", alertClass: "bg-yellow-50 border-yellow-300 text-yellow-900" },
+                    no: { label: "Ei ühildu", tone: "no", icon: "x-circle", badgeClass: "bg-red-100 text-red-900 border-red-300", alertClass: "bg-red-50 border-red-300 text-red-900" },
+                },
+                // Динамический UI
+                selectedPair: "Valitud paar:",
+                maleShort: "isane",
+                femaleShort: "emane",
+                matrixLabel: (label) => label.split(" ")[0].replace("Ühilduv", "Ühil.").replace("piirangutega", "(piir.)").replace("Ei ühildu", "Ei üh."),
+                // Логика правил
+                evaluateCompatibility: function(male, female) {
+                    const { standard: mStd, gender: mGen, size: mSize } = male;
+                    const { standard: fStd, gender: fGen, size: fSize } = female;
+
+                    // NEW SIZE CHECK
+                    if (mSize !== fSize) {
+                        return {
+                            level: "no",
+                            notes: [`Suuruste mittevastavus: ${mSize}" (isane) ei saa ühendada ${fSize}" (emane).`],
+                            seal: [], adapters: [], standards: []
+                        };
+                    }
+
+                    if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Sisemine viga: määratud vale sugu (gender)."], seal: [], adapters: [], standards: [] }; }
+                    const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
+                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Standardne BSPT kooniline paar: R (isane) → Rc (emane)"], ["Tihendamine keermel: lina/pasta, PTFE-teip või hermeetik."], [], ["ISO 7-1"] ); }
+                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Lubatud vastavalt ISO 7-1: R (kooniline) → Rp (paralleelne) tihendamisega keermel."], ["Tihendamine keermel: PTFE/pasta/teip."], [], ["ISO 7-1"] ); }
+                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Paralleelne BSPP: keere tsentreerib, tihendamine ei toimu keermel.", "Vajalik on lame tihend, tihendiga seib (bonded seal) või otsatihend/O-rõngas liitmikul."], ["Lame tihend, vask/alumiiniumrõngas, bonded seal, integreeritud O-rõngas (BSPP pöörlev/banjo jne)."], ["Kui tihenduspinda pole – kasutage adapterit G→R/Rp."], ["ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Keermestatud ühendus on võimalik, kuid tihendamine ei toimu keermel.", "Vajalik on otsatihend/tihend korpuse pinnal (kui see on ette nähtud)."], ["Lame tihend/seib, bonded seal, O-rõngas korpuse faasis."], ["Istme puudumisel – adapter G isane → R isane."], ["ISO 228-1", "ISO 7-1 (piiratud)"] ); }
+                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Mehaaniliselt keeratav (55°), kuid G (ISO 228) ise pole mõeldud keermel tihendamiseks.", "Tihendamine on võimalik ainult pinna ja tihendi/rõnga olemasolul."], ["Tihend/seib, bonded seal, kui korpusel on pind ja faas."], ["Eelistatult kasutada G asemel Rp-d või adapterit."], ["ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Standardne NPT kooniline paar."], ["Tihendamine keermel: PTFE-teip/pasta/hermeetik."], [], ["ASME B1.20.1"] ); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["NPTF (Dryseal) paar – metall-metall ilma hermeetikuta korrektse teostuse korral."], ["Standardi järgi ilma hermeetikuta; kokkupanekuks on lubatud minimaalne määrimine."], [], ["SAE J476", "ASME B1.20.3"] ); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Keeratav. Kuivtihendus pole tagatud; kasutage hermeetikut."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"] ); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Keeratav. Soovitatav on hermeetik; kuivtihendust ei tagata."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"] ); }
+                    const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) ja BSP(55°) erinevad profiilinurga ja sammude poolest; osaline sobivus on võimalik, kuid tihedus ja tugevus pole standardile vastavad."], ["Kasutage adapterit NPT ↔ BSP (konverter)."], ["Adapter NPT isane ↔ R/Rp/G emane või vastupidi."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) ja NPT(60°) pole standardi järgi ühilduvad; osaline sobivus on võimalik ilma tiheduseta."], ["Adapter BSP ↔ NPT."], ["BSP↔NPT adapter/liitmik."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
+                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-paralleelne väline Rc-koonilise sisemisega: mittestandardne paar – ei taga tihendamist."], ["Adapter G→R või siseosa otsatihendiga."], ["G isane → R isane + Rc emane"], ["ISO 7-1", "ISO 228-1"] ); }
+                    return res( "no", ["Valitud kombinatsioonile pole standardset paari või juhtumit pole kirjeldatud."], ["Kaaluge adapterit või paari vahetamist."], [], [] );
+                }
+            },
+        };
+
+        // --- 4. JavaScript для управления страницей ---
+
+        // Ссылки на DOM-элементы
+        const selects = {
+            left: {
+                standard: document.getElementById('left-standard'),
+                size: document.getElementById('left-size'),
+            },
+            right: {
+                standard: document.getElementById('right-standard'),
+                size: document.getElementById('right-size'),
+            }
+        };
+
+        const results = {
+            badge: document.getElementById('result-badge'),
+            pair: document.getElementById('result-pair'),
+            notes: document.getElementById('result-notes'),
+            notesList: document.getElementById('result-notes-list'),
+            seal: document.getElementById('result-seal'),
+            sealList: document.getElementById('result-seal-list'),
+            adapters: document.getElementById('result-adapters'),
+            adaptersList: document.getElementById('result-adapters-list'),
+            standards: document.getElementById('result-standards'),
+            standardsList: document.getElementById('result-standards-list'),
+        };
+
+        const imageContainers = {
+            left: document.getElementById('left-image-container'),
+            right: document.getElementById('right-image-container'),
+            result: document.getElementById('result-image-container'),
+        }
+
+        const staticElements = {
+            title: document.querySelector('title'),
+            h1: document.getElementById('main-title'),
+            subtitle: document.getElementById('main-subtitle'),
+            legendTitle: document.getElementById('legend-title'),
+            maleTitle: document.getElementById('male-title'),
+            femaleTitle: document.getElementById('female-title'),
+            notesTitle: document.getElementById('notes-title'),
+            sealTitle: document.getElementById('seal-title'),
+            adaptersTitle: document.getElementById('adapters-title'),
+            standardsTitle: document.getElementById('standards-title'),
+            tabMatrix: document.getElementById('tab-matrix'),
+            tabHelp: document.getElementById('tab-help'),
+            matrixHeader: document.getElementById('matrix-header'),
+            helpContent: document.getElementById('content-help'),
+        };
+
+        const tabs = {
+            triggers: [document.getElementById('tab-matrix'), document.getElementById('tab-help')],
+            content: [document.getElementById('content-matrix'), document.getElementById('content-help')]
+        };
+        
+        const matrixBody = document.getElementById('matrix-body');
+
+        // Функция-помощник: создание бейджа
+        function createBadge(label, level) {
+            const meta = translations[currentLang].LEVELS[level];
+            const span = document.createElement('span');
+            span.className = `badge ${meta.badgeClass}`;
+            span.innerHTML = `<i data-lucide="${meta.icon}" class="w-3.5 h-3.5"></i> ${label}`;
+            return span;
+        }
+
+        // Функция-помощник: заполнение списка
+        function populateList(element, items) {
+            if (items.length > 0) {
+                element.parentElement.parentElement.style.display = 'block';
+                element.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+            } else {
+                element.parentElement.parentElement.style.display = 'none';
+            }
+        }
+
+        // Функция: Заполнение <select>
+        function populateSelects() {
+            const tr = translations[currentLang];
+            // --- ИЗМЕНЕНО ---
+            const MALE_S_list = tr.MALE_STANDARDS.map(s => `<option value="${s.code}">${s.code} – ${s.name}</option>`).join('');
+            const FEMALE_S_list = tr.FEMALE_STANDARDS.map(s => `<option value="${s.code}">${s.code} – ${s.name}</option>`).join('');
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+            const SZ_list = SIZES.map(s => `<option value="${s}">${s}"</option>`).join('');
+
+            // Сохраняем текущие значения
+            const l_std = selects.left.standard.value;
+            const l_sz = selects.left.size.value;
+            const r_std = selects.right.standard.value;
+            const r_sz = selects.right.size.value;
+
+            // --- ИЗМЕНЕНО ---
+            selects.left.standard.innerHTML = MALE_S_list;
+            selects.right.standard.innerHTML = FEMALE_S_list;
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
+            selects.left.size.innerHTML = SZ_list;
+            selects.right.size.innerHTML = SZ_list;
+
+            // Восстанавливаем значения
+            selects.left.standard.value = l_std || "R";
+            selects.left.size.value = l_sz || "1/2";
+            
+            selects.right.standard.value = r_std || "Rc";
+            selects.right.size.value = r_sz || "1/2";
+        }
+
+        // Функция: Обновление результата
+        function updateResult() {
+            const tr = translations[currentLang];
+            const left = {
+                standard: selects.left.standard.value,
+                gender: "male", // <-- Убрано из UI
+                size: selects.left.size.value,
+            };
+            const right = {
+                standard: selects.right.standard.value,
+                gender: "female", // <-- Убрано из UI
+                size: selects.right.size.value,
+            };
+
+            const result = tr.evaluateCompatibility(left, right);
+            const meta = tr.LEVELS[result.level];
+
+            // 1. Обновить главный бейдж
+            results.badge.className = `badge ${meta.badgeClass}`;
+            results.badge.innerHTML = `<i data-lucide="${meta.icon}" class="w-3.5 h-3.5"></i> ${meta.label}`;
+
+            // 2. Обновить описание пары
+            results.pair.innerHTML = `${tr.selectedPair} <b>${left.standard} ${tr.maleShort}</b> → <b>${right.standard} ${tr.femaleShort}</b> (${left.size}")`;
+
+            // 3. Обновить примечания (Alert)
+            if (result.notes.length > 0) {
+                results.notes.style.display = 'block';
+                results.notes.className = `alert ${meta.alertClass}`;
+                results.notesList.innerHTML = `<ul class="list-disc ml-4 space-y-1">${result.notes.map(n => `<li>${n}</li>`).join('')}</ul>`;
+            } else {
+                results.notes.style.display = 'none';
+            }
+
+            // 4. Обновить списки
+            populateList(results.sealList, result.seal);
+            populateList(results.adaptersList, result.adapters);
+
+            // 5. Обновить нормативы
+            if (result.standards.length > 0) {
+                results.standards.style.display = 'flex';
+                results.standardsList.innerHTML = result.standards.map(s => 
+                    `<span class="badge bg-slate-100 text-slate-800 border-slate-300">${s}</span>`
+                ).join('');
+            } else {
+                results.standards.style.display = 'none';
+            }
+
+            // 6. Обновить ИЗОБРАЖЕНИЯ
+            const leftKey = left.standard + "_male";
+            const rightKey = right.standard + "_female";
+            const resultKey = "result_" + result.level;
+
+            imageContainers.left.innerHTML = VISUALS[leftKey] || VISUALS.default_svg;
+            imageContainers.right.innerHTML = VISUALS[rightKey] || VISUALS.default_svg;
+            imageContainers.result.innerHTML = VISUALS[resultKey] || '';
+
+            // 7. Обновить иконки
+            lucide.createIcons();
+        }
+
+        // Функция: Инициализация табов
+        function initTabs() {
+            tabs.triggers.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const tabName = trigger.dataset.tab;
+                    // Обновить триггеры
+                    tabs.triggers.forEach(t => t.dataset.state = 'inactive');
+                    trigger.dataset.state = 'active';
+                    // Обновить контент
+                    tabs.content.forEach(c => {
+                        c.dataset.state = (c.id === `content-${tabName}`) ? 'active' : 'inactive';
+                    });
+                });
+            });
+        }
+        
+        // Функция: Заполнение легенды
+        function populateLegend() {
+            const tr = translations[currentLang];
+            document.getElementById('legend-ok').outerHTML = createBadge(tr.LEVELS.ok.label, "ok").outerHTML;
+            document.getElementById('legend-caution').outerHTML = createBadge(tr.LEVELS.caution.label, "caution").outerHTML;
+            document.getElementById('legend-no').outerHTML = createBadge(tr.LEVELS.no.label, "no").outerHTML;
+        }
+
+        // Функция: Генерация матрицы
+        function populateMatrix() {
+            const tr = translations[currentLang];
+            const matrixStandards = ["R", "Rp", "Rc", "G", "NPT", "NPTF"];
+            let html = '';
+
+            for (const m of matrixStandards) {
+                html += '<tr>';
+                html += `<th class="px-2 py-1 border bg-slate-100 text-left font-medium text-slate-800">${m}</th>`;
+                for (const f of matrixStandards) {
+                    const { level } = tr.evaluateCompatibility(
+                        { standard: m, gender: "male" },
+                        { standard: f, gender: "female" }
+                    );
+                    const label = tr.matrixLabel(tr.LEVELS[level].label);
+                    let toneClass = '';
+                    if (level === 'ok') toneClass = 'bg-green-50 text-green-900';
+                    else if (level === 'caution') toneClass = 'bg-yellow-50 text-yellow-900';
+                    else toneClass = 'bg-red-50 text-red-900';
+                    
+                    html += `<td class="px-2 py-1 text-xs text-center border ${toneClass}">${label}</td>`;
+                }
+                html += '</tr>';
+            }
+            matrixBody.innerHTML = html;
+        }
+
+        // Функция: Заполнение статического текста
+        function populateStaticContent() {
+            const tr = translations[currentLang];
+            staticElements.title.innerText = tr.title;
+            staticElements.h1.innerText = tr.h1;
+            staticElements.subtitle.innerText = tr.subtitle;
+            staticElements.legendTitle.innerText = tr.statuses;
+            staticElements.maleTitle.innerText = tr.maleThread;
+            staticElements.femaleTitle.innerText = tr.femaleThread;
+            staticElements.notesTitle.innerText = tr.notes;
+            staticElements.sealTitle.innerText = tr.recSeal;
+            staticElements.adaptersTitle.innerText = tr.ifNoPair;
+            staticElements.standardsTitle.innerText = tr.standardsRef;
+            staticElements.tabMatrix.innerText = tr.tabMatrix;
+            staticElements.tabHelp.innerText = tr.tabHelp;
+            staticElements.matrixHeader.innerText = tr.matrixHeader;
+            staticElements.helpContent.innerHTML = tr.helpContent;
+        }
+
+        // Функция: Главный контроллер языка
+        function updateLanguage(lang) {
+            currentLang = lang;
+
+            // Обновить кнопки
+            document.querySelectorAll('.lang-switcher').forEach(btn => {
+                btn.dataset.state = (btn.dataset.lang === lang) ? 'active' : 'inactive';
+            });
+
+            // Обновить весь контент
+            populateStaticContent();
+            populateSelects();
+            populateLegend();
+            populateMatrix();
+            updateResult(); // updateResult вызовет lucide.createIcons()
+        }
+
+
+        // --- 5. Запуск при загрузке страницы ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Настроить табы (не зависит от языка)
+            initTabs();
+
+            // 2. Назначить слушателей событий
+            Object.values(selects.left).forEach(sel => sel.addEventListener('change', updateResult));
+            Object.values(selects.right).forEach(sel => sel.addEventListener('change', updateResult));
+            
+            document.querySelectorAll('.lang-switcher').forEach(button => {
+                button.addEventListener('click', () => {
+                    updateLanguage(button.dataset.lang);
+                });
+            });
+
+            // 3. Установить язык по умолчанию (Английский)
+            updateLanguage('en'); 
+
+            // 4. Инициализировать все иконки (один раз при первой загрузке)
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>
+
+
+

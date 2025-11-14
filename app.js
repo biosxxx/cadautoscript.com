@@ -117,40 +117,58 @@ const defaultScripts = [
 
 const webTools = [
   {
-    title: "Tolerance report generator",
+    title: "Pipe Cutter Visualizer",
     description:
-      "Builds PDF inspection sheets with key characteristics, tolerances per ISO 286 / ASME Y14.5, and QR codes that link to 3D models.",
-    badge: "Tolerance Lab",
-    link: "https://example.com/tolerance",
-    standard: "ISO 286 · ASME Y14.5",
-    metrics: ["5 min release", "ISO 286"],
+      "3D saddle-cut preview with wall thickness, offset, and bevel controls for piping spools.",
+    badge: "Pipe Cutter",
+    link: "utilities/pipe-cutter/",
+    standard: "ASME B31.3 · ISO 9606",
+    metrics: ["Three.js preview", "DXF export"],
   },
   {
-    title: "Welded frame mass calculator",
+    title: "Cylindrical Shell Rolling",
     description:
-      "Estimates weight, center of gravity, and machining budgets for frames based on EN 1090 and AWS D1.1 load cases.",
-    badge: "Fabrix Tool",
-    link: "https://example.com/frame-mass",
-    standard: "EN 1090 · AWS D1.1",
-    metrics: ["Structural steel", "CSV export"],
+      "Calculates roll offsets, bending allowance, and developed lengths for pressure shells.",
+    badge: "Shell Rolling",
+    link: "utilities/cylindrical-shell-rolling/",
+    standard: "EN 13445 · ASME VIII",
+    metrics: ["Roll offsets", "Bend allowance"],
   },
   {
-    title: "ERP specification validator",
+    title: "Metal Bending Prototype",
     description:
-      "Compares BOM data with ERP, flags duplicates, and exports purchase plans while mapping UNSPSCs and ECCN attributes.",
-    badge: "ERP Sync",
-    link: "https://example.com/erp-sync",
-    standard: "UNSPSC · ECCN",
-    metrics: ["XML/JSON", "REST API"],
+      "K-factor playground for sheet-metal bend deductions to keep CAD and press brake aligned.",
+    badge: "Bend Lab",
+    link: "utilities/metal-bending/",
+    standard: "ISO 2768 · ANSI Y14.5",
+    metrics: ["K-factor", "Bend deduction"],
   },
   {
-    title: "Test report generator",
+    title: "Interactive Thread Cheat Sheet",
     description:
-      "Fills Word templates, attaches charts, and publishes findings to Confluence with EN ISO 7500-1 compliant traceability.",
-    badge: "Test Pilot",
-    link: "https://example.com/test-report",
-    standard: "EN ISO 7500-1",
-    metrics: ["Word DOCX", "Atlassian API"],
+      "Browse ISO, UNC, and UNF threads, drill sizes, and callouts for drawings and travelers.",
+    badge: "Thread Atlas",
+    link: "utilities/interactive-thread/",
+    standard: "ISO 965 · UNC/UNF",
+    metrics: ["Metric & inch", "Drill sizes"],
+  },
+  {
+    title: "PDF Number Extractor",
+    description:
+      "Extract part numbers or serial IDs from PDFs entirely offline for QA traceability.",
+    badge: "Doc Parser",
+    link: "utilities/pdf-number-extractor/",
+    standard: "Offline",
+    metrics: ["Regex filters", "CSV export"],
+  },
+  {
+    title: "QR Nameplate Generator",
+    description:
+      "Generate QR-enabled equipment tags with branding, multilingual text, and export to SVG/PNG.",
+    badge: "QR Tags",
+    link: "utilities/qr-nameplate/",
+    standard: "ISO 3864 · Traceability",
+    metrics: ["SVG/PNG", "Branding"],
   },
 ];
 
