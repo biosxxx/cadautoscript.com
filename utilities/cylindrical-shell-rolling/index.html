@@ -20,26 +20,24 @@
       </div>
     </header>
     <main class="utility-main">
-      <aside class="utility-card utility-about" data-collapsible>
-        <div class="utility-about__header">
+      <div class="utility-stage">
+        <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
+        <aside class="utility-about" data-collapsible>
           <h2>About this tool</h2>
-          <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
-        </div>
-        <p>
-          Estimate roll positions, bending allowance, and developed length for cylindrical shells.
-          Use it to prep CNC roll data for EN 13445 / ASME VIII pressure shell jobs and export the
-          parameters for documentation.
-        </p>
-        <div class="utility-tags">
-          <span class="utility-tag">Plate rolling</span>
-          <span class="utility-tag">Pressure vessels</span>
-          <span class="utility-tag">EN 13445</span>
-        </div>
-        <p class="utility-note">
-          Runs entirely in the browser. Numbers stay on your device until you save them manually.
-        </p>
-      </aside>
-      <div class="utility-frame-wrapper">
+          <p>
+            Estimate roll positions, bending allowance, and developed length for cylindrical shells.
+            Use it to prep CNC roll data for EN 13445 / ASME VIII pressure shell jobs and export the
+            parameters for documentation.
+          </p>
+          <div class="utility-tags">
+            <span class="utility-tag">Plate rolling</span>
+            <span class="utility-tag">Pressure vessels</span>
+            <span class="utility-tag">EN 13445</span>
+          </div>
+          <p class="utility-note">
+            Runs entirely in the browser. Numbers stay on your device until you save them manually.
+          </p>
+        </aside>
         <iframe
           class="tool-frame"
           src="app.html"

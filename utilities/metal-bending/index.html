@@ -20,27 +20,25 @@
       </div>
     </header>
     <main class="utility-main">
-      <aside class="utility-card utility-about" data-collapsible>
-        <div class="utility-about__header">
+      <div class="utility-stage">
+        <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
+        <aside class="utility-about" data-collapsible>
           <h2>About this tool</h2>
-          <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
-        </div>
-        <p>
-          Model flange lengths, neutral axis positions, and bend deductions for sheet-metal jobs.
-          Adjust tooling data to keep fabrication in sync with ISO 2768 / ANSI Y14.5 tolerance
-          blocks.
-        </p>
-        <div class="utility-tags">
-          <span class="utility-tag">Sheet metal</span>
-          <span class="utility-tag">K-Factor</span>
-          <span class="utility-tag">Bend deduction</span>
-        </div>
-        <p class="utility-note">
-          Export the calculated allowances to spreadsheets or copy/paste the summary into SolidWorks
-          configurations.
-        </p>
-      </aside>
-      <div class="utility-frame-wrapper">
+          <p>
+            Model flange lengths, neutral axis positions, and bend deductions for sheet-metal jobs.
+            Adjust tooling data to keep fabrication in sync with ISO 2768 / ANSI Y14.5 tolerance
+            blocks.
+          </p>
+          <div class="utility-tags">
+            <span class="utility-tag">Sheet metal</span>
+            <span class="utility-tag">K-Factor</span>
+            <span class="utility-tag">Bend deduction</span>
+          </div>
+          <p class="utility-note">
+            Export the calculated allowances to spreadsheets or copy/paste the summary into
+            SolidWorks configurations.
+          </p>
+        </aside>
         <iframe
           class="tool-frame"
           src="app.html"

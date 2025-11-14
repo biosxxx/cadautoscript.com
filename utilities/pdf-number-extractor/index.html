@@ -20,26 +20,24 @@
       </div>
     </header>
     <main class="utility-main">
-      <aside class="utility-card utility-about" data-collapsible>
-        <div class="utility-about__header">
+      <div class="utility-stage">
+        <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
+        <aside class="utility-about" data-collapsible>
           <h2>About this tool</h2>
-          <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
-        </div>
-        <p>
-          Drop production PDFs or test reports, highlight numeric strings, and export BOM IDs or
-          drawing references without uploading documents to external services.
-        </p>
-        <div class="utility-tags">
-          <span class="utility-tag">PDF parsing</span>
-          <span class="utility-tag">Quality records</span>
-          <span class="utility-tag">Offline</span>
-        </div>
-        <p class="utility-note">
-          Files never leave your browser. Close the tab to clear the buffer or save the extracted
-          list as CSV.
-        </p>
-      </aside>
-      <div class="utility-frame-wrapper">
+          <p>
+            Drop production PDFs or test reports, highlight numeric strings, and export BOM IDs or
+            drawing references without uploading documents to external services.
+          </p>
+          <div class="utility-tags">
+            <span class="utility-tag">PDF parsing</span>
+            <span class="utility-tag">Quality records</span>
+            <span class="utility-tag">Offline</span>
+          </div>
+          <p class="utility-note">
+            Files never leave your browser. Close the tab to clear the buffer or save the extracted
+            list as CSV.
+          </p>
+        </aside>
         <iframe
           class="tool-frame"
           src="app.html"

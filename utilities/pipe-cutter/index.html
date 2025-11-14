@@ -20,26 +20,24 @@
       </div>
     </header>
     <main class="utility-main">
-      <aside class="utility-card utility-about" data-collapsible>
-        <div class="utility-about__header">
+      <div class="utility-stage">
+        <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
+        <aside class="utility-about" data-collapsible>
           <h2>About this tool</h2>
-          <button class="utility-toggle" type="button" aria-expanded="true">Hide panel</button>
-        </div>
-        <p>
-          Visualize saddle cuts for pipe-to-pipe intersections, tweak wall thickness, angles, and
-          offsets, and export the developed contour for CNC plasma or handheld cutting.
-        </p>
-        <div class="utility-tags">
-          <span class="utility-tag">Piping</span>
-          <span class="utility-tag">3D preview</span>
-          <span class="utility-tag">Fabrication</span>
-        </div>
-        <p class="utility-note">
-          The embedded Three.js scene stays local. Use screenshots or exported DXF files for shop
-          travellers.
-        </p>
-      </aside>
-      <div class="utility-frame-wrapper">
+          <p>
+            Visualize saddle cuts for pipe-to-pipe intersections, tweak wall thickness, angles, and
+            offsets, and export the developed contour for CNC plasma or handheld cutting.
+          </p>
+          <div class="utility-tags">
+            <span class="utility-tag">Piping</span>
+            <span class="utility-tag">3D preview</span>
+            <span class="utility-tag">Fabrication</span>
+          </div>
+          <p class="utility-note">
+            The embedded Three.js scene stays local. Use screenshots or exported DXF files for shop
+            travellers.
+          </p>
+        </aside>
         <iframe class="tool-frame" src="app.html" title="Pipe Cutter" loading="lazy"></iframe>
       </div>
     </main>
