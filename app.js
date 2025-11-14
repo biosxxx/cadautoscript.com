@@ -122,6 +122,7 @@ const webTools = [
       "Builds PDF inspection sheets with key characteristics, tolerances per ISO 286 / ASME Y14.5, and QR codes that link to 3D models.",
     badge: "Tolerance Lab",
     link: "https://example.com/tolerance",
+    standard: "ISO 286 · ASME Y14.5",
     metrics: ["5 min release", "ISO 286"],
   },
   {
@@ -130,6 +131,7 @@ const webTools = [
       "Estimates weight, center of gravity, and machining budgets for frames based on EN 1090 and AWS D1.1 load cases.",
     badge: "Fabrix Tool",
     link: "https://example.com/frame-mass",
+    standard: "EN 1090 · AWS D1.1",
     metrics: ["Structural steel", "CSV export"],
   },
   {
@@ -138,6 +140,7 @@ const webTools = [
       "Compares BOM data with ERP, flags duplicates, and exports purchase plans while mapping UNSPSCs and ECCN attributes.",
     badge: "ERP Sync",
     link: "https://example.com/erp-sync",
+    standard: "UNSPSC · ECCN",
     metrics: ["XML/JSON", "REST API"],
   },
   {
@@ -146,6 +149,7 @@ const webTools = [
       "Fills Word templates, attaches charts, and publishes findings to Confluence with EN ISO 7500-1 compliant traceability.",
     badge: "Test Pilot",
     link: "https://example.com/test-report",
+    standard: "EN ISO 7500-1",
     metrics: ["Word DOCX", "Atlassian API"],
   },
 ];
@@ -299,14 +303,20 @@ const renderTools = () => {
   toolsEl.innerHTML = webTools
     .map(
       (tool) => `
-        <article class="tool-card">
-          <span class="badge">${tool.badge}</span>
+        <article class="tool-card" data-theme="${tool.badge}">
+          <div class="tool-card__head">
+            <span class="badge">${tool.badge}</span>
+            <span class="pill">Web</span>
+          </div>
           <strong>${tool.title}</strong>
           <p>${tool.description}</p>
-          <div class="tool-meta">
+          <div class="tool-card__metrics">
             ${tool.metrics.map((metric) => `<span class="tag">${metric}</span>`).join("")}
           </div>
-          <a class="button primary" href="${tool.link}" target="_blank" rel="noopener">Open</a>
+          <div class="tool-card__footer">
+            <span class="tool-card__standard">${tool.standard || ""}</span>
+            <a class="button primary" href="${tool.link}" target="_blank" rel="noopener">Launch</a>
+          </div>
         </article>
       `
     )

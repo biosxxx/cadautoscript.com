@@ -128,6 +128,19 @@ main {
   padding: 32px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.panel--glow::before {
+  content: "";
+  position: absolute;
+  inset: -40% 40% auto;
+  width: 380px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(100, 255, 218, 0.18), transparent 70%);
+  pointer-events: none;
+  filter: blur(12px);
 }
 
 .panel--split {
@@ -143,6 +156,11 @@ main {
   justify-content: space-between;
   gap: 16px;
   align-items: flex-end;
+}
+
+.panel__header--stacked {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .panel__actions {
@@ -399,19 +417,41 @@ main {
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-top: 24px;
 }
 
 .tool-card {
-  background: var(--panel-alt);
+  background: linear-gradient(135deg, rgba(22, 32, 56, 0.9), rgba(11, 14, 24, 0.95));
   border-radius: 24px;
   border: 1px solid var(--border);
-  padding: 20px;
+  padding: 24px;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.tool-card::after {
+  content: attr(data-theme);
+  position: absolute;
+  inset: auto 16px 10px auto;
+  font-size: 3.2rem;
+  letter-spacing: 0.12em;
+  opacity: 0.03;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.tool-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .tool-card strong {
@@ -423,12 +463,52 @@ main {
   color: var(--muted);
 }
 
-.tool-meta {
+.tool-meta,
+.tool-card__metrics {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.tool-card__footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tool-card__standard {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tools-cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tools-note {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.pill {
+  background: rgba(100, 255, 218, 0.18);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+  border: 1px solid rgba(100, 255, 218, 0.4);
 }
 
 .footer {
