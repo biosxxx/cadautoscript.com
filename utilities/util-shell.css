@@ -82,13 +82,19 @@ body.utility-shell {
 
 .utility-main {
   flex: 1;
-  padding: 32px;
+  padding: clamp(24px, 3vw, 48px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .utility-stage {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 200px);
+  max-width: 1440px;
+  margin: 0 auto;
+  height: clamp(520px, 70vh, 960px);
+  min-height: clamp(480px, 55vh, 720px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 32px;
   box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
@@ -180,6 +186,7 @@ body.utility-shell {
   height: 100%;
   border: none;
   background: transparent;
+  min-height: 520px;
 }
 
 .utility-card h2 {
@@ -218,10 +225,12 @@ body.utility-shell {
   }
 
   .utility-stage {
-    min-height: 70vh;
+    height: auto;
+    min-height: 60vh;
   }
 
   .tool-frame {
+    position: relative;
     min-height: 60vh;
   }
 
