@@ -437,6 +437,16 @@ main {
   gap: 8px;
 }
 
+.utility-list a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.utility-list a:hover {
+  color: var(--accent-strong);
+}
+
 .utility-list li::before {
   content: "•";
   font-size: 1.1rem;
