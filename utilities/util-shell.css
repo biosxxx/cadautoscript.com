@@ -93,8 +93,7 @@ body.utility-shell {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  height: clamp(520px, 70vh, 960px);
-  min-height: clamp(480px, 55vh, 720px);
+  min-height: clamp(520px, calc(100vh - 220px), 1320px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 32px;
   box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
