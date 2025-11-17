@@ -14,125 +14,7 @@
     <link rel="icon" type="image/png" href="favicon.png" />
   </head>
   <body>
-    <header class="hero">
-      <div class="hero__content">
-        <div class="hero__meta">
-          <span class="logo">CAD AutoScript</span>
-          <span class="tagline">SolidWorks macros, online tools, and report generators</span>
-        </div>
-        <div class="hero__text">
-          <h1>Automation hub for SolidWorks engineers</h1>
-          <p>
-            Keep your custom macros, calculators, and QA reports together. Curated disciplines,
-            fast search, and the ability to add new scripts or generators without spinning up a
-            backend.
-          </p>
-          <div class="hero__actions">
-            <a class="button primary" href="#catalog">Browse macro catalog</a>
-            <a class="button ghost" href="#tools">View web tools</a>
-          </div>
-        </div>
-        <div class="hero__stats">
-          <div class="stat-card">
-            <strong id="stat-count">18</strong>
-            <span>ready automations</span>
-          </div>
-          <div class="stat-card">
-            <strong>5 disciplines</strong>
-            <span>for SolidWorks</span>
-          </div>
-          <div class="stat-card">
-            <strong>3 generators</strong>
-            <span>for reports & calcs</span>
-          </div>
-        </div>
-      </div>
-    </header>
-
     <main>
-      <section class="panel" id="catalog">
-        <div class="panel__header">
-          <div>
-            <p class="eyebrow">Macro catalog</p>
-            <h2>SolidWorks scripts sorted by discipline</h2>
-          </div>
-          <div class="panel__actions">
-            <label class="input input--icon">
-              <span>Search</span>
-              <input
-                id="search"
-                type="search"
-                placeholder="Example: sheet metal DXF, PDF report, BOM"
-              />
-            </label>
-            <button class="button" id="reset-filter">Reset</button>
-          </div>
-        </div>
-        <div class="panel__filters">
-          <div class="filter-label">Disciplines</div>
-          <div class="filter-chips" id="category-filters"></div>
-          <div class="filter-badges">
-            <span class="badge">SolidWorks 2022+</span>
-            <span class="badge">VBA / C#</span>
-            <span class="badge">API ready</span>
-          </div>
-        </div>
-        <div class="scripts-grid" id="script-list"></div>
-      </section>
-
-      <section class="panel panel--split" id="add-script">
-        <div>
-          <p class="eyebrow">Submission form</p>
-          <h2>Add your macro or automation case</h2>
-          <p>
-            Fill in the form and keep the template locally. New entries appear in the catalog
-            instantly and stay in your browser storage.
-          </p>
-          <ul class="checklist">
-            <li>New disciplines get generated automatically</li>
-            <li>Local storage, no backend or accounts</li>
-            <li>Links to Git repos, documentation, and report templates</li>
-          </ul>
-        </div>
-        <form id="script-form" class="form">
-          <label class="input">
-            <span>Macro title</span>
-            <input name="title" type="text" required placeholder="Fast BOM PDF" />
-          </label>
-          <label class="input">
-            <span>Description</span>
-            <textarea
-              name="description"
-              rows="3"
-              required
-              placeholder="Briefly describe the task, output format, and toolchain"
-            ></textarea>
-          </label>
-          <div class="form__row">
-            <label class="input">
-              <span>Discipline</span>
-              <input name="category" type="text" required placeholder="e.g. Drawings" />
-            </label>
-            <label class="input">
-              <span>SolidWorks version</span>
-              <input name="version" type="text" placeholder="2024 SP1" />
-            </label>
-          </div>
-          <label class="input">
-            <span>Tags</span>
-            <input name="tags" type="text" placeholder="pdf, bom, reports" />
-          </label>
-          <label class="input">
-            <span>Repository or source link</span>
-            <input name="link" type="url" placeholder="https://..." />
-          </label>
-          <label class="input">
-            <span>Documentation</span>
-            <input name="doc" type="url" placeholder="https://..." />
-          </label>
-          <button class="button primary" type="submit">Save macro</button>
-        </form>
-      </section>
 
       <section class="panel panel--glow" id="tools">
         <div class="panel__header panel__header--stacked">
@@ -176,13 +58,6 @@
                 >
               </li>
             </ul>
-          </div>
-          <div class="tools-cta">
-            <div class="tools-note">
-              <span class="pill">Live</span>
-              <span>Instant launch, auto updates, zero installs.</span>
-            </div>
-            <a class="button ghost" href="#add-script">Submit a generator</a>
           </div>
         </div>
         <div class="tools-grid">
@@ -360,18 +235,18 @@
     <footer class="footer">
       <div>
         <strong>CAD AutoScript</strong>
-        <p>Sandbox for SolidWorks macros, reports, and browser-based calculators.</p>
+        <p>Direct launchpad for in-browser fabrication calculators and QA helpers.</p>
       </div>
       <div class="footer__links">
-        <a href="#catalog">Macro catalog</a>
-        <a href="#tools">Report generators</a>
-        <a href="#add-script">Submit automation</a>
+        <a href="utilities/pipe-cutter/" target="_blank" rel="noopener">Pipe Cutter</a>
+        <a href="utilities/cylindrical-shell-rolling/" target="_blank" rel="noopener">Shell Rolling</a>
+        <a href="utilities/metal-bending/" target="_blank" rel="noopener">Sheet Bending</a>
+        <a href="utilities/interactive-thread/" target="_blank" rel="noopener">Thread Atlas</a>
+        <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener">Doc Parser</a>
+        <a href="utilities/qr-nameplate/" target="_blank" rel="noopener">QR Nameplates</a>
       </div>
       <div class="footer__note">Local storage • No extra dependencies</div>
     </footer>
 
-    <div id="snackbar" class="snackbar" role="status">Saved</div>
-
-    <script src="app.js" type="module"></script>
   </body>
 </html>
