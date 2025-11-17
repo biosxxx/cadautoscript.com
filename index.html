@@ -43,6 +43,12 @@
             ship with DXF/SVG/CSV exporters, live previews, and consistent UX from kiosk displays to
             tablets.
           </p>
+          <div class="hero__pills">
+            <span class="pill">Chromium only</span>
+            <span class="pill">GPU ready</span>
+            <span class="pill">WebAssembly</span>
+            <span class="pill">DXF / SVG / CSV</span>
+          </div>
           <div class="hero__actions">
             <a class="button primary" href="#utilities">Browse utilities</a>
             <a class="button ghost" href="utilities/interactive-thread/" target="_blank" rel="noopener"
@@ -65,11 +71,20 @@
             Optimized for Chrome, Edge, Arc, and Blink-based browsers with WebGL 2 support. Adaptive
             layouts scale from 5K engineering monitors to on-site tablets.
           </p>
-          <ul>
+          <ul class="hero__list">
             <li>Realtime 3D previews via Three.js</li>
             <li>DXF/SVG/CSV exporters executed client-side</li>
             <li>Glassmorphic UI tuned for shop floors & offices</li>
           </ul>
+          <div class="hero__signal">
+            <span class="pill">Live telemetry</span>
+            <div class="hero__signal-bars" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -98,15 +113,6 @@
             <h2>Launch any companion instantly</h2>
           </div>
           <div class="utilities__controls">
-            <label class="field" for="utility-search">
-              <span>Search</span>
-              <input
-                id="utility-search"
-                type="search"
-                placeholder="Search by tag, material, or standard"
-                autocomplete="off"
-              />
-            </label>
             <div id="filter-group" class="chip-group" role="tablist" aria-label="Utility filters"></div>
           </div>
         </div>

@@ -75,10 +75,8 @@ const utilities = [
 ];
 const state = {
     filter: "all",
-    search: "",
 };
 const grid = document.querySelector("#utility-grid");
-const searchInput = document.querySelector("#utility-search");
 const filterGroup = document.querySelector("#filter-group");
 const formatLabel = (label) => label.charAt(0).toUpperCase() + label.slice(1);
 const createCard = (utility) => {
@@ -120,26 +118,9 @@ const createCard = (utility) => {
     return card;
 };
 const applyFilters = () => {
-    const normalizedSearch = state.search.trim().toLowerCase();
     return utilities.filter((utility) => {
         const matchesFilter = state.filter === "all" || utility.category === state.filter;
-        if (!matchesFilter) {
-            return false;
-        }
-        if (!normalizedSearch) {
-            return true;
-        }
-        const haystack = [
-            utility.title,
-            utility.description,
-            utility.tags.join(" "),
-            utility.standard,
-            utility.badge,
-            utility.technology,
-        ]
-            .join(" ")
-            .toLowerCase();
-        return haystack.includes(normalizedSearch);
+        return matchesFilter;
     });
 };
 const renderUtilities = () => {
@@ -173,13 +154,6 @@ const renderFilterGroup = () => {
             renderUtilities();
         });
         filterGroup.appendChild(button);
-    });
-};
-const bindSearch = () => {
-    searchInput?.addEventListener("input", (event) => {
-        const target = event.target;
-        state.search = target.value;
-        renderUtilities();
     });
 };
 const updateStats = () => {
@@ -263,7 +237,6 @@ const initGridCanvas = () => {
 const bootstrap = () => {
     renderFilterGroup();
     renderUtilities();
-    bindSearch();
     updateStats();
     initGridCanvas();
 };

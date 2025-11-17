@@ -95,6 +95,13 @@ body {
   color: var(--muted);
 }
 
+.hero__pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
 .hero__panel {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -114,10 +121,56 @@ body {
   color: var(--muted);
 }
 
-.hero__panel ul {
+.hero__list {
   margin: 0;
   padding-left: 18px;
   color: var(--muted);
+}
+
+.hero__signal {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero__signal-bars {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  height: 24px;
+}
+
+.hero__signal-bars span {
+  width: 6px;
+  border-radius: 50px;
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.hero__signal-bars span:nth-child(2) {
+  height: 60%;
+  animation-delay: 0.2s;
+}
+
+.hero__signal-bars span:nth-child(3) {
+  height: 85%;
+  animation-delay: 0.4s;
+}
+
+.hero__signal-bars span:nth-child(4) {
+  height: 45%;
+  animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scaleY(0.7);
+  }
+  50% {
+    transform: scaleY(1.1);
+  }
 }
 
 .hero__actions {
@@ -204,25 +257,9 @@ body {
 
 .utilities__controls {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  align-items: flex-end;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.field input {
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text);
+  align-items: center;
 }
 
 .chip, .chip-group button {

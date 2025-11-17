@@ -97,13 +97,11 @@ const utilities: Utility[] = [
   },
 ];
 
-const state: { filter: UtilityCategory | "all"; search: string } = {
+const state: { filter: UtilityCategory | "all" } = {
   filter: "all",
-  search: "",
 };
 
 const grid = document.querySelector<HTMLDivElement>("#utility-grid");
-const searchInput = document.querySelector<HTMLInputElement>("#utility-search");
 const filterGroup = document.querySelector<HTMLDivElement>("#filter-group");
 
 const formatLabel = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
@@ -155,26 +153,9 @@ const createCard = (utility: Utility): HTMLElement => {
 };
 
 const applyFilters = () => {
-  const normalizedSearch = state.search.trim().toLowerCase();
   return utilities.filter((utility) => {
     const matchesFilter = state.filter === "all" || utility.category === state.filter;
-    if (!matchesFilter) {
-      return false;
-    }
-    if (!normalizedSearch) {
-      return true;
-    }
-    const haystack = [
-      utility.title,
-      utility.description,
-      utility.tags.join(" "),
-      utility.standard,
-      utility.badge,
-      utility.technology,
-    ]
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(normalizedSearch);
+    return matchesFilter;
   });
 };
 
@@ -210,14 +191,6 @@ const renderFilterGroup = () => {
       renderUtilities();
     });
     filterGroup.appendChild(button);
-  });
-};
-
-const bindSearch = () => {
-  searchInput?.addEventListener("input", (event) => {
-    const target = event.target as HTMLInputElement;
-    state.search = target.value;
-    renderUtilities();
   });
 };
 
@@ -313,7 +286,6 @@ const initGridCanvas = () => {
 const bootstrap = () => {
   renderFilterGroup();
   renderUtilities();
-  bindSearch();
   updateStats();
   initGridCanvas();
 };
