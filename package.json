@@ -1,0 +1,27 @@
+{
+  "name": "cadautoscript.com",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biosxxx/cadautoscript.com.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/biosxxx/cadautoscript.com/issues"
+  },
+  "homepage": "https://github.com/biosxxx/cadautoscript.com#readme",
+  "devDependencies": {
+    "rimraf": "^6.1.0",
+    "typescript": "^5.9.3"
+  }
+}

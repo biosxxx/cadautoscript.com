@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CAD AutoScript  /  Web Utility Deck</title>
+    <title>CAD AutoScript / Utility Deck</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,16 +14,16 @@
     <link rel="icon" type="image/png" href="favicon.png" />
   </head>
   <body>
-    <div class="plasma"></div>
-    <div class="plasma plasma--two"></div>
+    <canvas id="grid-canvas" aria-hidden="true"></canvas>
 
-    <header class="utility-header">
-      <div class="brand">
-        <span class="brand__label">CAD AutoScript</span>
-        <span class="brand__subtitle">Fabrication & QA companions</span>
+    <header class="site-header">
+      <div class="site-header__brand">
+        <span class="eyebrow">CAD AutoScript</span>
+        <strong>Fabrication & QA companions</strong>
       </div>
-      <nav class="utility-nav">
+      <nav class="site-header__nav" aria-label="Primary">
         <a href="#utilities">Utility deck</a>
+        <a href="#updates">Change log</a>
         <a href="https://github.com/biosxxx/cadautoscript.com" target="_blank" rel="noopener"
           >GitHub</a
         >
@@ -33,209 +33,120 @@
       </nav>
     </header>
 
-    <main class="shell">
-      <section class="hero-grid">
-        <div class="hero-copy">
+    <main class="page">
+      <section class="hero" id="overview">
+        <div class="hero__text">
           <p class="eyebrow">Web-native</p>
           <h1>Dynamic toolkit for piping, bending, QA, and traceability</h1>
           <p>
-            All utilities run directly inside Chromium-powered browsers with GPU acceleration, no
-            installs required. They cache offline, remember preferences, and sync instantly with CAD
-            AutoScript updates.
+            Utilities run in Chromium with GPU acceleration, offline cache, and instant updates. They
+            ship with DXF/SVG/CSV exporters, live previews, and consistent UX from kiosk displays to
+            tablets.
           </p>
-          <div class="hero-actions">
+          <div class="hero__actions">
             <a class="button primary" href="#utilities">Browse utilities</a>
             <a class="button ghost" href="utilities/interactive-thread/" target="_blank" rel="noopener"
-              >Open Thread Atlas</a
+              >Open thread atlas</a
             >
           </div>
         </div>
-        <div class="hero-panel">
-          <div class="hero-panel__row">
+        <div class="hero__panel" role="status" aria-live="polite">
+          <div class="hero__panel-row">
             <div>
-              <span class="stat-label">Live tools</span>
-              <strong>6</strong>
+              <p class="eyebrow">Live tools</p>
+              <strong data-stat="live-tools">0</strong>
             </div>
             <div>
-              <span class="stat-label">Chromium ready</span>
+              <p class="eyebrow">Chromium ready</p>
               <strong>100%</strong>
             </div>
           </div>
           <p>
             Optimized for Chrome, Edge, Arc, and Blink-based browsers with WebGL 2 support. Adaptive
-            layouts scale from engineering kiosks to tablets.
+            layouts scale from 5K engineering monitors to on-site tablets.
           </p>
-          <ul class="hero-list">
-            <li>Realtime 3D previews powered by Three.js</li>
-            <li>DXF/SVG/CSV exporters run entirely client-side</li>
-            <li>Glassmorphic UI tuned for shop floors and offices</li>
+          <ul>
+            <li>Realtime 3D previews via Three.js</li>
+            <li>DXF/SVG/CSV exporters executed client-side</li>
+            <li>Glassmorphic UI tuned for shop floors & offices</li>
           </ul>
         </div>
       </section>
 
-      <section class="utility-section" id="utilities">
-        <div class="section-head">
+      <section class="stats" aria-label="Live telemetry">
+        <article>
+          <p class="eyebrow">Cache</p>
+          <strong>Offline</strong>
+          <span>All tools install-free with background sync</span>
+        </article>
+        <article>
+          <p class="eyebrow">Latency</p>
+          <strong>&lt; 70ms</strong>
+          <span>UI updates run through requestAnimationFrame</span>
+        </article>
+        <article>
+          <p class="eyebrow">Formats</p>
+          <strong>DXF | SVG | CSV</strong>
+          <span>Export locally without backend round-trips</span>
+        </article>
+      </section>
+
+      <section class="utilities" id="utilities">
+        <div class="utilities__head">
           <div>
             <p class="eyebrow">Utility stack</p>
             <h2>Launch any companion instantly</h2>
           </div>
-          <div class="section-actions">
-            <button class="chip" type="button">GPU ready</button>
-            <button class="chip" type="button">Offline cache</button>
-            <button class="chip" type="button">Zero installs</button>
+          <div class="utilities__controls">
+            <label class="field" for="utility-search">
+              <span>Search</span>
+              <input
+                id="utility-search"
+                type="search"
+                placeholder="Search by tag, material, or standard"
+                autocomplete="off"
+              />
+            </label>
+            <div id="filter-group" class="chip-group" role="tablist" aria-label="Utility filters"></div>
           </div>
         </div>
+        <div id="utility-grid" class="utility-grid" aria-live="polite"></div>
+      </section>
 
-        <div class="utility-cards">
-          <article class="utility-card" data-theme="pipe">
-            <div class="utility-card__head">
-              <span class="badge">Pipe Cutter</span>
-              <span class="pill">WebGL</span>
-            </div>
-            <h3>Pipe Cutter Visualizer</h3>
-            <p>
-              Preview saddle intersections, tune offsets, and export DXF templates for CNC plasma or
-              waterjet equipment.
-            </p>
-            <ul class="utility-feature-list">
-              <li>Realtime 3D viewport</li>
-              <li>DXF template export</li>
-              <li>Angle + offset controls</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>ASME B31.3  /  ISO 9606</span>
-              <a class="button primary" href="utilities/pipe-cutter/" target="_blank" rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
-
-          <article class="utility-card" data-theme="shell">
-            <div class="utility-card__head">
-              <span class="badge">Shell Rolling</span>
-              <span class="pill">Calc</span>
-            </div>
-            <h3>Cylindrical Shell Rolling</h3>
-            <p>
-              Determine roll spacing, bending allowance, and developed lengths for EN 13445 / ASME
-              VIII shells.
-            </p>
-            <ul class="utility-feature-list">
-              <li>EN & ASME presets</li>
-              <li>Export printable offsets</li>
-              <li>Live tolerance hints</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>EN 13445  /  ASME VIII</span>
-              <a
-                class="button primary"
-                href="utilities/cylindrical-shell-rolling/"
-                target="_blank"
-                rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
-
-          <article class="utility-card" data-theme="bending">
-            <div class="utility-card__head">
-              <span class="badge">Bend Sandbox</span>
-              <span class="pill">Canvas</span>
-            </div>
-            <h3>Sheet-metal bending sandbox</h3>
-            <p>
-              Simulate K-factors, reliefs, and bend deductions before sending toolpaths to CAM.
-            </p>
-            <ul class="utility-feature-list">
-              <li>K-factor control</li>
-              <li>Press brake presets</li>
-              <li>Metric & inch</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>ISO 2768  /  EN 10149</span>
-              <a class="button primary" href="utilities/metal-bending/" target="_blank" rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
-
-          <article class="utility-card" data-theme="thread">
-            <div class="utility-card__head">
-              <span class="badge">Thread Atlas</span>
-              <span class="pill">Data</span>
-            </div>
-            <h3>Interactive thread reference</h3>
-            <p>
-              Browse ISO metric, UNC, and UNF threads, check drill diameters, and copy callouts for
-              drawings or CAM notes.
-            </p>
-            <ul class="utility-feature-list">
-              <li>Metric + imperial tables</li>
-              <li>Instant drill lookups</li>
-              <li>Copy-ready callouts</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>ISO 965  /  UNC/UNF</span>
-              <a class="button primary" href="utilities/interactive-thread/" target="_blank" rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
-
-          <article class="utility-card" data-theme="parser">
-            <div class="utility-card__head">
-              <span class="badge">Doc Parser</span>
-              <span class="pill">WASM</span>
-            </div>
-            <h3>PDF number extractor</h3>
-            <p>
-              Highlight and export serials, BOM IDs, and QA data without uploading drawings to third-party services.
-            </p>
-            <ul class="utility-feature-list">
-              <li>Local regex filters</li>
-              <li>CSV export</li>
-              <li>Offline friendly</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>Offline parsing</span>
-              <a class="button primary" href="utilities/pdf-number-extractor/" target="_blank" rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
-
-          <article class="utility-card" data-theme="qr">
-            <div class="utility-card__head">
-              <span class="badge">QR Nameplates</span>
-              <span class="pill">SVG</span>
-            </div>
-            <h3>QR nameplate generator</h3>
-            <p>
-              Create serialized tags with logos, safety icons, QR codes, and export polished SVG/PNG plates for printing.
-            </p>
-            <ul class="utility-feature-list">
-              <li>Brand palettes</li>
-              <li>Auto serial & QR</li>
-              <li>SVG/PNG export</li>
-            </ul>
-            <div class="utility-card__footer">
-              <span>ISO 3864  /  Traceability</span>
-              <a class="button primary" href="utilities/qr-nameplate/" target="_blank" rel="noopener"
-                >Launch</a
-              >
-            </div>
-          </article>
+      <section class="timeline" id="updates" aria-label="Update cadence">
+        <div>
+          <p class="eyebrow">Update window</p>
+          <h2>Shipping log</h2>
         </div>
+        <ol>
+          <li>
+            <span>Nov 2025</span>
+            <p>Introduced Chromium-only deck, TypeScript renderer, and canvas grid animation.</p>
+          </li>
+          <li>
+            <span>Oct 2025</span>
+            <p>Added QR nameplates revamp with SVG layering and shop-floor presets.</p>
+          </li>
+          <li>
+            <span>Sep 2025</span>
+            <p>Thread atlas upgrade with UNC/UNF filters, copy-ready callouts, and drill matching.</p>
+          </li>
+        </ol>
       </section>
     </main>
 
-    <footer class="utility-footer">
-      <span>CAD AutoScript — web utilities for SolidWorks and fabrication teams.</span>
-      <div class="footer-links">
-        <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener">Doc Parser</a>
-        <a href="utilities/qr-nameplate/" target="_blank" rel="noopener">QR Nameplates</a>
-        <a href="utilities/metal-bending/" target="_blank" rel="noopener">Bend Sandbox</a>
+    <footer class="site-footer">
+      <div>
+        <strong>CAD AutoScript</strong>
+        <span>Web utilities for SolidWorks & fabrication teams.</span>
+      </div>
+      <div class="site-footer__links">
+        <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener">Doc parser</a>
+        <a href="utilities/qr-nameplate/" target="_blank" rel="noopener">QR nameplates</a>
+        <a href="utilities/metal-bending/" target="_blank" rel="noopener">Bend sandbox</a>
       </div>
     </footer>
+
+    <script type="module" src="dist/app.js"></script>
   </body>
 </html>
