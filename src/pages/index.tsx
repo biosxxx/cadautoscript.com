@@ -2,109 +2,33 @@ import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import {utilities} from '@site/src/data/utilities';
 import styles from './index.module.css';
 
-type UtilityCard = {
-  title: string;
-  summary: string;
-  href: string;
-  badge: string;
-  tech: string;
-  standard: string;
-  tags: string[];
-};
-
-const utilities: UtilityCard[] = [
-  {
-    title: 'Pipe Cutter Visualizer',
-    summary:
-      'Preview saddle intersections, tweak offsets, and export DXF templates ready for CNC plasma or waterjet tables.',
-    href: '/utilities/pipe-cutter/',
-    badge: 'Pipe Cutter',
-    tech: 'WebGL',
-    standard: 'ASME B31.3 · ISO 9606',
-    tags: ['3D preview', 'DXF export', 'Offsets'],
-  },
-  {
-    title: 'Cylindrical Shell Rolling',
-    summary:
-      'Determine roll spacing, bending allowance, and developed lengths with EN 13445 / ASME VIII presets.',
-    href: '/utilities/cylindrical-shell-rolling/',
-    badge: 'Shell Rolling',
-    tech: 'Calc',
-    standard: 'EN 13445 · ASME VIII',
-    tags: ['Roll offsets', 'Tolerances', 'Printable'],
-  },
-  {
-    title: 'Sheet-metal bending sandbox',
-    summary: 'Simulate K-factors, reliefs, and bend deductions before committing tooling or CAM time.',
-    href: '/utilities/metal-bending/',
-    badge: 'Bend Sandbox',
-    tech: 'Canvas',
-    standard: 'ISO 2768 · EN 10149',
-    tags: ['K-factor', 'Press brake', 'Metric & inch'],
-  },
-  {
-    title: 'Interactive thread atlas',
-    summary: 'Filter ISO, UNC, and UNF series, get drill diameters, and copy callouts directly into drawings.',
-    href: '/utilities/interactive-thread/',
-    badge: 'Thread Atlas',
-    tech: 'Data',
-    standard: 'ISO 965 · UNC/UNF',
-    tags: ['Lookup', 'Callouts', 'Drill charts'],
-  },
-  {
-    title: 'PDF number extractor',
-    summary: 'Highlight serials, QA IDs, and BOM references locally with WASM-powered parsing and CSV export.',
-    href: '/utilities/pdf-number-extractor/',
-    badge: 'Doc Parser',
-    tech: 'WASM',
-    standard: 'Offline parsing',
-    tags: ['Regex', 'CSV', 'Offline'],
-  },
-  {
-    title: 'QR nameplate generator',
-    summary:
-      'Create serialized equipment tags with logos, QR codes, and safety icons. Export SVG or PNG instantly.',
-    href: '/utilities/qr-nameplate/',
-    badge: 'QR Nameplates',
-    tech: 'SVG',
-    standard: 'ISO 3864 · Traceability',
-    tags: ['Branding', 'Auto serial', 'QR codes'],
-  },
-];
-
 const heroStats = [
-  {label: 'Live tools', value: '6', detail: 'Piping, bending, QA, traceability'},
-  {label: 'Runtime', value: 'Chromium only', detail: 'WebGL 2 · WASM · offline cache'},
-  {label: 'Export formats', value: 'DXF · SVG · CSV', detail: 'Generated directly in the browser'},
+  {label: 'Live utilities', value: utilities.length.toString()},
+  {label: 'Runtime', value: 'Chromium + WASM'},
+  {label: 'Formats', value: 'DXF / SVG / CSV'},
 ];
 
-const heroHighlights = [
-  'MDX-driven docs with embedded calculators',
-  'Dark UI tuned for shop floors and offices',
-  'Telemetry friendly layout for kiosks',
-];
-
-function UtilityCardItem({utility}: {utility: UtilityCard}) {
+function UtilityCard({utility}: {utility: (typeof utilities)[number]}) {
   return (
     <article className={styles.utilityCard}>
       <div className={styles.utilityHead}>
-        <span className={styles.badge}>{utility.badge}</span>
-        <span className={styles.pill}>{utility.tech}</span>
+        <span className={styles.badge}>{utility.tech}</span>
+        <span className={styles.subtle}>{utility.standards}</span>
       </div>
-      <h3>{utility.title}</h3>
-      <p>{utility.summary}</p>
-      <ul className={styles.tagList}>
-        {utility.tags.map((tag) => (
-          <li key={tag}>{tag}</li>
+      <h3>{utility.name}</h3>
+      <p>{utility.description}</p>
+      <ul className={styles.featureList}>
+        {utility.features.map((feature) => (
+          <li key={feature}>{feature}</li>
         ))}
       </ul>
       <div className={styles.utilityFooter}>
-        <span>{utility.standard}</span>
-        <Link className="button button--primary" href={utility.href}>
-          Launch
-        </Link>
+        <a className="button button--primary" href={utility.href} data-noBrokenLinkCheck>
+          Open utility
+        </a>
       </div>
     </article>
   );
@@ -115,86 +39,67 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={siteConfig.title}
-      description="CAD AutoScript · SolidWorks macros, interactive calculators, and QA generators">
+      description="CAD AutoScript — SolidWorks macros, calculators, and QA tools">
       <main className={styles.main}>
-        <header className={styles.hero}>
-          <div className={styles.heroText}>
-            <p className={styles.eyebrow}>Web-native</p>
-            <h1>Dynamic toolkit for piping, bending, QA, and traceability</h1>
+        <section className={styles.hero}>
+          <div>
+            <p className={styles.eyebrow}>CAD AutoScript</p>
+            <h1>Minimal hub for fabrication utilities</h1>
             <p>
-              CAD AutoScript packages SolidWorks macros, Chromium utilities, and DXF/CSV/SVG generators into
-              a single wiki-like hub. Everything runs client-side with GPU acceleration and offline cache.
+              SolidWorks macros, DXF generators, and QA helpers live in one place. Open the calculator you
+              need, keep docs nearby, and let Chromium do the heavy lifting.
             </p>
-            <div className={styles.heroHighlights}>
-              {heroHighlights.map((item) => (
-                <span key={item} className={styles.pill}>
-                  {item}
-                </span>
-              ))}
-            </div>
             <div className={styles.heroActions}>
-              <Link className="button button--primary button--lg" href="/docs/intro">
-                Browse documentation
+              <Link className="button button--primary" href="/docs/utilities/overview">
+                View all docs
               </Link>
-              <Link className="button button--secondary button--lg" href="/blog">
-                Read release notes
+              <Link className="button button--secondary" href="/blog">
+                Release notes
               </Link>
             </div>
           </div>
-          <div className={styles.heroPanel}>
+          <div className={styles.heroStats}>
             {heroStats.map((stat) => (
-              <div key={stat.label} className={styles.heroStat}>
+              <div key={stat.label}>
                 <span>{stat.label}</span>
                 <strong>{stat.value}</strong>
-                <small>{stat.detail}</small>
               </div>
             ))}
-            <div className={styles.heroSignal}>
-              <span className={styles.pill}>Live telemetry</span>
-              <div className={styles.signalBars} aria-hidden="true">
-                <span />
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
           </div>
-        </header>
+        </section>
 
         <section className={styles.utilitySection}>
-          <div className={styles.sectionHead}>
-            <div>
-              <p className={styles.eyebrow}>Utility stack</p>
-              <h2>Launch any companion instantly</h2>
-            </div>
-            <p className={styles.sectionLead}>
-              Each calculator ships as a standalone React component. Drop it into MDX, link it from docs, or
-              run it as a kiosk app.
+          <header>
+            <p className={styles.eyebrow}>Utilities</p>
+            <h2>Just the essentials</h2>
+            <p>
+              Each utility is a standalone static app hosted under <code>/utilities/*</code>. Launches open
+              the same pages machinists already know.
             </p>
-          </div>
+          </header>
           <div className={styles.utilityGrid}>
             {utilities.map((utility) => (
-              <UtilityCardItem key={utility.title} utility={utility} />
+              <UtilityCard key={utility.id} utility={utility} />
             ))}
           </div>
         </section>
 
         <section className={styles.docsSection}>
           <div>
-            <p className={styles.eyebrow}>Docs + MDX</p>
-            <h2>Document workflows right next to the tools</h2>
+            <p className={styles.eyebrow}>Documentation</p>
+            <h2>Embed and explain inside MDX</h2>
             <p>
-              Use Docusaurus MDX to mix Markdown, component embeds, and release notes. Every macro or
-              generator can document itself with live props, screenshots, and telemetry.
+              Drop calculators into MDX, capture screenshots, or write run-books. The docs and utilities ship
+              together so the interface stays small and predictable.
             </p>
           </div>
           <div className={styles.docsLinks}>
-            <Link className="button button--primary button--lg" href="/docs/utilities/overview">
-              Explore catalog docs
+            <Link className="button button--primary" href="/docs/utilities/embed-calculators">
+              Embed utilities
             </Link>
-            <Link className="button button--secondary button--lg" href="/utilities/pdf-number-extractor/">
-              Try Doc Parser
-            </Link>
+            <a className="button button--secondary" href="/utilities/pdf-number-extractor/" data-noBrokenLinkCheck>
+              Launch Doc Parser
+            </a>
           </div>
         </section>
       </main>

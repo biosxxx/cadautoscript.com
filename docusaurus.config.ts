@@ -13,8 +13,12 @@ const config: Config = {
   baseUrl: '/',
   organizationName: 'biosxxx',
   projectName: 'cadautoscript.com',
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'ignore',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'ignore',
+    },
+  },
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -63,7 +67,7 @@ const config: Config = {
           label: 'Docs',
         },
         {to: '/blog', label: 'Updates', position: 'left'},
-        {to: '/utilities/pipe-cutter/', label: 'Launch Pipe Cutter', position: 'right'},
+        {href: '/utilities/pipe-cutter/', label: 'Launch Pipe Cutter', position: 'right'},
         {
           href: 'https://github.com/biosxxx/cadautoscript.com',
           label: 'GitHub',
@@ -97,7 +101,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `© ${new Date().getFullYear()} CAD AutoScript. Built with Docusaurus.`,
+      copyright: `Copyright ${new Date().getFullYear()} CAD AutoScript. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

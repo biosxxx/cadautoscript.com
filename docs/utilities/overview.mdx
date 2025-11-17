@@ -1,0 +1,43 @@
+---
+sidebar_position: 2
+title: Utility catalog
+---
+
+import {utilities} from '@site/src/data/utilities';
+
+Each calculator below launches the same standalone page machinists already use. Docs stay nearby, but the apps themselves run in Chromium with WebGL/WASM acceleration.
+
+<table className="utilityTable">
+  <thead>
+    <tr>
+      <th>Utility</th>
+      <th>Description</th>
+      <th>Standards</th>
+      <th>Launch</th>
+    </tr>
+  </thead>
+  <tbody>
+    {utilities.map((utility) => (
+      <tr key={utility.id}>
+        <td>{utility.name}</td>
+        <td>{utility.description}</td>
+        <td>{utility.standards}</td>
+        <td>
+          <a href={utility.href} data-noBrokenLinkCheck>
+            Open
+          </a>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+## Versioning & telemetry
+
+- Utilities are static builds under static/utilities/*. Update the React/Vite project, drop the bundle here, commit, and push.
+- Include a concise changelog in the docs whenever a calculator or macro changes behavior.
+- Use browser devtools or custom logging endpoints if you need telemetry—nothing tracks usage by default.
+
+## Embed utilities inside docs
+
+See [Embedding calculators](./embed-calculators.md) for iframe snippets and React wrappers. MDX lets you import components or iframes directly, so you can keep instructions and UI together.

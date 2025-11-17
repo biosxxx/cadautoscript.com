@@ -1,58 +1,59 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
-
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #4de2ff;
-  --ifm-color-primary-dark: #2bcfef;
-  --ifm-color-primary-darker: #17b5d6;
-  --ifm-color-primary-darkest: #118daf;
-  --ifm-color-primary-light: #71eaff;
-  --ifm-color-primary-lighter: #aaf3ff;
-  --ifm-color-primary-lightest: #d3f9ff;
+  --ifm-color-primary: #64ffda;
+  --ifm-color-primary-dark: #39e7bb;
+  --ifm-color-primary-darker: #22c59d;
+  --ifm-color-primary-darkest: #159277;
+  --ifm-color-primary-light: #8affe3;
+  --ifm-color-primary-lighter: #b9ffef;
+  --ifm-color-primary-lightest: #e2fffa;
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --docusaurus-highlighted-code-line-bg: rgba(77, 226, 255, 0.08);
-  --cad-bg: radial-gradient(circle at 10% 10%, rgba(77, 226, 255, 0.15), transparent 60%),
-    radial-gradient(circle at 80% 0%, rgba(100, 255, 218, 0.12), transparent 55%), #050713;
+  --page-bg: linear-gradient(180deg, #05070f 0%, #080c18 100%);
+  --card-border: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme='dark'] {
-  --ifm-color-primary: #64ffda;
-  --ifm-color-primary-dark: #43f5c9;
-  --ifm-color-primary-darker: #2fddb3;
-  --ifm-color-primary-darkest: #27b091;
-  --ifm-color-primary-light: #82ffdf;
-  --ifm-color-primary-lighter: #aefee9;
-  --ifm-color-primary-lightest: #d9fff5;
-  --docusaurus-highlighted-code-line-bg: rgba(100, 255, 218, 0.12);
-}
-
-html,
 body {
-  background: var(--cad-bg);
+  background: var(--page-bg);
+  color: #f3f6ff;
 }
 
 .navbar,
 .footer {
-  background: rgba(5, 7, 19, 0.9);
-  backdrop-filter: blur(16px);
+  background: rgba(3, 5, 12, 0.9);
+  backdrop-filter: blur(14px);
 }
 
 .navbar__brand {
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.utilityTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.utilityTable th,
+.utilityTable td {
+  border: 1px solid var(--card-border);
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.utilityTable th {
+  font-size: 0.85rem;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.utilityTable a {
+  color: var(--ifm-color-primary);
 }
 
 .utilityFrame {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
   min-height: 420px;
-  background: #050713;
 }
-

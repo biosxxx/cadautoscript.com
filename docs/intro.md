@@ -40,4 +40,4 @@ MDX lets us import React components or iframe-like utilities directly inside doc
 
 ## What's next
 
-Browse the [Utility catalog](utilities/overview.md) to see every calculator with specs, supported standards, and launch links. Each entry explains when to use it and how to embed it inside MDX.
+Browse the [Utility catalog](./utilities/overview) to see every calculator with specs, supported standards, and launch links. Each entry explains when to use it and how to embed it inside MDX.
