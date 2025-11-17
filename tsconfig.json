@@ -1,16 +1,8 @@
 {
+  // This file is not used in compilation. It is here just for a nice editor experience.
+  "extends": "@docusaurus/tsconfig",
   "compilerOptions": {
-    "target": "es2020",
-    "module": "es2020",
-    "moduleResolution": "bundler",
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": false,
-    "sourceMap": false
+    "baseUrl": "."
   },
-  "include": ["src"]
+  "exclude": [".docusaurus", "build"]
 }
