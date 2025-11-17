@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CAD AutoScript • SolidWorks Macros & Calculators</title>
+    <title>CAD AutoScript  /  Web Utility Deck</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,99 +14,119 @@
     <link rel="icon" type="image/png" href="favicon.png" />
   </head>
   <body>
-    <main>
+    <div class="plasma"></div>
+    <div class="plasma plasma--two"></div>
 
-      <section class="panel panel--glow" id="tools">
-        <div class="panel__header panel__header--stacked">
-          <div>
-            <p class="eyebrow">Web utilities</p>
-            <h2>Darkroom of calculators and report generators</h2>
-            <p>
-              Browser-first apps for CNC piping, rolling, bending, documentation parsing, QR tagging,
-              and thread lookups—each one fully embedded and ready to launch inside CAD AutoScript.
-              No placeholders: every card below opens the actual engineer-facing tool.
-            </p>
-            <ul class="utility-list">
-              <li>
-                <a href="utilities/pipe-cutter/" target="_blank" rel="noopener"
-                  >Pipe Cutter 3D preview with DXF saddle templates</a
-                >
-              </li>
-              <li>
-                <a href="utilities/cylindrical-shell-rolling/" target="_blank" rel="noopener"
-                  >Shell Rolling calculator for EN 13445 / ASME VIII jobs</a
-                >
-              </li>
-              <li>
-                <a href="utilities/metal-bending/" target="_blank" rel="noopener"
-                  >Sheet-metal bending sandbox with K-factor controls</a
-                >
-              </li>
-              <li>
-                <a href="utilities/interactive-thread/" target="_blank" rel="noopener"
-                  >Thread atlas (ISO / UNC / UNF drill charts)</a
-                >
-              </li>
-              <li>
-                <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener"
-                  >PDF number extractor for QA records</a
-                >
-              </li>
-              <li>
-                <a href="utilities/qr-nameplate/" target="_blank" rel="noopener"
-                  >QR nameplate generator with branding presets</a
-                >
-              </li>
-            </ul>
+    <header class="utility-header">
+      <div class="brand">
+        <span class="brand__label">CAD AutoScript</span>
+        <span class="brand__subtitle">Fabrication & QA companions</span>
+      </div>
+      <nav class="utility-nav">
+        <a href="#utilities">Utility deck</a>
+        <a href="https://github.com/biosxxx/cadautoscript.com" target="_blank" rel="noopener"
+          >GitHub</a
+        >
+        <a class="chip" href="utilities/pipe-cutter/" target="_blank" rel="noopener"
+          >Launch Pipe Cutter</a
+        >
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Web-native</p>
+          <h1>Dynamic toolkit for piping, bending, QA, and traceability</h1>
+          <p>
+            All utilities run directly inside Chromium-powered browsers with GPU acceleration, no
+            installs required. They cache offline, remember preferences, and sync instantly with CAD
+            AutoScript updates.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#utilities">Browse utilities</a>
+            <a class="button ghost" href="utilities/interactive-thread/" target="_blank" rel="noopener"
+              >Open Thread Atlas</a
+            >
           </div>
         </div>
-        <div class="tools-grid">
-          <article class="tool-card" data-theme="Pipe Cutter">
-            <div class="tool-card__head">
+        <div class="hero-panel">
+          <div class="hero-panel__row">
+            <div>
+              <span class="stat-label">Live tools</span>
+              <strong>6</strong>
+            </div>
+            <div>
+              <span class="stat-label">Chromium ready</span>
+              <strong>100%</strong>
+            </div>
+          </div>
+          <p>
+            Optimized for Chrome, Edge, Arc, and Blink-based browsers with WebGL 2 support. Adaptive
+            layouts scale from engineering kiosks to tablets.
+          </p>
+          <ul class="hero-list">
+            <li>Realtime 3D previews powered by Three.js</li>
+            <li>DXF/SVG/CSV exporters run entirely client-side</li>
+            <li>Glassmorphic UI tuned for shop floors and offices</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="utility-section" id="utilities">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Utility stack</p>
+            <h2>Launch any companion instantly</h2>
+          </div>
+          <div class="section-actions">
+            <button class="chip" type="button">GPU ready</button>
+            <button class="chip" type="button">Offline cache</button>
+            <button class="chip" type="button">Zero installs</button>
+          </div>
+        </div>
+
+        <div class="utility-cards">
+          <article class="utility-card" data-theme="pipe">
+            <div class="utility-card__head">
               <span class="badge">Pipe Cutter</span>
-              <span class="pill">Web</span>
+              <span class="pill">WebGL</span>
             </div>
-            <strong>Pipe Cutter 3D preview with DXF saddle templates</strong>
+            <h3>Pipe Cutter Visualizer</h3>
             <p>
-              Visualize intersecting pipes, tweak wall thickness or offsets, and export saddle
-              outlines ready for CNC plasma cutters.
+              Preview saddle intersections, tune offsets, and export DXF templates for CNC plasma or
+              waterjet equipment.
             </p>
-            <ul class="tool-card__features">
-              <li>Real-time 3D viewport</li>
-              <li>Printable DXF template</li>
+            <ul class="utility-feature-list">
+              <li>Realtime 3D viewport</li>
+              <li>DXF template export</li>
+              <li>Angle + offset controls</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">Three.js preview</span>
-              <span class="tag">DXF export</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">ASME B31.3 · ISO 9606</span>
+            <div class="utility-card__footer">
+              <span>ASME B31.3  /  ISO 9606</span>
               <a class="button primary" href="utilities/pipe-cutter/" target="_blank" rel="noopener"
                 >Launch</a
               >
             </div>
           </article>
 
-          <article class="tool-card" data-theme="Shell Rolling">
-            <div class="tool-card__head">
+          <article class="utility-card" data-theme="shell">
+            <div class="utility-card__head">
               <span class="badge">Shell Rolling</span>
-              <span class="pill">Web</span>
+              <span class="pill">Calc</span>
             </div>
-            <strong>Shell Rolling calculator for EN 13445 / ASME VIII jobs</strong>
+            <h3>Cylindrical Shell Rolling</h3>
             <p>
-              Determine roll spacing, bending allowance, and developed lengths for cylindrical
-              shells that comply with EN and ASME pressure codes.
+              Determine roll spacing, bending allowance, and developed lengths for EN 13445 / ASME
+              VIII shells.
             </p>
-            <ul class="tool-card__features">
-              <li>Supports EN/ASME inputs</li>
-              <li>Exports shop-ready offsets</li>
+            <ul class="utility-feature-list">
+              <li>EN & ASME presets</li>
+              <li>Export printable offsets</li>
+              <li>Live tolerance hints</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">Roll offsets</span>
-              <span class="tag">Bend allowance</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">EN 13445 · ASME VIII</span>
+            <div class="utility-card__footer">
+              <span>EN 13445  /  ASME VIII</span>
               <a
                 class="button primary"
                 href="utilities/cylindrical-shell-rolling/"
@@ -117,112 +137,89 @@
             </div>
           </article>
 
-          <article class="tool-card" data-theme="Bend Lab">
-            <div class="tool-card__head">
-              <span class="badge">Bend Lab</span>
-              <span class="pill">Web</span>
+          <article class="utility-card" data-theme="bending">
+            <div class="utility-card__head">
+              <span class="badge">Bend Sandbox</span>
+              <span class="pill">Canvas</span>
             </div>
-            <strong>Sheet-metal bending sandbox with K-factor controls</strong>
+            <h3>Sheet-metal bending sandbox</h3>
             <p>
-              Experiment with K-factor, neutral axis, and bend deduction to match press brake
-              behavior and keep SolidWorks configurations accurate.
+              Simulate K-factors, reliefs, and bend deductions before sending toolpaths to CAM.
             </p>
-            <ul class="tool-card__features">
-              <li>Interactive K-factor tuning</li>
-              <li>Outputs allowance + deduction</li>
+            <ul class="utility-feature-list">
+              <li>K-factor control</li>
+              <li>Press brake presets</li>
+              <li>Metric & inch</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">K-factor</span>
-              <span class="tag">Bend deduction</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">ISO 2768 · ANSI Y14.5</span>
+            <div class="utility-card__footer">
+              <span>ISO 2768  /  EN 10149</span>
               <a class="button primary" href="utilities/metal-bending/" target="_blank" rel="noopener"
                 >Launch</a
               >
             </div>
           </article>
 
-          <article class="tool-card" data-theme="Thread Atlas">
-            <div class="tool-card__head">
+          <article class="utility-card" data-theme="thread">
+            <div class="utility-card__head">
               <span class="badge">Thread Atlas</span>
-              <span class="pill">Web</span>
+              <span class="pill">Data</span>
             </div>
-            <strong>Thread atlas (ISO / UNC / UNF drill charts)</strong>
+            <h3>Interactive thread reference</h3>
             <p>
-              Search ISO metric coarse/fine, UNC, and UNF threads, preview recommended drill
-              diameters, and copy callouts for drawings.
+              Browse ISO metric, UNC, and UNF threads, check drill diameters, and copy callouts for
+              drawings or CAM notes.
             </p>
-            <ul class="tool-card__features">
-              <li>Filterable ISO/UNC/UNF tables</li>
-              <li>Copy/paste ready callouts</li>
+            <ul class="utility-feature-list">
+              <li>Metric + imperial tables</li>
+              <li>Instant drill lookups</li>
+              <li>Copy-ready callouts</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">Metric & inch</span>
-              <span class="tag">Drill sizes</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">ISO 965 · UNC/UNF</span>
-              <a
-                class="button primary"
-                href="utilities/interactive-thread/"
-                target="_blank"
-                rel="noopener"
+            <div class="utility-card__footer">
+              <span>ISO 965  /  UNC/UNF</span>
+              <a class="button primary" href="utilities/interactive-thread/" target="_blank" rel="noopener"
                 >Launch</a
               >
             </div>
           </article>
 
-          <article class="tool-card" data-theme="Doc Parser">
-            <div class="tool-card__head">
+          <article class="utility-card" data-theme="parser">
+            <div class="utility-card__head">
               <span class="badge">Doc Parser</span>
-              <span class="pill">Web</span>
+              <span class="pill">WASM</span>
             </div>
-            <strong>PDF number extractor for QA records</strong>
+            <h3>PDF number extractor</h3>
             <p>
-              Open QA reports or drawings, highlight numeric strings (serials, BOM IDs) and export
-              them without sending files to external services.
+              Highlight and export serials, BOM IDs, and QA data without uploading drawings to third-party services.
             </p>
-            <ul class="tool-card__features">
-              <li>Drag-drop PDFs</li>
-              <li>Highlight and export matches</li>
+            <ul class="utility-feature-list">
+              <li>Local regex filters</li>
+              <li>CSV export</li>
+              <li>Offline friendly</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">Regex filters</span>
-              <span class="tag">CSV export</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">Offline</span>
-              <a
-                class="button primary"
-                href="utilities/pdf-number-extractor/"
-                target="_blank"
-                rel="noopener"
+            <div class="utility-card__footer">
+              <span>Offline parsing</span>
+              <a class="button primary" href="utilities/pdf-number-extractor/" target="_blank" rel="noopener"
                 >Launch</a
               >
             </div>
           </article>
 
-          <article class="tool-card" data-theme="QR Tags">
-            <div class="tool-card__head">
-              <span class="badge">QR Tags</span>
-              <span class="pill">Web</span>
+          <article class="utility-card" data-theme="qr">
+            <div class="utility-card__head">
+              <span class="badge">QR Nameplates</span>
+              <span class="pill">SVG</span>
             </div>
-            <strong>QR nameplate generator with branding presets</strong>
+            <h3>QR nameplate generator</h3>
             <p>
-              Create serialized equipment tags with logos, safety info, and QR codes. Export as
-              SVG/PNG for printing or laser marking.
+              Create serialized tags with logos, safety icons, QR codes, and export polished SVG/PNG plates for printing.
             </p>
-            <ul class="tool-card__features">
-              <li>Custom palette + logo</li>
-              <li>Auto serial + QR</li>
+            <ul class="utility-feature-list">
+              <li>Brand palettes</li>
+              <li>Auto serial & QR</li>
+              <li>SVG/PNG export</li>
             </ul>
-            <div class="tool-card__metrics">
-              <span class="tag">SVG/PNG</span>
-              <span class="tag">Branding</span>
-            </div>
-            <div class="tool-card__footer">
-              <span class="tool-card__standard">ISO 3864 · Traceability</span>
+            <div class="utility-card__footer">
+              <span>ISO 3864  /  Traceability</span>
               <a class="button primary" href="utilities/qr-nameplate/" target="_blank" rel="noopener"
                 >Launch</a
               >
@@ -232,21 +229,13 @@
       </section>
     </main>
 
-    <footer class="footer">
-      <div>
-        <strong>CAD AutoScript</strong>
-        <p>Direct launchpad for in-browser fabrication calculators and QA helpers.</p>
-      </div>
-      <div class="footer__links">
-        <a href="utilities/pipe-cutter/" target="_blank" rel="noopener">Pipe Cutter</a>
-        <a href="utilities/cylindrical-shell-rolling/" target="_blank" rel="noopener">Shell Rolling</a>
-        <a href="utilities/metal-bending/" target="_blank" rel="noopener">Sheet Bending</a>
-        <a href="utilities/interactive-thread/" target="_blank" rel="noopener">Thread Atlas</a>
+    <footer class="utility-footer">
+      <span>CAD AutoScript — web utilities for SolidWorks and fabrication teams.</span>
+      <div class="footer-links">
         <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener">Doc Parser</a>
         <a href="utilities/qr-nameplate/" target="_blank" rel="noopener">QR Nameplates</a>
+        <a href="utilities/metal-bending/" target="_blank" rel="noopener">Bend Sandbox</a>
       </div>
-      <div class="footer__note">Local storage • No extra dependencies</div>
     </footer>
-
   </body>
 </html>
