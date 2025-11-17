@@ -1,60 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Maintenance</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CAD AutoScript • SolidWorks Macros & Calculators</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <div class="hero__meta">
+          <span class="logo">CAD AutoScript</span>
+          <span class="tagline">SolidWorks macros, online tools, and report generators</span>
+        </div>
+        <div class="hero__text">
+          <h1>Automation hub for SolidWorks engineers</h1>
+          <p>
+            Keep your custom macros, calculators, and QA reports together. Curated disciplines,
+            fast search, and the ability to add new scripts or generators without spinning up a
+            backend.
+          </p>
+          <div class="hero__actions">
+            <a class="button primary" href="#catalog">Browse macro catalog</a>
+            <a class="button ghost" href="#tools">View web tools</a>
+          </div>
+        </div>
+        <div class="hero__stats">
+          <div class="stat-card">
+            <strong id="stat-count">18</strong>
+            <span>ready automations</span>
+          </div>
+          <div class="stat-card">
+            <strong>5 disciplines</strong>
+            <span>for SolidWorks</span>
+          </div>
+          <div class="stat-card">
+            <strong>3 generators</strong>
+            <span>for reports & calcs</span>
+          </div>
+        </div>
+      </div>
+    </header>
 
-        body {
-            background-color: #121212;
-            color: #f0f0f0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 500px;
-            padding: 40px;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #f0f0f0;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 30px auto;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        p {
-            font-size: 1.1rem;
-            color: #a0a0a0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="spinner"></div>
-        <h1>We'll be back soon!</h1>
-        <p>
-            Sorry for the inconvenience. We're performing some scheduled maintenance
-            and will be back online as shorty as possible.
-        </p>
-    </div>
-</body>
+    <main>
+      <section class="panel" id="catalog">
+        <div class="panel__header">
+          <div>
+            <p class="eyebrow">Macro catalog</p>
+            <h2>SolidWorks scripts sorted by discipline</h2>
+          </div>
+          <div class="panel__actions">
+            <label class="input input--icon">
+              <span>Search</span>
+              <input
+                id="search"
+                type="search"
+                placeholder="Example: sheet metal DXF, PDF report, BOM"
+              />
+            </label>
+            <button class="button" id="reset-filter">Reset</button>
+          </div>
+        </div>
+        <div class="panel__filters">
+          <div class="filter-label">Disciplines</div>
+          <div class="filter-chips" id="category-filters"></div>
+          <div class="filter-badges">
+            <span class="badge">SolidWorks 2022+</span>
+            <span class="badge">VBA / C#</span>
+            <span class="badge">API ready</span>
+          </div>
+        </div>
+        <div class="scripts-grid" id="script-list"></div>
+      </section>
+
+      <section class="panel panel--split" id="add-script">
+        <div>
+          <p class="eyebrow">Submission form</p>
+          <h2>Add your macro or automation case</h2>
+          <p>
+            Fill in the form and keep the template locally. New entries appear in the catalog
+            instantly and stay in your browser storage.
+          </p>
+          <ul class="checklist">
+            <li>New disciplines get generated automatically</li>
+            <li>Local storage, no backend or accounts</li>
+            <li>Links to Git repos, documentation, and report templates</li>
+          </ul>
+        </div>
+        <form id="script-form" class="form">
+          <label class="input">
+            <span>Macro title</span>
+            <input name="title" type="text" required placeholder="Fast BOM PDF" />
+          </label>
+          <label class="input">
+            <span>Description</span>
+            <textarea
+              name="description"
+              rows="3"
+              required
+              placeholder="Briefly describe the task, output format, and toolchain"
+            ></textarea>
+          </label>
+          <div class="form__row">
+            <label class="input">
+              <span>Discipline</span>
+              <input name="category" type="text" required placeholder="e.g. Drawings" />
+            </label>
+            <label class="input">
+              <span>SolidWorks version</span>
+              <input name="version" type="text" placeholder="2024 SP1" />
+            </label>
+          </div>
+          <label class="input">
+            <span>Tags</span>
+            <input name="tags" type="text" placeholder="pdf, bom, reports" />
+          </label>
+          <label class="input">
+            <span>Repository or source link</span>
+            <input name="link" type="url" placeholder="https://..." />
+          </label>
+          <label class="input">
+            <span>Documentation</span>
+            <input name="doc" type="url" placeholder="https://..." />
+          </label>
+          <button class="button primary" type="submit">Save macro</button>
+        </form>
+      </section>
+
+      <section class="panel panel--glow" id="tools">
+        <div class="panel__header panel__header--stacked">
+          <div>
+            <p class="eyebrow">Web utilities</p>
+            <h2>Darkroom of calculators and report generators</h2>
+            <p>
+              Browser-first apps for CNC piping, rolling, bending, documentation parsing, QR tagging,
+              and thread lookups—each one fully embedded and ready to launch inside CAD AutoScript.
+              No placeholders: every card below opens the actual engineer-facing tool.
+            </p>
+            <ul class="utility-list">
+              <li>
+                <a href="utilities/pipe-cutter/" target="_blank" rel="noopener"
+                  >Pipe Cutter 3D preview with DXF saddle templates</a
+                >
+              </li>
+              <li>
+                <a href="utilities/cylindrical-shell-rolling/" target="_blank" rel="noopener"
+                  >Shell Rolling calculator for EN 13445 / ASME VIII jobs</a
+                >
+              </li>
+              <li>
+                <a href="utilities/metal-bending/" target="_blank" rel="noopener"
+                  >Sheet-metal bending sandbox with K-factor controls</a
+                >
+              </li>
+              <li>
+                <a href="utilities/interactive-thread/" target="_blank" rel="noopener"
+                  >Thread atlas (ISO / UNC / UNF drill charts)</a
+                >
+              </li>
+              <li>
+                <a href="utilities/pdf-number-extractor/" target="_blank" rel="noopener"
+                  >PDF number extractor for QA records</a
+                >
+              </li>
+              <li>
+                <a href="utilities/qr-nameplate/" target="_blank" rel="noopener"
+                  >QR nameplate generator with branding presets</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="tools-cta">
+            <div class="tools-note">
+              <span class="pill">Live</span>
+              <span>Instant launch, auto updates, zero installs.</span>
+            </div>
+            <a class="button ghost" href="#add-script">Submit a generator</a>
+          </div>
+        </div>
+        <div class="tools-grid">
+          <article class="tool-card" data-theme="Pipe Cutter">
+            <div class="tool-card__head">
+              <span class="badge">Pipe Cutter</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Pipe Cutter 3D preview with DXF saddle templates</strong>
+            <p>
+              Visualize intersecting pipes, tweak wall thickness or offsets, and export saddle
+              outlines ready for CNC plasma cutters.
+            </p>
+            <ul class="tool-card__features">
+              <li>Real-time 3D viewport</li>
+              <li>Printable DXF template</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Three.js preview</span>
+              <span class="tag">DXF export</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ASME B31.3 · ISO 9606</span>
+              <a class="button primary" href="utilities/pipe-cutter/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Shell Rolling">
+            <div class="tool-card__head">
+              <span class="badge">Shell Rolling</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Shell Rolling calculator for EN 13445 / ASME VIII jobs</strong>
+            <p>
+              Determine roll spacing, bending allowance, and developed lengths for cylindrical
+              shells that comply with EN and ASME pressure codes.
+            </p>
+            <ul class="tool-card__features">
+              <li>Supports EN/ASME inputs</li>
+              <li>Exports shop-ready offsets</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Roll offsets</span>
+              <span class="tag">Bend allowance</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">EN 13445 · ASME VIII</span>
+              <a
+                class="button primary"
+                href="utilities/cylindrical-shell-rolling/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Bend Lab">
+            <div class="tool-card__head">
+              <span class="badge">Bend Lab</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Sheet-metal bending sandbox with K-factor controls</strong>
+            <p>
+              Experiment with K-factor, neutral axis, and bend deduction to match press brake
+              behavior and keep SolidWorks configurations accurate.
+            </p>
+            <ul class="tool-card__features">
+              <li>Interactive K-factor tuning</li>
+              <li>Outputs allowance + deduction</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">K-factor</span>
+              <span class="tag">Bend deduction</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 2768 · ANSI Y14.5</span>
+              <a class="button primary" href="utilities/metal-bending/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Thread Atlas">
+            <div class="tool-card__head">
+              <span class="badge">Thread Atlas</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>Thread atlas (ISO / UNC / UNF drill charts)</strong>
+            <p>
+              Search ISO metric coarse/fine, UNC, and UNF threads, preview recommended drill
+              diameters, and copy callouts for drawings.
+            </p>
+            <ul class="tool-card__features">
+              <li>Filterable ISO/UNC/UNF tables</li>
+              <li>Copy/paste ready callouts</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Metric & inch</span>
+              <span class="tag">Drill sizes</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 965 · UNC/UNF</span>
+              <a
+                class="button primary"
+                href="utilities/interactive-thread/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="Doc Parser">
+            <div class="tool-card__head">
+              <span class="badge">Doc Parser</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>PDF number extractor for QA records</strong>
+            <p>
+              Open QA reports or drawings, highlight numeric strings (serials, BOM IDs) and export
+              them without sending files to external services.
+            </p>
+            <ul class="tool-card__features">
+              <li>Drag-drop PDFs</li>
+              <li>Highlight and export matches</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">Regex filters</span>
+              <span class="tag">CSV export</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">Offline</span>
+              <a
+                class="button primary"
+                href="utilities/pdf-number-extractor/"
+                target="_blank"
+                rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+
+          <article class="tool-card" data-theme="QR Tags">
+            <div class="tool-card__head">
+              <span class="badge">QR Tags</span>
+              <span class="pill">Web</span>
+            </div>
+            <strong>QR nameplate generator with branding presets</strong>
+            <p>
+              Create serialized equipment tags with logos, safety info, and QR codes. Export as
+              SVG/PNG for printing or laser marking.
+            </p>
+            <ul class="tool-card__features">
+              <li>Custom palette + logo</li>
+              <li>Auto serial + QR</li>
+            </ul>
+            <div class="tool-card__metrics">
+              <span class="tag">SVG/PNG</span>
+              <span class="tag">Branding</span>
+            </div>
+            <div class="tool-card__footer">
+              <span class="tool-card__standard">ISO 3864 · Traceability</span>
+              <a class="button primary" href="utilities/qr-nameplate/" target="_blank" rel="noopener"
+                >Launch</a
+              >
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <strong>CAD AutoScript</strong>
+        <p>Sandbox for SolidWorks macros, reports, and browser-based calculators.</p>
+      </div>
+      <div class="footer__links">
+        <a href="#catalog">Macro catalog</a>
+        <a href="#tools">Report generators</a>
+        <a href="#add-script">Submit automation</a>
+      </div>
+      <div class="footer__note">Local storage • No extra dependencies</div>
+    </footer>
+
+    <div id="snackbar" class="snackbar" role="status">Saved</div>
+
+    <script src="app.js" type="module"></script>
+  </body>
 </html>
