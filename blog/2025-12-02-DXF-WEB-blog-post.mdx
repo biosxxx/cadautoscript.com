@@ -5,6 +5,8 @@ authors: [yurii]
 tags: [chromium, nodejs, dxf, automation, cad]
 ---
 
+import {DxfCircleDemo} from '@site/src/components/DxfCircleDemo';
+
 Traditional approaches to drawing generation rely heavily on bulky desktop software and proprietary APIs. The modern approach shifts the geometric kernel to the web.
 
 In this article, we explore how to use the Chromium engine (via Puppeteer or Playwright) and JavaScript to automatically generate, validate, and nest DXF files.
@@ -80,15 +82,9 @@ const fs = require('fs');
 
 Interactive Example
 
-With MDX, you can even embed interactive elements directly in the post. For example, triggering a generation process:
+With MDX, you can even embed interactive elements directly in the post. Launch the DXF circle generator below, tweak the snippet, and download the updated DXF instantly:
 
-<button
-  type="button"
-  className="button button--primary"
-  onClick={() => alert('DXF Generation Simulated!')}
->
-  Simulate DXF Export
-</button>
+<DxfCircleDemo />
 
 Application for Nesting
 
