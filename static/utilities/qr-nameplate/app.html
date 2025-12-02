@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Конфигуратор таблички с QR-кодом (UI-тюнинг полей ввода)</title>
+    <title>Генератор таблички с QR-кодом (UI-оболочка без сервера)</title>
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -124,6 +124,19 @@
         .option-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--brand-ring); }
         .option-btn.active { background: #2563eb; color: #fff; border-color: #3b82f6; transform: scale(1.02); box-shadow: 0 8px 20px rgba(37,99,235,.4); }
 
+        /* ====== Language toggle ====== */
+        .lang-btn {
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            color: #e5e7eb;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: background-color .2s ease, color .2s ease;
+        }
+        .lang-btn.active { background: #2563eb; color: #fff; }
+
         /* ====== ЧЕКБОКС «Добавить рамку» как кнопка ====== */
         #add-border { display: none; }
         #add-border-label {
@@ -157,44 +170,48 @@
 <body class="bg-gray-900 text-gray-50 font-sans p-4 sm:p-6 lg:p-8">
     <div class="container mx-auto max-w-7xl">
         <header class="text-center mb-12">
-            <h1>Конфигуратор кастомной таблички</h1>
-            <p class="text-base sm:text-lg text-gray-400">Создайте свой уникальный дизайн с QR-кодом</p>
+            <div class="flex justify-end mb-6">
+                <div class="inline-flex bg-gray-800 border border-gray-700 rounded-full p-1 gap-1" role="group" aria-label="Language switcher">
+                    <button type="button" class="lang-btn active" data-lang="ru">RU</button>
+                    <button type="button" class="lang-btn" data-lang="en">EN</button>
+                </div>
+            </div>
+            <h1 data-i18n="headerTitle">Генератор 3D-таблички</h1>
+            <p class="text-base sm:text-lg text-gray-400" data-i18n="headerSubtitle">Создайте свою табличку с QR-кодом в интерактивном режиме</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Панель настроек -->
             <div class="lg:col-span-1 bg-gray-800 p-8 rounded-2xl shadow-xl">
-                <div class="space-y-6">
-
-                    <h2 class="section-header">Гравировка</h2>
+                <div class="space-y-6">                    <h2 class="section-header" data-i18n="contentSectionTitle">Гравировка</h2>
 
                     <div>
-                        <label for="plaque-text">Текст для гравировки</label>
-                        <input type="text" id="plaque-text" class="form-input" value="Название" placeholder="Ваш заголовок..." />
+                        <label for="plaque-text" data-i18n="plaqueTextLabel">Текст для гравировки</label>
+                        <input type="text" id="plaque-text" class="form-input" data-i18n-placeholder="plaqueTextPlaceholder" data-i18n-value="plaqueTextValue" value="Название" placeholder="Ваш заголовок..." />
                     </div>
 
                     <div>
-                        <label for="qr-url">Ссылка для QR-кода</label>
-                        <input type="url" id="qr-url" class="form-input" value="https://google.com/" placeholder="https://example.com/info" />
+                        <label for="qr-url" data-i18n="qrUrlLabel">Ссылка для QR-кода</label>
+                        <input type="url" id="qr-url" class="form-input" data-i18n-placeholder="qrUrlPlaceholder" data-i18n-value="qrUrlValue" value="https://google.com/" placeholder="https://example.com/info" />
                     </div>
 
-                    <h2 class="section-header mt-6">Основа</h2>
+                    <h2 class="section-header mt-6" data-i18n="dimensionsSectionTitle">Основа</h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="plaque-width">Ширина (мм)</label>
+                            <label for="plaque-width" data-i18n="widthLabel">Ширина (мм)</label>
                             <input type="number" id="plaque-width" class="form-input-num" value="150" placeholder="150" />
                         </div>
                         <div>
-                            <label for="plaque-height">Высота (мм)</label>
+                            <label for="plaque-height" data-i18n="heightLabel">Высота (мм)</label>
                             <input type="number" id="plaque-height" class="form-input-num" value="150" placeholder="150" />
                         </div>
                         <div>
-                            <label for="plaque-depth">Толщина (мм)</label>
+                            <label for="plaque-depth" data-i18n="depthLabel">Толщина (мм)</label>
                             <input type="number" id="plaque-depth" class="form-input-num" value="5" placeholder="5" />
                         </div>
                         <div>
-                            <label for="plaque-radius">Радиус (мм)</label>
+                            <label for="plaque-radius" data-i18n="radiusLabel">Радиус (мм)</label>
                             <input type="number" id="plaque-radius" class="form-input-num" value="5" placeholder="5" />
                         </div>
                     </div>
@@ -202,20 +219,20 @@
                     <div class="mt-2">
                         <label id="add-border-label" for="add-border">
                             <input type="checkbox" id="add-border" class="mr-2" />
-                            <span class="text-sm font-medium">Добавить рамку</span>
+                            <span class="text-sm font-medium" data-i18n="addBorderLabel">Добавить рамку</span>
                         </label>
                     </div>
 
                     <div>
-                        <label>Материал</label>
+                        <label data-i18n="materialLabel">Материал</label>
                         <div id="material-options" class="flex flex-col gap-3">
-                            <button class="option-btn active" data-material="steel">Нержавеющая сталь</button>
-                            <button class="option-btn" data-material="copper">Медь</button>
-                            <button class="option-btn" data-material="black-granite">Черный гранит</button>
+                            <button class="option-btn active" data-material="steel" data-i18n="materialSteel">Нержавеющая сталь</button>
+                            <button class="option-btn" data-material="copper" data-i18n="materialCopper">Медь</button>
+                            <button class="option-btn" data-material="black-granite" data-i18n="materialGranite">Черный гранит</button>
                         </div>
                     </div>
 
-                    <button id="generate-btn" class="generate-btn">Сгенерировать 3D Модель</button>
+                    <button id="generate-btn" class="generate-btn" data-i18n="generateBtn">Сгенерировать 3D модель</button>
                 </div>
             </div>
 
@@ -235,6 +252,59 @@
         import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
         import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
+        const translations = {
+            ru: {
+                title: 'Генератор таблички с QR-кодом (UI-оболочка без сервера)',
+                headerTitle: 'Генератор 3D-таблички',
+                headerSubtitle: 'Создайте свою табличку с QR-кодом в интерактивном режиме',
+                contentSectionTitle: 'Гравировка',
+                plaqueTextLabel: 'Текст для гравировки',
+                plaqueTextPlaceholder: 'Ваш заголовок...',
+                plaqueTextValue: 'Название',
+                qrUrlLabel: 'Ссылка для QR-кода',
+                qrUrlPlaceholder: 'https://example.com/info',
+                qrUrlValue: 'https://google.com/',
+                dimensionsSectionTitle: 'Основа',
+                widthLabel: 'Ширина (мм)',
+                heightLabel: 'Высота (мм)',
+                depthLabel: 'Толщина (мм)',
+                radiusLabel: 'Радиус (мм)',
+                addBorderLabel: 'Добавить рамку',
+                materialLabel: 'Материал',
+                materialSteel: 'Нержавеющая сталь',
+                materialCopper: 'Медь',
+                materialGranite: 'Черный гранит',
+                generateBtn: 'Сгенерировать 3D модель',
+                generateBtnLoading: 'Генерация...'
+            },
+            en: {
+                title: 'QR Nameplate Generator (UI shell only)',
+                headerTitle: '3D Nameplate Generator',
+                headerSubtitle: 'Design a QR-enabled nameplate interactively',
+                contentSectionTitle: 'Engraving',
+                plaqueTextLabel: 'Text for engraving',
+                plaqueTextPlaceholder: 'Enter engraving text...',
+                plaqueTextValue: 'My nameplate',
+                qrUrlLabel: 'Link for QR code',
+                qrUrlPlaceholder: 'https://example.com/info',
+                qrUrlValue: 'https://google.com/',
+                dimensionsSectionTitle: 'Dimensions',
+                widthLabel: 'Width (mm)',
+                heightLabel: 'Height (mm)',
+                depthLabel: 'Thickness (mm)',
+                radiusLabel: 'Corner radius (mm)',
+                addBorderLabel: 'Add border',
+                materialLabel: 'Material',
+                materialSteel: 'Stainless steel',
+                materialCopper: 'Copper',
+                materialGranite: 'Black granite',
+                generateBtn: 'Generate 3D model',
+                generateBtnLoading: 'Generating...'
+            }
+        };
+
+        let currentLang = 'ru';
+
         // --- Селекторы UI ---
         const plaqueTextEl = document.getElementById('plaque-text');
         const qrUrlEl = document.getElementById('qr-url');
@@ -242,6 +312,11 @@
         const plaqueCanvas = document.getElementById('plaque-canvas');
         const engravingMapCanvas = document.getElementById('engraving-map-canvas');
         const generateBtn = document.getElementById('generate-btn');
+        const langButtons = document.querySelectorAll('.lang-btn');
+        const pageTitleEl = document.querySelector('title');
+        const i18nElements = document.querySelectorAll('[data-i18n]');
+        const i18nPlaceholders = document.querySelectorAll('[data-i18n-placeholder]');
+        const i18nValueElements = document.querySelectorAll('[data-i18n-value]');
 
         const plaqueWidthEl = document.getElementById('plaque-width');
         const plaqueHeightEl = document.getElementById('plaque-height');
@@ -250,14 +325,53 @@
         const addBorderEl = document.getElementById('add-border');
         const addBorderLabel = document.getElementById('add-border-label');
 
+        i18nValueElements.forEach((el) => {
+            el.addEventListener('input', () => { el.dataset.userEdited = 'true'; });
+        });
+
         // --- Состояние ---
         let currentSize = { w: 15, h: 15, d: 0.5, radius: 0.5 };
         let currentMaterialType = 'steel';
-        let currentEngraving = { text: 'Название', url: 'https://google.com/', border: false };
+        let currentEngraving = { text: translations.ru.plaqueTextValue, url: translations.ru.qrUrlValue, border: false };
 
         let plaqueMesh; let scene, camera, renderer, controls;
         let qrCodeInstance = null; let engravingMapTexture = null;
         const TEXTURE_RESOLUTION = 1024;
+
+        function updateGenerateButtonState(isLoading) {
+            const locale = translations[currentLang];
+            if (!locale) return;
+            generateBtn.textContent = isLoading ? locale.generateBtnLoading : locale.generateBtn;
+        }
+
+        function applyTranslations(lang) {
+            const locale = translations[lang];
+            if (!locale) return;
+            i18nElements.forEach((el) => {
+                const key = el.dataset.i18n;
+                if (key && locale[key]) el.textContent = locale[key];
+            });
+            i18nPlaceholders.forEach((el) => {
+                const key = el.dataset.i18nPlaceholder;
+                if (key && locale[key]) el.setAttribute('placeholder', locale[key]);
+            });
+            i18nValueElements.forEach((el) => {
+                const key = el.dataset.i18nValue;
+                if (key && locale[key] && el.dataset.userEdited !== 'true') {
+                    el.value = locale[key];
+                }
+            });
+            if (pageTitleEl && locale.title) pageTitleEl.textContent = locale.title;
+            updateGenerateButtonState(generateBtn.disabled);
+        }
+
+        function setLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
+            applyTranslations(lang);
+        }
 
         function initThreeJS() {
             scene = new THREE.Scene();
@@ -380,7 +494,7 @@
                     ctx.strokeRect(ctx.lineWidth, ctx.lineWidth, canvas.width - (ctx.lineWidth * 2), canvas.height - (ctx.lineWidth * 2));
                 }
 
-                const engravingText = text || 'Ваш заголовок...';
+                const engravingText = text || translations[currentLang].plaqueTextPlaceholder || translations.ru.plaqueTextPlaceholder;
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 let fontSize = 150; ctx.font = `bold ${fontSize}px sans-serif`;
                 let metrics = ctx.measureText(engravingText);
@@ -388,7 +502,7 @@
                 // ИЗМЕНЕНО: Сдвигаем текст с 25% на 20%
                 ctx.fillText(engravingText, canvas.width / 2, canvas.height * 0.20);
 
-                const qrUrl = (url && url.trim()) ? url.trim() : 'https://example.com/info';
+                const qrUrl = (url && url.trim()) ? url.trim() : translations[currentLang].qrUrlPlaceholder;
                 const qrSize = TEXTURE_RESOLUTION * 0.5;
                 const tempQrDiv = document.createElement('div');
                 tempQrDiv.style.width = `${qrSize}px`; tempQrDiv.style.height = `${qrSize}px`;
@@ -448,15 +562,17 @@
         }
 
         async function handleGenerateClick() {
-            generateBtn.disabled = true; generateBtn.textContent = 'Генерация...';
+            generateBtn.disabled = true; updateGenerateButtonState(true);
             currentSize.w = parseFloat(plaqueWidthEl.value) / 10 || 15;
             currentSize.h = parseFloat(plaqueHeightEl.value) / 10 || 15;
             currentSize.d = parseFloat(plaqueDepthEl.value) / 10 || 0.5;
             currentSize.radius = parseFloat(plaqueRadiusEl.value) / 10 || 0.5;
-            currentEngraving.text = plaqueTextEl.value; currentEngraving.url = qrUrlEl.value; currentEngraving.border = addBorderEl.checked;
+            currentEngraving.text = plaqueTextEl.value || translations[currentLang].plaqueTextValue;
+            currentEngraving.url = qrUrlEl.value || translations[currentLang].qrUrlValue;
+            currentEngraving.border = addBorderEl.checked;
             const activeMaterial = materialOptionsEl.querySelector('.option-btn.active'); if (activeMaterial) currentMaterialType = activeMaterial.dataset.material;
             updatePlaqueGeometry(); await updatePlaqueMaterial();
-            generateBtn.disabled = false; generateBtn.textContent = 'Сгенерировать 3D Модель';
+            generateBtn.disabled = false; updateGenerateButtonState(false);
         }
 
         materialOptionsEl.addEventListener('click', (e) => {
@@ -467,6 +583,9 @@
         });
         addBorderEl.addEventListener('change', () => { addBorderLabel.classList.toggle('active', addBorderEl.checked); });
         generateBtn.addEventListener('click', handleGenerateClick);
+        langButtons.forEach((btn) => {
+            btn.addEventListener('click', () => setLanguage(btn.dataset.lang || 'ru'));
+        });
 
         window.addEventListener('resize', () => {
             if (camera && renderer && plaqueCanvas.clientWidth > 0 && plaqueCanvas.clientHeight > 0) {
@@ -475,7 +594,11 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => { initThreeJS(); addBorderLabel.classList.toggle('active', addBorderEl.checked); });
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLang);
+            initThreeJS();
+            addBorderLabel.classList.toggle('active', addBorderEl.checked);
+        });
     </script>
 </body>
 </html>
