@@ -61,12 +61,12 @@ export const utilities: UtilityDescriptor[] = [
   },
   {
     id: 'qr-nameplate',
-    name: 'QR nameplate generator',
+    name: '3D QR nameplate generator',
     description:
-      'Create serialized equipment tags with branding, safety icons, and QR/serial automation.',
-    tech: 'SVG',
-    standards: 'ISO 3864 · Traceability',
-    features: ['Custom palette', 'Auto serial + QR', 'SVG/PNG output'],
+      'Model serialized equipment tags with QR codes, then preview thickness, materials, and engraving depth in real time.',
+    tech: 'WebGL + QR',
+    standards: 'Traceability - ISO 3864',
+    features: ['Three.js preview', 'Material presets', 'QR + engraving texture'],
     href: '/utilities/qr-nameplate/',
   },
   {
