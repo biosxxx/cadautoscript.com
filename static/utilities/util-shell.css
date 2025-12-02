@@ -161,18 +161,19 @@ body.utility-shell {
   top: 24px;
   right: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.8);
+  background: #0b1224;
   color: #f5f7ff;
   padding: 8px 22px;
   font-size: 0.85rem;
   cursor: pointer;
   z-index: 3;
   backdrop-filter: blur(6px);
+  box-shadow: 0 6px 16px rgba(8, 12, 24, 0.45);
 }
 
 .utility-toggle:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: #111935;
 }
 
 .tool-frame {
