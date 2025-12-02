@@ -7,6 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = {darkMode: 'class'};</script>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      if (window['pdfjsLib']) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,6 +30,23 @@
         background: #fff;
         box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .page-preview {
+        width: 120px;
+        height: 160px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 16px;
+        background: radial-gradient(circle at 20% 20%, rgba(33, 92, 255, 0.1), #f7f9ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .page-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: block;
       }
       .page-card.dragging {
         opacity: 0.6;
@@ -104,6 +128,7 @@
       const { PDFDocument, degrees } = PDFLib;
 
       const documents = new Map();
+      const pagePreviews = new Map();
       let pages = [];
       let dragSourceId = null;
 
@@ -135,6 +160,7 @@
         pages = [];
         documents.forEach((doc) => URL.revokeObjectURL(doc.url));
         documents.clear();
+        pagePreviews.clear();
         renderPages();
         statusEl.textContent = 'Workspace cleared.';
       });
@@ -183,16 +209,26 @@
         counterEl.textContent = `${pages.length} page${pages.length > 1 ? 's' : ''} ready`;
         pages.forEach((page, index) => {
           const doc = documents.get(page.docId);
+          const preview = pagePreviews.get(page.id);
           const card = document.createElement('div');
           card.className = 'page-card p-5';
           card.draggable = true;
           card.dataset.pageId = page.id;
           card.innerHTML = `
             <div class="flex justify-between flex-wrap gap-4">
-              <div>
-                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Page ${index + 1}</p>
-                <p class="text-lg font-semibold">${doc.name}</p>
-                <p class="text-sm text-slate-500">Original page ${page.pageIndex + 1}</p>
+              <div class="flex flex-wrap gap-4 items-start">
+                <div class="page-preview">
+                  ${
+                    preview
+                      ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
+                      : '<span class="text-xs text-slate-400">Rendering…</span>'
+                  }
+                </div>
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Page ${index + 1}</p>
+                  <p class="text-lg font-semibold">${doc.name}</p>
+                  <p class="text-sm text-slate-500">Original page ${page.pageIndex + 1}</p>
+                </div>
               </div>
               <div class="text-sm text-slate-500">Rotation: ${page.rotation}&deg;</div>
             </div>
@@ -239,6 +275,7 @@
           }
           if (action === 'remove') {
             pages = pages.filter((p) => p.id !== pageId);
+            pagePreviews.delete(pageId);
             renderPages();
           }
         });
@@ -277,19 +314,38 @@
 
       async function loadPdf(file) {
         const buffer = await file.arrayBuffer();
+        const byteArray = new Uint8Array(buffer);
         const docId = `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        const pdfDoc = await PDFDocument.load(buffer);
+        const pdfDoc = await PDFDocument.load(byteArray);
+        const previewDoc = await pdfjsLib.getDocument({ data: byteArray }).promise;
         const pageCount = pdfDoc.getPageCount();
         const url = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));
-        documents.set(docId, { name: file.name, bytes: buffer, url, pageCount });
+        documents.set(docId, { name: file.name, bytes: byteArray, url, pageCount });
         for (let i = 0; i < pageCount; i += 1) {
-          pages.push({
+          const thumbnail = await renderThumbnail(previewDoc, i);
+          const pageEntry = {
             id: `${docId}-p${i}`,
             docId,
             pageIndex: i,
             rotation: 0,
-          });
+          };
+          pages.push(pageEntry);
+          pagePreviews.set(pageEntry.id, thumbnail);
         }
+      }
+
+      async function renderThumbnail(pdfDoc, pageIndex) {
+        const page = await pdfDoc.getPage(pageIndex + 1);
+        const baseViewport = page.getViewport({ scale: 1 });
+        const targetWidth = 120;
+        const scale = targetWidth / baseViewport.width;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: context, viewport }).promise;
+        return canvas.toDataURL('image/png');
       }
     </script>
   </body>
