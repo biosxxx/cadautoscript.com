@@ -47,6 +47,7 @@ Maker.js - Library for CAD operations and DXF export.
 
 Code Example (Node.js)
 
+```js
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
@@ -75,14 +76,18 @@ const fs = require('fs');
   console.log('DXF generated successfully.');
   await browser.close();
 })();
-
+```
 
 Interactive Example
 
 With MDX, you can even embed interactive elements directly in the post. For example, triggering a generation process:
 
-<button onClick={() => alert('DXF Generation Simulated!')} style={{backgroundColor: '#25c2a0', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer'}}>
-Simulate DXF Export
+<button
+  type="button"
+  className="button button--primary"
+  onClick={() => alert('DXF Generation Simulated!')}
+>
+  Simulate DXF Export
 </button>
 
 Application for Nesting

@@ -47,3 +47,23 @@ cad:
   label: CAD
   permalink: /cad
   description: Computer-Aided Design tools and techniques
+
+ai:
+  label: AI
+  permalink: /ai
+  description: Applied AI for CAD and manufacturing workflows
+
+llm:
+  label: LLM
+  permalink: /llm
+  description: Large Language Model automation patterns
+
+python:
+  label: Python
+  permalink: /python
+  description: Python scripting for CAD and data automation
+
+solidworks:
+  label: SolidWorks
+  permalink: /solidworks
+  description: SolidWorks macros, API usage, and automation
