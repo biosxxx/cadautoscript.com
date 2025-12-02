@@ -79,11 +79,12 @@ export default function CustomSearchNavbarItem({className}: Props): JSX.Element 
                 <p className={styles.empty}>No matches yet. Try another keyword.</p>
               ) : (
                 results.map((record) => (
-                  <Link
+                  <a
                     key={record.href}
-                    to={record.href}
+                    href={record.href}
                     className={styles.resultItem}
                     onClick={() => setIsOpen(false)}
+                    data-noBrokenLinkCheck
                   >
                     <span>
                       <strong>{record.title}</strong>
@@ -96,7 +97,7 @@ export default function CustomSearchNavbarItem({className}: Props): JSX.Element 
                         </span>
                       ))}
                     </span>
-                  </Link>
+                  </a>
                 ))
               )}
             </div>

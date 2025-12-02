@@ -3,9 +3,18 @@ import {useEffect, useRef} from 'react';
 type Props = {
   diameter: number;
   innerDiameter?: number;
+  background: string;
+  border: string;
+  textColor: string;
 };
 
-export function CirclePreview({diameter, innerDiameter = 0}: Props): JSX.Element {
+export function CirclePreview({
+  diameter,
+  innerDiameter = 0,
+  background,
+  border,
+  textColor,
+}: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -24,7 +33,7 @@ export function CirclePreview({diameter, innerDiameter = 0}: Props): JSX.Element
     canvas.height = size;
     ctx.clearRect(0, 0, size, size);
 
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = background;
     ctx.fillRect(0, 0, size, size);
 
     const padding = 24;
@@ -46,7 +55,7 @@ export function CirclePreview({diameter, innerDiameter = 0}: Props): JSX.Element
       ctx.stroke();
     }
 
-    ctx.fillStyle = '#e2e8f0';
+    ctx.fillStyle = textColor;
     ctx.font = '14px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`Ø ${diameter.toFixed(1)} mm`, size / 2, size / 2 + outerRadius + 20);
@@ -60,8 +69,8 @@ export function CirclePreview({diameter, innerDiameter = 0}: Props): JSX.Element
         maxWidth: 260,
         height: 260,
         borderRadius: 12,
-        border: '1px solid rgba(148,163,184,0.4)',
-        background: '#0f172a',
+        border: `1px solid ${border}`,
+        background,
       }}
       aria-label="DXF circle preview"
     />

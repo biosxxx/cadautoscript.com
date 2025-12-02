@@ -1,4 +1,5 @@
 import {useMemo, useState} from 'react';
+import {useColorMode} from '@docusaurus/theme-common';
 import {CirclePreview} from './CirclePreview';
 import {generateCircleDxf} from './generateCircleDxf';
 
@@ -17,6 +18,30 @@ function extractValue(code: string, key: string): number {
 }
 
 export function DxfCircleDemo(): JSX.Element {
+  const {colorMode} = useColorMode();
+  const isDark = colorMode === 'dark';
+  const palette = isDark
+    ? {
+        surface: '#0b1220',
+        overlay: 'rgba(15,23,42,0.75)',
+        border: 'rgba(148,163,184,0.4)',
+        text: '#e2e8f0',
+        secondaryText: '#94a3b8',
+        codeBg: '#020617',
+        previewBg: '#0f172a',
+        previewText: '#e2e8f0',
+      }
+    : {
+        surface: '#f1f5f9',
+        overlay: 'rgba(15,23,42,0.45)',
+        border: 'rgba(15,23,42,0.15)',
+        text: '#0f172a',
+        secondaryText: '#475569',
+        codeBg: '#ffffff',
+        previewBg: '#ffffff',
+        previewText: '#0f172a',
+      };
+
   const [isOpen, setIsOpen] = useState(false);
   const [snippet, setSnippet] = useState(defaultSnippet);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +98,7 @@ export function DxfCircleDemo(): JSX.Element {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15,23,42,0.75)',
+            background: palette.overlay,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -83,18 +108,18 @@ export function DxfCircleDemo(): JSX.Element {
         >
           <div
             style={{
-              background: '#0b1220',
+              background: palette.surface,
               borderRadius: 16,
               padding: '1.5rem',
               width: 'min(960px, 100%)',
-              color: '#e2e8f0',
+              color: palette.text,
               boxShadow: '0 20px 60px rgba(15,23,42,0.6)',
             }}
           >
             <div style={{display: 'flex', justifyContent: 'space-between', gap: '1rem'}}>
               <div style={{flex: 1}}>
                 <h3 style={{marginTop: 0}}>Edit the generator snippet</h3>
-                <p style={{marginBottom: '0.5rem', color: '#94a3b8', fontSize: 14}}>
+                <p style={{marginBottom: '0.5rem', color: palette.secondaryText, fontSize: 14}}>
                   Change the outer diameter or add <code>innerDiameter</code> to create washer-style rings.
                 </p>
                 <textarea
@@ -104,9 +129,9 @@ export function DxfCircleDemo(): JSX.Element {
                     width: '100%',
                     height: 220,
                     borderRadius: 12,
-                    border: '1px solid rgba(148,163,184,0.4)',
-                    background: '#020617',
-                    color: '#e2e8f0',
+                    border: `1px solid ${palette.border}`,
+                    background: palette.codeBg,
+                    color: palette.text,
                     fontFamily: 'JetBrains Mono, Consolas, monospace',
                     fontSize: 14,
                     padding: '1rem',
@@ -114,7 +139,7 @@ export function DxfCircleDemo(): JSX.Element {
                   }}
                 />
                 {error && (
-                  <p style={{color: '#f87171', fontSize: 13, marginTop: 8}}>{error}</p>
+                  <p style={{color: '#ef4444', fontSize: 13, marginTop: 8}}>{error}</p>
                 )}
                 <div style={{display: 'flex', gap: '0.5rem', marginTop: '1rem'}}>
                   <button
@@ -143,11 +168,17 @@ export function DxfCircleDemo(): JSX.Element {
                   gap: '1rem',
                 }}
               >
-                <CirclePreview diameter={diameter} innerDiameter={innerDiameter} />
-                <p style={{fontSize: 14, color: '#94a3b8'}}>
+                <CirclePreview
+                  diameter={diameter}
+                  innerDiameter={innerDiameter}
+                  background={palette.previewBg}
+                  border={palette.border}
+                  textColor={palette.previewText}
+                />
+                <p style={{fontSize: 14, color: palette.secondaryText}}>
                   Outer diameter: <strong>{diameter.toFixed(1)} mm</strong>
                 </p>
-                <p style={{fontSize: 14, color: '#94a3b8'}}>
+                <p style={{fontSize: 14, color: palette.secondaryText}}>
                   {innerDiameter > 0 ? (
                     <>
                       Inner diameter: <strong>{innerDiameter.toFixed(1)} mm</strong>
