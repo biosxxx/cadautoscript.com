@@ -312,13 +312,15 @@
 
       async function loadPdf(file) {
         const buffer = await file.arrayBuffer();
-        const byteArray = new Uint8Array(buffer);
+        const pdfLibBuffer = buffer.slice(0);
+        const previewBuffer = buffer.slice(0);
+        const byteArray = new Uint8Array(previewBuffer);
         const docId = `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        const pdfDoc = await PDFDocument.load(buffer);
+        const pdfDoc = await PDFDocument.load(pdfLibBuffer);
         const previewDoc = await pdfjsLib.getDocument({ data: byteArray }).promise;
         const pageCount = pdfDoc.getPageCount();
         const url = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));
-        documents.set(docId, { name: file.name, bytes: buffer, url, pageCount });
+        documents.set(docId, { name: file.name, bytes: pdfLibBuffer, url, pageCount });
         for (let i = 0; i < pageCount; i += 1) {
           const thumbnail = await renderThumbnail(previewDoc, i);
           const pageEntry = {
