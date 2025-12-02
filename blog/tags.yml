@@ -27,3 +27,23 @@ chromium:
   label: Chromium
   permalink: /chromium
   description: Chromium-specific runtime updates
+
+nodejs:
+  label: Node.js
+  permalink: /nodejs
+  description: Node.js automation and server-side development
+
+dxf:
+  label: DXF
+  permalink: /dxf
+  description: DXF file format and generation
+
+automation:
+  label: Automation
+  permalink: /automation
+  description: CAD and workflow automation
+
+cad:
+  label: CAD
+  permalink: /cad
+  description: Computer-Aided Design tools and techniques
