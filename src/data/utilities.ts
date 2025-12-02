@@ -70,6 +70,16 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/qr-nameplate/',
   },
   {
+    id: 'dxf-editor',
+    name: 'WebDXF editor',
+    description:
+      'Trim geometry, annotate lengths, and resave DXF files directly in the browser for quick QA or macro testing.',
+    tech: 'Canvas',
+    standards: 'DXF R12',
+    features: ['Crossing selection', 'Trim + measure', 'Offline DXF I/O'],
+    href: '/utilities/dxf-editor/',
+  },
+  {
     id: 'pdf-master',
     name: 'PDF Master',
     description:
