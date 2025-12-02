@@ -73,3 +73,14 @@
 .utility-shell.light-theme .utility-toggle:hover {
   background: #f4f6ff;
 }
+
+.utility-shell.light-theme .utility-fullscreen {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  color: #0f172a;
+  box-shadow: 0 15px 30px rgba(15, 23, 42, 0.18);
+}
+
+.utility-shell.light-theme .utility-fullscreen:hover {
+  background: #f4f6ff;
+}

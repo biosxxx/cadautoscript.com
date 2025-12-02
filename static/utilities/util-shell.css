@@ -176,6 +176,48 @@ body.utility-shell {
   background: #111935;
 }
 
+.utility-fullscreen {
+  position: absolute;
+  top: 78px;
+  right: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.8);
+  background: #0b1224;
+  color: #f5f7ff;
+  padding: 8px 22px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  z-index: 3;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 16px rgba(8, 12, 24, 0.45);
+}
+
+.utility-fullscreen:hover {
+  background: #111935;
+}
+
+.utility-stage.is-fullscreen {
+  position: fixed;
+  inset: 16px;
+  width: auto;
+  max-width: none;
+  height: calc(100vh - 32px);
+  min-height: 0;
+  z-index: 1000;
+  border-radius: 24px;
+}
+
+.utility-stage.is-fullscreen .tool-frame {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body.utility-shell.utility-shell--fullscreen {
+  overflow: hidden;
+}
+
 .tool-frame {
   position: absolute;
   inset: 0;
@@ -234,6 +276,13 @@ body.utility-shell {
   .utility-toggle {
     position: static;
     margin-bottom: 12px;
+  }
+
+  .utility-fullscreen {
+    position: static;
+    margin-bottom: 12px;
+    width: 100%;
+    text-align: center;
   }
 
   .utility-about {

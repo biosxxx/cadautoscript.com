@@ -25,12 +25,14 @@
 }
 
 .hero h1 {
-  margin: 0.6rem 0 1rem;
-  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.4rem 0 0.7rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  line-height: 1.2;
 }
 
 .hero p {
   color: #a9b6d6;
+  font-size: 0.95rem;
 }
 
 .heroActions {
@@ -47,13 +49,14 @@
 }
 
 .heroStats span {
-  font-size: 0.8rem;
+  font-size: 0.65rem;
   letter-spacing: 0.1em;
   color: #8ca3c9;
 }
 
 .heroStats strong {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .utilitySection,

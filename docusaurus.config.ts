@@ -89,9 +89,15 @@ const config: Config = {
         {
           title: 'Utilities',
           items: [
-            {label: 'Pipe Cutter', href: '/utilities/pipe-cutter/'},
-            {label: 'Shell Rolling', href: '/utilities/cylindrical-shell-rolling/'},
-            {label: 'Thread Atlas', href: '/utilities/interactive-thread/'},
+            {
+              html: '<a class="footer__link-item" href="/utilities/pipe-cutter/" data-noBrokenLinkCheck>Pipe Cutter</a>',
+            },
+            {
+              html: '<a class="footer__link-item" href="/utilities/cylindrical-shell-rolling/" data-noBrokenLinkCheck>Shell Rolling</a>',
+            },
+            {
+              html: '<a class="footer__link-item" href="/utilities/interactive-thread/" data-noBrokenLinkCheck>Thread Atlas</a>',
+            },
           ],
         },
         {

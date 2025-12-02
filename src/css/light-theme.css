@@ -29,6 +29,15 @@ html[data-theme='light'] .footer__item {
   color: inherit;
 }
 
+html[data-theme='light'] .footer__title,
+html[data-theme='light'] .footer__link-item {
+  color: #0f172a !important;
+}
+
+html[data-theme='light'] .footer__link-item:hover {
+  color: var(--ifm-color-primary) !important;
+}
+
 html[data-theme='light'] .hero--primary {
   background: #ffffff;
   color: #0f172a;
