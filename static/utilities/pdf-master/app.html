@@ -134,6 +134,29 @@
         color: #7a82a1;
         margin: 0;
       }
+      .view-toggle {
+        display: inline-flex;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        border-radius: 999px;
+        padding: 4px;
+        gap: 4px;
+        background: #f6f8ff;
+        margin-top: 18px;
+      }
+      .view-toggle button {
+        border: none;
+        background: transparent;
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #6c7392;
+      }
+      .view-toggle button.is-active {
+        background: #0f172a;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+      }
       .btn.ghost {
         background: #17b27b;
         color: #fff;
@@ -150,6 +173,16 @@
         border: 2px dashed rgba(15, 23, 42, 0.08);
         border-radius: 28px;
         background: rgba(255, 255, 255, 0.6);
+      }
+      .page-list {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .tile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 18px;
       }
       .page-card {
         border-radius: 22px;
@@ -236,6 +269,85 @@
         background: #0f172a;
         color: #fff;
       }
+      .tile-card {
+        border-radius: 20px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(255, 255, 255, 0.96);
+        padding: 16px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        min-height: 240px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .tile-card.dragging {
+        opacity: 0.75;
+        transform: scale(0.98);
+      }
+      .tile-thumb {
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: #f9fbff;
+        padding: 8px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .tile-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .tile-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .tile-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0;
+      }
+      .tile-sub {
+        font-size: 0.75rem;
+        color: #7a82a1;
+        margin: 0;
+      }
+      .tile-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .tile-actions .icon {
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        box-shadow: 0 6px 15px rgba(15, 23, 42, 0.15);
+        background: #fff;
+        color: #1c2f6a;
+      }
+      .tile-actions .icon.rotate {
+        background: #e0ebff;
+        color: #1a48c4;
+      }
+      .tile-actions .icon.remove {
+        background: #ffe2e7;
+        color: #b31537;
+      }
+      .tile-actions a.icon {
+        text-decoration: none;
+        background: #0f172a;
+        color: #fff;
+      }
       #status-message {
         color: #7a82a1;
         font-size: 0.9rem;
@@ -283,10 +395,14 @@
           <p id="page-counter">No pages loaded</p>
           <button id="merge-btn" class="btn ghost" disabled>Download merged PDF</button>
         </div>
+        <div class="view-toggle" role="tablist" aria-label="Choose layout">
+          <button type="button" data-view="list" class="is-active">Stacked view</button>
+          <button type="button" data-view="tiles">Tile view</button>
+        </div>
       </section>
 
       <section>
-        <div id="page-list">
+        <div id="page-list" class="page-list">
           <div class="page-list-empty">
             Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view
             the page in the native viewer.
@@ -306,12 +422,36 @@
       const mergeButton = document.getElementById('merge-btn');
       const counterEl = document.getElementById('page-counter');
       const statusEl = document.getElementById('status-message');
+      const viewButtons = document.querySelectorAll('[data-view]');
       const { PDFDocument, degrees } = PDFLib;
 
       const documents = new Map();
       const pagePreviews = new Map();
       let pages = [];
       let dragSourceId = null;
+      let currentView = 'list';
+
+      const viewStrategies = {
+        list: createListCard,
+        tiles: createTileCard,
+      };
+
+      function setView(mode) {
+        currentView = mode;
+        viewButtons.forEach((button) => {
+          button.classList.toggle('is-active', button.dataset.view === currentView);
+        });
+        pageListEl.classList.toggle('tile-grid', currentView === 'tiles');
+        renderPages();
+      }
+      viewButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          if (button.dataset.view !== currentView) {
+            setView(button.dataset.view);
+          }
+        });
+      });
+      setView(currentView);
 
       chooseButton.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', (event) => {
@@ -381,6 +521,7 @@
 
       function renderPages() {
         pageListEl.innerHTML = '';
+        pageListEl.classList.toggle('tile-grid', currentView === 'tiles');
         mergeButton.disabled = !pages.length;
         if (!pages.length) {
           pageListEl.innerHTML = `<div class="page-list-empty">Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view the page in the native viewer.</div>`;
@@ -388,40 +529,69 @@
           return;
         }
         counterEl.textContent = `${pages.length} page${pages.length > 1 ? 's' : ''} ready`;
+        const createCard = viewStrategies[currentView] || viewStrategies.list;
         pages.forEach((page, index) => {
           const doc = documents.get(page.docId);
           const preview = pagePreviews.get(page.id);
-          const card = document.createElement('div');
-          card.className = 'page-card';
-          card.draggable = true;
-          card.dataset.pageId = page.id;
-          card.innerHTML = `
-            <div class="page-card__meta">
-              <div class="page-card__details">
-                <div class="page-preview">
-                  ${
-                    preview
-                      ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
-                      : '<span class="chip">Rendering…</span>'
-                  }
-                </div>
-                <div>
-                  <p class="chip">Page ${index + 1}</p>
-                  <p class="title">${doc.name}</p>
-                  <p class="subtext">Original page ${page.pageIndex + 1}</p>
-                </div>
-              </div>
-              <div class="subtext">Rotation: ${page.rotation}&deg;</div>
-            </div>
-            <div class="page-card__actions">
-              <button data-action="rotate" class="btn text rotate">Rotate +90&deg;</button>
-              <button data-action="remove" class="btn text danger">Remove</button>
-              <a class="btn text dark" target="_blank" rel="noopener" href="${doc.url}#page=${page.pageIndex + 1}">View source</a>
-            </div>
-          `;
+          const card = createCard(page, index, doc, preview);
           hookCardEvents(card, page.id);
           pageListEl.appendChild(card);
         });
+      }
+
+      function createListCard(page, index, doc, preview) {
+        const card = document.createElement('div');
+        card.className = 'page-card';
+        card.draggable = true;
+        card.dataset.pageId = page.id;
+        card.innerHTML = `
+          <div class="page-card__meta">
+            <div class="page-card__details">
+              <div class="page-preview">
+                ${
+                  preview
+                    ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
+                    : '<span class="chip">Rendering…</span>'
+                }
+              </div>
+              <div>
+                <p class="chip">Page ${index + 1}</p>
+                <p class="title">${doc.name}</p>
+                <p class="subtext">Original page ${page.pageIndex + 1}</p>
+              </div>
+            </div>
+            <div class="subtext">Rotation: ${page.rotation}&deg;</div>
+          </div>
+          <div class="page-card__actions">
+            <button data-action="rotate" class="btn text rotate">Rotate +90&deg;</button>
+            <button data-action="remove" class="btn text danger">Remove</button>
+            <a class="btn text dark" target="_blank" rel="noopener" href="${doc.url}#page=${page.pageIndex + 1}">View source</a>
+          </div>
+        `;
+        return card;
+      }
+
+      function createTileCard(page, index, doc, preview) {
+        const card = document.createElement('div');
+        card.className = 'tile-card';
+        card.draggable = true;
+        card.dataset.pageId = page.id;
+        const previewMarkup = preview
+          ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
+          : '<span class="chip">Rendering…</span>';
+        card.innerHTML = `
+          <div class="tile-thumb">${previewMarkup}</div>
+          <div class="tile-meta">
+            <p class="tile-name">${doc.name}</p>
+            <p class="tile-sub">#${index + 1} · Original page ${page.pageIndex + 1}</p>
+          </div>
+          <div class="tile-actions">
+            <button data-action="rotate" class="icon rotate" title="Rotate +90°">⟳</button>
+            <button data-action="remove" class="icon remove" title="Remove page">✕</button>
+            <a class="icon" target="_blank" rel="noopener" href="${doc.url}#page=${page.pageIndex + 1}" title="Open source">↗</a>
+          </div>
+        `;
+        return card;
       }
 
       function hookCardEvents(card, pageId) {
