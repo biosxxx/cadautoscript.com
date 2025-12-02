@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Master</title>
-    <link rel="stylesheet" href="../../vendor/tailwind.min.css" />
     <script src="../../vendor/pdf-lib.min.js"></script>
     <script src="../../vendor/pdf.min.js"></script>
     <script>
@@ -19,15 +18,173 @@
       rel="stylesheet"
     />
     <style>
-      body {
+      :root {
         font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #0f172a;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 15% 20%, rgba(66, 133, 244, 0.15), transparent 55%),
+          linear-gradient(180deg, #f6f8ff, #f1f5ff);
+        padding: 40px 20px 80px;
+      }
+      .workspace {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.4em;
+        color: #94a3d6;
+        font-size: 0.75rem;
+        margin-bottom: 12px;
+      }
+      .hero h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin: 0;
+      }
+      .hero p {
+        max-width: 640px;
+        margin: 16px auto 0;
+        color: #4f5977;
+        line-height: 1.6;
+      }
+      .panel {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 32px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
+        padding: 36px;
+        margin-bottom: 32px;
+      }
+      .drop-zone {
+        border: 2px dashed rgba(33, 92, 255, 0.3);
+        border-radius: 28px;
+        padding: 40px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(33, 92, 255, 0.08), rgba(255, 255, 255, 0.6));
+        transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+      }
+      .drop-zone__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 20px;
+        background: #1a2d6d;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        box-shadow: 0 12px 30px rgba(26, 45, 109, 0.35);
+      }
+      .drop-zone h2 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+      .drop-zone p {
+        margin: 12px 0 24px;
+        color: #4f5977;
+      }
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center;
+      }
+      .btn {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 26px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+      }
+      .btn.primary {
+        background: linear-gradient(135deg, #215cff, #3f8bff);
+        color: #fff;
+      }
+      .btn.secondary {
+        background: #fff;
+        color: #132043;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+      }
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .status-row p {
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.2em;
+        color: #7a82a1;
+        margin: 0;
+      }
+      .btn.ghost {
+        background: #17b27b;
+        color: #fff;
+      }
+      .btn[disabled] {
+        opacity: 0.45;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .page-list-empty {
+        text-align: center;
+        color: #7a82a1;
+        padding: 60px 20px;
+        border: 2px dashed rgba(15, 23, 42, 0.08);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.6);
       }
       .page-card {
-        border-radius: 18px;
+        border-radius: 22px;
         border: 1px solid rgba(15, 23, 42, 0.08);
         background: #fff;
         box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        padding: 28px;
+        margin-bottom: 24px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .page-card.dragging {
+        opacity: 0.7;
+        transform: scale(0.99);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.25);
+      }
+      .page-card__meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .page-card__details {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      .title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      .subtext {
+        color: #6c7392;
+        margin: 0;
       }
       .page-preview {
         width: 120px;
@@ -46,72 +203,98 @@
         object-fit: contain;
         display: block;
       }
-      .page-card.dragging {
-        opacity: 0.6;
-        box-shadow: 0 30px 50px rgba(15, 23, 42, 0.25);
-        transform: scale(0.98);
+      .page-card__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .chip {
+        text-transform: uppercase;
+        letter-spacing: 0.35em;
+        font-size: 0.7rem;
+        color: #9aa2bf;
+        margin-bottom: 6px;
+      }
+      .btn.text {
+        border-radius: 14px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        box-shadow: none;
+      }
+      .btn.text.rotate {
+        border: 1px solid rgba(33, 92, 255, 0.3);
+        color: #1c2f6a;
+        background: rgba(33, 92, 255, 0.08);
+      }
+      .btn.text.danger {
+        border: 1px solid rgba(255, 76, 115, 0.3);
+        color: #b10b33;
+        background: rgba(255, 76, 115, 0.08);
+      }
+      .btn.text.dark {
+        background: #0f172a;
+        color: #fff;
+      }
+      #status-message {
+        color: #7a82a1;
+        font-size: 0.9rem;
+        margin-top: 18px;
+        min-height: 20px;
       }
       .drop-ready {
         border-color: #215cff !important;
-        background: rgba(33, 92, 255, 0.05) !important;
+        background: rgba(33, 92, 255, 0.1) !important;
+        transform: translateY(-2px);
+      }
+      input[type='file'].sr-only {
+        position: absolute;
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        z-index: -1;
       }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-900 min-h-screen">
-    <div class="max-w-6xl mx-auto px-4 py-10">
-      <header class="mb-8 text-center">
-        <p class="text-sm uppercase tracking-[0.4em] text-slate-500">PDF pipeline</p>
-        <h1 class="text-4xl font-bold mt-2">PDF Master workspace</h1>
-        <p class="text-slate-600 mt-3 max-w-2xl mx-auto">
+  <body>
+    <div class="workspace">
+      <header class="hero">
+        <p class="eyebrow">PDF pipeline</p>
+        <h1>PDF Master workspace</h1>
+        <p>
           Merge submittals, drag sheets into the right sequence, rotate field sketches, and export a
           single PDF without uploading sensitive data.
         </p>
       </header>
 
-      <section class="bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 mb-8">
-        <div
-          id="drop-zone"
-          class="border border-dashed border-slate-300 rounded-2xl p-8 text-center transition-colors"
-        >
-          <div class="mx-auto w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4">
-            ⬆
+      <section class="panel">
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone__icon">⬆</div>
+          <h2>Drop PDFs here or choose files</h2>
+          <p>Supports multi-upload and keeps everything on this device.</p>
+          <div class="button-row">
+            <button id="choose-files" class="btn primary">Select PDF files</button>
+            <button id="clear-workspace" class="btn secondary">Clear workspace</button>
           </div>
-          <p class="text-lg font-semibold">Drop PDFs here or choose files</p>
-          <p class="text-slate-500 mb-4">Supports multi-upload and keeps everything on this device.</p>
-          <div class="flex justify-center gap-3 flex-wrap">
-            <button id="choose-files" class="px-5 py-2 rounded-full bg-indigo-600 text-white font-semibold">
-              Select PDF files
-            </button>
-            <button id="clear-workspace" class="px-5 py-2 rounded-full border border-slate-300 text-slate-700">
-              Clear workspace
-            </button>
-          </div>
-          <input id="file-input" class="hidden" type="file" accept="application/pdf" multiple />
+          <input id="file-input" class="sr-only" type="file" accept="application/pdf" multiple />
         </div>
-        <div class="flex items-center justify-between mt-6 flex-wrap gap-3">
-          <p id="page-counter" class="text-sm tracking-wide uppercase text-slate-500">No pages loaded</p>
-          <div class="flex gap-3">
-            <button
-              id="merge-btn"
-              class="bg-emerald-600 text-white font-semibold px-5 py-2 rounded-full disabled:opacity-50"
-              disabled
-            >
-              Download merged PDF
-            </button>
-          </div>
+        <div class="status-row">
+          <p id="page-counter">No pages loaded</p>
+          <button id="merge-btn" class="btn ghost" disabled>Download merged PDF</button>
         </div>
       </section>
 
       <section>
-        <div id="page-list" class="space-y-4 min-h-[200px]">
-          <div class="text-center text-slate-500 py-16 border border-dashed border-slate-200 rounded-3xl">
+        <div id="page-list">
+          <div class="page-list-empty">
             Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view
             the page in the native viewer.
           </div>
         </div>
       </section>
 
-      <p id="status-message" class="text-sm text-slate-500 mt-6"></p>
+      <p id="status-message"></p>
     </div>
 
     <script>
@@ -200,7 +383,7 @@
         pageListEl.innerHTML = '';
         mergeButton.disabled = !pages.length;
         if (!pages.length) {
-          pageListEl.innerHTML = `<div class="text-center text-slate-500 py-16 border border-dashed border-slate-200 rounded-3xl">Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view the page in the native viewer.</div>`;
+          pageListEl.innerHTML = `<div class="page-list-empty">Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view the page in the native viewer.</div>`;
           counterEl.textContent = 'No pages loaded';
           return;
         }
@@ -209,31 +392,31 @@
           const doc = documents.get(page.docId);
           const preview = pagePreviews.get(page.id);
           const card = document.createElement('div');
-          card.className = 'page-card p-5';
+          card.className = 'page-card';
           card.draggable = true;
           card.dataset.pageId = page.id;
           card.innerHTML = `
-            <div class="flex justify-between flex-wrap gap-4">
-              <div class="flex flex-wrap gap-4 items-start">
+            <div class="page-card__meta">
+              <div class="page-card__details">
                 <div class="page-preview">
                   ${
                     preview
                       ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
-                      : '<span class="text-xs text-slate-400">Rendering…</span>'
+                      : '<span class="chip">Rendering…</span>'
                   }
                 </div>
                 <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Page ${index + 1}</p>
-                  <p class="text-lg font-semibold">${doc.name}</p>
-                  <p class="text-sm text-slate-500">Original page ${page.pageIndex + 1}</p>
+                  <p class="chip">Page ${index + 1}</p>
+                  <p class="title">${doc.name}</p>
+                  <p class="subtext">Original page ${page.pageIndex + 1}</p>
                 </div>
               </div>
-              <div class="text-sm text-slate-500">Rotation: ${page.rotation}&deg;</div>
+              <div class="subtext">Rotation: ${page.rotation}&deg;</div>
             </div>
-            <div class="flex gap-3 flex-wrap mt-4">
-              <button data-action="rotate" class="px-4 py-2 rounded-full border border-slate-300 text-slate-700">Rotate +90&deg;</button>
-              <button data-action="remove" class="px-4 py-2 rounded-full border border-rose-200 text-rose-600">Remove</button>
-              <a href="${doc.url}#page=${page.pageIndex + 1}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-slate-900 text-white">View source</a>
+            <div class="page-card__actions">
+              <button data-action="rotate" class="btn text rotate">Rotate +90&deg;</button>
+              <button data-action="remove" class="btn text danger">Remove</button>
+              <a class="btn text dark" target="_blank" rel="noopener" href="${doc.url}#page=${page.pageIndex + 1}">View source</a>
             </div>
           `;
           hookCardEvents(card, page.id);
