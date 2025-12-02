@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = {darkMode: 'class'};</script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      .page-card {
+        border-radius: 18px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: #fff;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .page-card.dragging {
+        opacity: 0.6;
+        box-shadow: 0 30px 50px rgba(15, 23, 42, 0.25);
+        transform: scale(0.98);
+      }
+      .drop-ready {
+        border-color: #215cff !important;
+        background: rgba(33, 92, 255, 0.05) !important;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 py-10">
+      <header class="mb-8 text-center">
+        <p class="text-sm uppercase tracking-[0.4em] text-slate-500">PDF pipeline</p>
+        <h1 class="text-4xl font-bold mt-2">PDF Master workspace</h1>
+        <p class="text-slate-600 mt-3 max-w-2xl mx-auto">
+          Merge submittals, drag sheets into the right sequence, rotate field sketches, and export a
+          single PDF without uploading sensitive data.
+        </p>
+      </header>
+
+      <section class="bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 mb-8">
+        <div
+          id="drop-zone"
+          class="border border-dashed border-slate-300 rounded-2xl p-8 text-center transition-colors"
+        >
+          <div class="mx-auto w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4">
+            ⬆
+          </div>
+          <p class="text-lg font-semibold">Drop PDFs here or choose files</p>
+          <p class="text-slate-500 mb-4">Supports multi-upload and keeps everything on this device.</p>
+          <div class="flex justify-center gap-3 flex-wrap">
+            <button id="choose-files" class="px-5 py-2 rounded-full bg-indigo-600 text-white font-semibold">
+              Select PDF files
+            </button>
+            <button id="clear-workspace" class="px-5 py-2 rounded-full border border-slate-300 text-slate-700">
+              Clear workspace
+            </button>
+          </div>
+          <input id="file-input" class="hidden" type="file" accept="application/pdf" multiple />
+        </div>
+        <div class="flex items-center justify-between mt-6 flex-wrap gap-3">
+          <p id="page-counter" class="text-sm tracking-wide uppercase text-slate-500">No pages loaded</p>
+          <div class="flex gap-3">
+            <button
+              id="merge-btn"
+              class="bg-emerald-600 text-white font-semibold px-5 py-2 rounded-full disabled:opacity-50"
+              disabled
+            >
+              Download merged PDF
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div id="page-list" class="space-y-4 min-h-[200px]">
+          <div class="text-center text-slate-500 py-16 border border-dashed border-slate-200 rounded-3xl">
+            Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view
+            the page in the native viewer.
+          </div>
+        </div>
+      </section>
+
+      <p id="status-message" class="text-sm text-slate-500 mt-6"></p>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById('file-input');
+      const chooseButton = document.getElementById('choose-files');
+      const clearButton = document.getElementById('clear-workspace');
+      const dropZone = document.getElementById('drop-zone');
+      const pageListEl = document.getElementById('page-list');
+      const mergeButton = document.getElementById('merge-btn');
+      const counterEl = document.getElementById('page-counter');
+      const statusEl = document.getElementById('status-message');
+      const { PDFDocument, degrees } = PDFLib;
+
+      const documents = new Map();
+      let pages = [];
+      let dragSourceId = null;
+
+      chooseButton.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (event) => {
+        if (!event.target.files?.length) return;
+        ingestFiles(event.target.files);
+        event.target.value = '';
+      });
+
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.add('drop-ready');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          if (eventName === 'drop' && event.dataTransfer?.files?.length) {
+            ingestFiles(event.dataTransfer.files);
+          }
+          dropZone.classList.remove('drop-ready');
+        });
+      });
+
+      clearButton.addEventListener('click', () => {
+        pages = [];
+        documents.forEach((doc) => URL.revokeObjectURL(doc.url));
+        documents.clear();
+        renderPages();
+        statusEl.textContent = 'Workspace cleared.';
+      });
+
+      mergeButton.addEventListener('click', async () => {
+        if (!pages.length) return;
+        mergeButton.disabled = true;
+        mergeButton.textContent = 'Preparing...';
+        statusEl.textContent = 'Copying pages and building merged PDF...';
+        try {
+          const merged = await PDFDocument.create();
+          for (const page of pages) {
+            const source = await PDFDocument.load(documents.get(page.docId).bytes);
+            const [copied] = await merged.copyPages(source, [page.pageIndex]);
+            if (page.rotation) {
+              copied.setRotation(degrees(page.rotation));
+            }
+            merged.addPage(copied);
+          }
+          const bytes = await merged.save();
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `pdf-master-${new Date().toISOString().slice(0, 10)}.pdf`;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
+          statusEl.textContent = 'Merged PDF generated successfully.';
+        } catch (error) {
+          console.error(error);
+          statusEl.textContent = 'Something went wrong while merging the files.';
+        } finally {
+          mergeButton.disabled = !pages.length;
+          mergeButton.textContent = 'Download merged PDF';
+        }
+      });
+
+      function renderPages() {
+        pageListEl.innerHTML = '';
+        mergeButton.disabled = !pages.length;
+        if (!pages.length) {
+          pageListEl.innerHTML = `<div class="text-center text-slate-500 py-16 border border-dashed border-slate-200 rounded-3xl">Drop PDFs to build a playlist of sheets. Drag entries to reorder, rotate them, and view the page in the native viewer.</div>`;
+          counterEl.textContent = 'No pages loaded';
+          return;
+        }
+        counterEl.textContent = `${pages.length} page${pages.length > 1 ? 's' : ''} ready`;
+        pages.forEach((page, index) => {
+          const doc = documents.get(page.docId);
+          const card = document.createElement('div');
+          card.className = 'page-card p-5';
+          card.draggable = true;
+          card.dataset.pageId = page.id;
+          card.innerHTML = `
+            <div class="flex justify-between flex-wrap gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Page ${index + 1}</p>
+                <p class="text-lg font-semibold">${doc.name}</p>
+                <p class="text-sm text-slate-500">Original page ${page.pageIndex + 1}</p>
+              </div>
+              <div class="text-sm text-slate-500">Rotation: ${page.rotation}&deg;</div>
+            </div>
+            <div class="flex gap-3 flex-wrap mt-4">
+              <button data-action="rotate" class="px-4 py-2 rounded-full border border-slate-300 text-slate-700">Rotate +90&deg;</button>
+              <button data-action="remove" class="px-4 py-2 rounded-full border border-rose-200 text-rose-600">Remove</button>
+              <a href="${doc.url}#page=${page.pageIndex + 1}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-slate-900 text-white">View source</a>
+            </div>
+          `;
+          hookCardEvents(card, page.id);
+          pageListEl.appendChild(card);
+        });
+      }
+
+      function hookCardEvents(card, pageId) {
+        card.addEventListener('dragstart', (event) => {
+          dragSourceId = pageId;
+          event.dataTransfer.effectAllowed = 'move';
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+          dragSourceId = null;
+          card.classList.remove('dragging');
+        });
+        card.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+        });
+        card.addEventListener('drop', (event) => {
+          event.preventDefault();
+          const targetId = pageId;
+          if (!dragSourceId || dragSourceId === targetId) return;
+          const bounds = card.getBoundingClientRect();
+          const before = event.clientY < bounds.top + bounds.height / 2;
+          movePage(dragSourceId, targetId, before ? 'before' : 'after');
+        });
+        card.addEventListener('click', (event) => {
+          const action = event.target.dataset.action;
+          if (!action) return;
+          if (action === 'rotate') {
+            const page = pages.find((p) => p.id === pageId);
+            page.rotation = (page.rotation + 90) % 360;
+            renderPages();
+          }
+          if (action === 'remove') {
+            pages = pages.filter((p) => p.id !== pageId);
+            renderPages();
+          }
+        });
+      }
+
+      function movePage(sourceId, targetId, position) {
+        const srcIndex = pages.findIndex((p) => p.id === sourceId);
+        if (srcIndex === -1) return;
+        const [entry] = pages.splice(srcIndex, 1);
+        let targetIndex = pages.findIndex((p) => p.id === targetId);
+        if (targetIndex === -1) {
+          pages.splice(srcIndex, 0, entry);
+          return;
+        }
+        if (position === 'after') {
+          targetIndex += 1;
+        }
+        pages.splice(targetIndex, 0, entry);
+        renderPages();
+      }
+
+      function ingestFiles(fileList) {
+        statusEl.textContent = 'Loading files…';
+        const jobs = Array.from(fileList).map((file) => loadPdf(file));
+        Promise.all(jobs)
+          .then(() => {
+            statusEl.textContent = 'Files imported successfully.';
+            renderPages();
+          })
+          .catch((error) => {
+            console.error(error);
+            statusEl.textContent = 'Some files could not be processed. Make sure they are valid PDFs.';
+            renderPages();
+          });
+      }
+
+      async function loadPdf(file) {
+        const buffer = await file.arrayBuffer();
+        const docId = `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const pdfDoc = await PDFDocument.load(buffer);
+        const pageCount = pdfDoc.getPageCount();
+        const url = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));
+        documents.set(docId, { name: file.name, bytes: buffer, url, pageCount });
+        for (let i = 0; i < pageCount; i += 1) {
+          pages.push({
+            id: `${docId}-p${i}`,
+            docId,
+            pageIndex: i,
+            rotation: 0,
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

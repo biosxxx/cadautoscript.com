@@ -69,4 +69,21 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Custom palette', 'Auto serial + QR', 'SVG/PNG output'],
     href: '/utilities/qr-nameplate/',
   },
+  {
+    id: 'pdf-master',
+    name: 'PDF Master',
+    description:
+      'Organize drawing packs, reorder or rotate single sheets, and export a clean merged PDF locally.',
+    tech: 'PDF toolkit',
+    standards: 'Offline processing',
+    features: [
+      'Drag & drop reordering',
+      'Merge multiple PDFs',
+      'Rotate individual pages',
+      'View pages in original file',
+    ],
+    href: '/utilities/pdf-master/',
+  },
 ];
+
+
