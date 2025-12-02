@@ -1,0 +1,51 @@
+---
+title: "Engineering Web: Chromium and HTML5 as an Environment for CAD and Calculations"
+sidebar_position: 3
+description: Why the Chromium engine, HTML5, and Web APIs are the new platform for technical utilities.
+---
+
+Traditional engineering software often suffers from two extremes: it is either **heavy desktop CAD** requiring powerful hardware/licenses, or **scattered spreadsheets** that are hard to maintain. Modern web technology—Chromium, HTML5, WebAssembly—enables full engineering utilities that run entirely in the browser. The browser becomes the operating system for calculations.
+
+## Why this matters
+
+### Effortless cross-platform compatibility
+One HTML/JS build runs the same on Windows, Linux, macOS, or shop-floor tablets. No installers or DLL wrangling.
+
+### Visualization and interactivity
+DOM, Canvas, SVG, and WebGL let you render diagrams and 3D previews in real time. Adjusting a beam length or wall thickness rebuilds the view immediately.
+
+### Hardware access
+APIs like Web Serial, Web Bluetooth, and WebHID talk to PLCs, controllers, and instruments over USB/COM. Perfect for electromechanics or production diagnostics.
+
+### Local operation (PWA)
+Progressive Web Apps cache the utility so it runs offline at the machine. It behaves like a native tool, yet updates via a simple deploy.
+
+## Practical implementation examples
+
+### 1. Interactive fits & tolerances (mechanical)
+- **Inputs:** nominal diameter + tolerance class (e.g., `50 H7/g6`).
+- **Logic:** JavaScript computes deviations, clearances, interference bands.
+- **Visualization:** Canvas draws tolerance zones; tooltips show failure probabilities.
+- **Outcome:** Engineers see the fit instead of parsing static tables.
+
+### 2. Cable cross-section calculator (electrical)
+- **Interface:** Drag-and-drop load nodes on an SVG route.
+- **Dynamics:** Cable color shifts green→red when voltage drop exceeds allowed %.
+- **Automation:** `jspdf` exports a formatted specification for signoff.
+
+### 3. Controller diagnostic panel (electromechanical)
+- **Scenario:** Motor control units built on STM32/Arduino.
+- **Solution:** Page with “Connect” button; browser requests COM port via Web Serial.
+- **Functionality:** Live telemetry charts (Chart.js/uPlot) plus editable PID fields that write back via serial.
+- **Advantage:** No vendor runtimes or driver installs—Chrome + USB cable is enough.
+
+## Tech stack to get started
+
+- **UI:** HTML + CSS (Tailwind/Bootstrap optional).
+- **Logic:** Vanilla JavaScript or TypeScript for typed physical values.
+- **Graphics:** SVG/Canvas for 2D schematics; Three.js for 3D nodes.
+- **Compute:** WebAssembly for heavy math from C++/Rust, but JS covers most use cases.
+
+## Conclusion
+
+Moving engineering calculations to the web isn’t a trend—it’s a distribution strategy. A calculator becomes a link you can embed into a corporate portal, share with a colleague, or open on a tablet beside the machine. That reduces human error and accelerates the engineering cycle.

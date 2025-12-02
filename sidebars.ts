@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'utilities/overview',
+        'utilities/engineering-web',
         'utilities/embed-calculators',
       ],
     },
