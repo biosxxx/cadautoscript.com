@@ -229,6 +229,7 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        perspective: 1000px;
       }
       .page-preview img {
         max-width: 100%;
@@ -293,6 +294,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        perspective: 1000px;
       }
       .tile-thumb img {
         width: 100%;
@@ -347,6 +349,40 @@
         text-decoration: none;
         background: #0f172a;
         color: #fff;
+      }
+      .preview-face {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        transform-style: preserve-3d;
+      }
+      .preview-plane {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.35s ease;
+      }
+      .preview-placeholder {
+        font-size: 0.75rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: #9aa2bf;
+      }
+      .preview-face.is-flipping {
+        animation: previewFlip 0.55s ease;
+      }
+      @keyframes previewFlip {
+        0% {
+          transform: rotateY(0deg);
+        }
+        50% {
+          transform: rotateY(90deg) scale(0.94);
+        }
+        100% {
+          transform: rotateY(0deg);
+        }
       }
       #status-message {
         color: #7a82a1;
@@ -430,6 +466,7 @@
       let pages = [];
       let dragSourceId = null;
       let currentView = 'list';
+      const pendingFlipIds = new Set();
 
       const viewStrategies = {
         list: createListCard,
@@ -452,6 +489,22 @@
         });
       });
       setView(currentView);
+
+      function queuePreviewFlip(id) {
+        pendingFlipIds.add(id);
+      }
+
+      function runPendingPreviewFlips() {
+        pendingFlipIds.forEach((id) => {
+          document.querySelectorAll(`[data-preview="${id}"]`).forEach((node) => {
+            node.classList.add('is-flipping');
+            setTimeout(() => {
+              node.classList.remove('is-flipping');
+            }, 500);
+          });
+        });
+        pendingFlipIds.clear();
+      }
 
       chooseButton.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', (event) => {
@@ -537,6 +590,20 @@
           hookCardEvents(card, page.id);
           pageListEl.appendChild(card);
         });
+        runPendingPreviewFlips();
+      }
+
+      function buildPreviewMarkup(page, index, preview) {
+        const content = preview
+          ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
+          : '<div class="preview-placeholder">Rendering...</div>';
+        return `
+          <div class="preview-face" data-preview="${page.id}">
+            <div class="preview-plane" style="transform: rotate(${page.rotation}deg);">
+              ${content}
+            </div>
+          </div>
+        `;
       }
 
       function createListCard(page, index, doc, preview) {
@@ -548,11 +615,7 @@
           <div class="page-card__meta">
             <div class="page-card__details">
               <div class="page-preview">
-                ${
-                  preview
-                    ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
-                    : '<span class="chip">Rendering…</span>'
-                }
+                ${buildPreviewMarkup(page, index, preview)}
               </div>
               <div>
                 <p class="chip">Page ${index + 1}</p>
@@ -576,11 +639,10 @@
         card.className = 'tile-card';
         card.draggable = true;
         card.dataset.pageId = page.id;
-        const previewMarkup = preview
-          ? `<img src="${preview}" alt="Page preview ${index + 1}" />`
-          : '<span class="chip">Rendering…</span>';
         card.innerHTML = `
-          <div class="tile-thumb">${previewMarkup}</div>
+          <div class="tile-thumb">
+            ${buildPreviewMarkup(page, index, preview)}
+          </div>
           <div class="tile-meta">
             <p class="tile-name">${doc.name}</p>
             <p class="tile-sub">#${index + 1} · Original page ${page.pageIndex + 1}</p>
@@ -622,11 +684,13 @@
           if (action === 'rotate') {
             const page = pages.find((p) => p.id === pageId);
             page.rotation = (page.rotation + 90) % 360;
+            queuePreviewFlip(pageId);
             renderPages();
           }
           if (action === 'remove') {
             pages = pages.filter((p) => p.id !== pageId);
             pagePreviews.delete(pageId);
+            pendingFlipIds.delete(pageId);
             renderPages();
           }
         });
@@ -649,7 +713,7 @@
       }
 
       function ingestFiles(fileList) {
-        statusEl.textContent = 'Loading files…';
+        statusEl.textContent = 'Loading files...';
         const jobs = Array.from(fileList).map((file) => loadPdf(file));
         Promise.all(jobs)
           .then(() => {
