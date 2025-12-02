@@ -68,7 +68,7 @@ const config: Config = {
           label: 'Docs',
         },
         {to: '/blog', label: 'Updates', position: 'left'},
-        {href: '/utilities/pipe-cutter/', label: 'Launch Pipe Cutter', position: 'right'},
+        {type: 'custom-search', position: 'right'},
         {
           href: 'https://github.com/biosxxx/cadautoscript.com',
           label: 'GitHub',
