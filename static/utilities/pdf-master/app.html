@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Master</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = {darkMode: 'class'};</script>
+    <link rel="stylesheet" href="../../vendor/tailwind.min.css" />
     <script src="../../vendor/pdf-lib.min.js"></script>
     <script src="../../vendor/pdf.min.js"></script>
     <script>
@@ -315,11 +314,11 @@
         const buffer = await file.arrayBuffer();
         const byteArray = new Uint8Array(buffer);
         const docId = `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        const pdfDoc = await PDFDocument.load(byteArray);
+        const pdfDoc = await PDFDocument.load(buffer);
         const previewDoc = await pdfjsLib.getDocument({ data: byteArray }).promise;
         const pageCount = pdfDoc.getPageCount();
         const url = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));
-        documents.set(docId, { name: file.name, bytes: byteArray, url, pageCount });
+        documents.set(docId, { name: file.name, bytes: buffer, url, pageCount });
         for (let i = 0; i < pageCount; i += 1) {
           const thumbnail = await renderThumbnail(previewDoc, i);
           const pageEntry = {

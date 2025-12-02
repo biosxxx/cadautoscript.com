@@ -1,0 +1,24 @@
+:root {
+  --shell-bg: radial-gradient(circle at 15% 15%, rgba(33, 92, 255, 0.08), transparent 60%),
+    #f5f7ff;
+  --shell-border: rgba(15, 23, 42, 0.08);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--shell-bg);
+  color: #0f172a;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
