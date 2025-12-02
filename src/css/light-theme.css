@@ -1,0 +1,92 @@
+:root[data-theme='light'] {
+  --ifm-color-primary: #215cff;
+  --ifm-color-primary-dark: #1d4ee0;
+  --ifm-color-primary-darker: #173fb3;
+  --ifm-color-primary-darkest: #102b7d;
+  --ifm-color-primary-light: #4a7bff;
+  --ifm-color-primary-lighter: #7da0ff;
+  --ifm-color-primary-lightest: #c6d5ff;
+  --page-bg: radial-gradient(circle at 20% 20%, rgba(73, 123, 255, 0.15), transparent 55%),
+    #f5f7ff;
+  --card-border: rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] body {
+  background: var(--page-bg);
+  color: #0f172a;
+}
+
+html[data-theme='light'] .navbar,
+html[data-theme='light'] .footer {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] .navbar__item,
+html[data-theme='light'] .footer__item {
+  color: inherit;
+}
+
+html[data-theme='light'] .hero--primary {
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 32px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme='light'] .card {
+  border: 1px solid var(--card-border);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  color: #0f172a;
+}
+
+html[data-theme='light'] .utilityTable th,
+html[data-theme='light'] .utilityTable td {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] .utilityFrame {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme='light'] input,
+html[data-theme='light'] textarea,
+html[data-theme='light'] select {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  padding: 0.65rem 0.85rem;
+  color: #0f172a;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+html[data-theme='light'] input:focus,
+html[data-theme='light'] textarea:focus,
+html[data-theme='light'] select:focus {
+  outline: 2px solid rgba(33, 92, 255, 0.35);
+  border-color: rgba(33, 92, 255, 0.35);
+}
+
+html[data-theme='light'] .button.button--primary {
+  background: var(--ifm-color-primary);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(33, 92, 255, 0.35);
+}
+
+html[data-theme='light'] .button.button--secondary {
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] pre,
+html[data-theme='light'] code {
+  background: rgba(15, 23, 42, 0.05);
+}
