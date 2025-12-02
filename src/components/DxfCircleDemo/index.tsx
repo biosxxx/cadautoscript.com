@@ -4,11 +4,12 @@ import {generateCircleDxf} from './generateCircleDxf';
 
 const defaultSnippet = `// Update the diameter value and preview refreshes instantly
 const diameter = 80; // millimeters
-export default { diameter };
+const innerDiameter = 40; // optional inner diameter
+export default { diameter, innerDiameter };
 `;
 
-function extractDiameter(code: string): number {
-  const match = code.match(/diameter\s*=\s*([0-9]+(?:\.[0-9]+)?)/i);
+function extractValue(code: string, key: string): number {
+  const match = code.match(new RegExp(`${key}\\s*=\\s*([0-9]+(?:\\.[0-9]+)?)`, 'i'));
   if (!match) {
     return NaN;
   }
@@ -21,7 +22,7 @@ export function DxfCircleDemo(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
 
   const diameter = useMemo(() => {
-    const value = extractDiameter(snippet);
+    const value = extractValue(snippet, 'diameter');
     if (!Number.isFinite(value)) {
       setError('Add or update `const diameter = <value>;` in the snippet.');
       return 80;
@@ -34,7 +35,15 @@ export function DxfCircleDemo(): JSX.Element {
     return Math.min(value, 400);
   }, [snippet]);
 
-  const dxfContent = useMemo(() => generateCircleDxf(diameter), [diameter]);
+  const innerDiameter = useMemo(() => {
+    const raw = extractValue(snippet, 'innerDiameter');
+    if (!Number.isFinite(raw)) {
+      return 0;
+    }
+    return Math.max(0, Math.min(raw, diameter - 1));
+  }, [snippet, diameter]);
+
+  const dxfContent = useMemo(() => generateCircleDxf(diameter, innerDiameter), [diameter, innerDiameter]);
 
   const handleDownload = () => {
     const blob = new Blob([dxfContent], {type: 'application/dxf'});
@@ -86,7 +95,7 @@ export function DxfCircleDemo(): JSX.Element {
               <div style={{flex: 1}}>
                 <h3 style={{marginTop: 0}}>Edit the generator snippet</h3>
                 <p style={{marginBottom: '0.5rem', color: '#94a3b8', fontSize: 14}}>
-                  Change the diameter value and preview updates instantly.
+                  Change the outer diameter or add <code>innerDiameter</code> to create washer-style rings.
                 </p>
                 <textarea
                   value={snippet}
@@ -134,9 +143,18 @@ export function DxfCircleDemo(): JSX.Element {
                   gap: '1rem',
                 }}
               >
-                <CirclePreview diameter={diameter} />
+                <CirclePreview diameter={diameter} innerDiameter={innerDiameter} />
                 <p style={{fontSize: 14, color: '#94a3b8'}}>
-                  Current diameter: <strong>{diameter.toFixed(1)} mm</strong>
+                  Outer diameter: <strong>{diameter.toFixed(1)} mm</strong>
+                </p>
+                <p style={{fontSize: 14, color: '#94a3b8'}}>
+                  {innerDiameter > 0 ? (
+                    <>
+                      Inner diameter: <strong>{innerDiameter.toFixed(1)} mm</strong>
+                    </>
+                  ) : (
+                    'Inner diameter disabled'
+                  )}
                 </p>
               </div>
             </div>

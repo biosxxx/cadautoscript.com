@@ -2,9 +2,10 @@ import {useEffect, useRef} from 'react';
 
 type Props = {
   diameter: number;
+  innerDiameter?: number;
 };
 
-export function CirclePreview({diameter}: Props): JSX.Element {
+export function CirclePreview({diameter, innerDiameter = 0}: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -28,19 +29,28 @@ export function CirclePreview({diameter}: Props): JSX.Element {
 
     const padding = 24;
     const maxRadius = (size - padding * 2) / 2;
-    const radius = Math.max(4, Math.min(maxRadius, (diameter / 2) * 2));
+    const outerRadius = Math.max(4, Math.min(maxRadius, (diameter / 2) * 2));
+    const innerRadius = innerDiameter > 0 ? Math.max(2, Math.min(outerRadius - 4, (innerDiameter / 2) * 2)) : 0;
 
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
+    ctx.arc(size / 2, size / 2, outerRadius, 0, Math.PI * 2);
     ctx.stroke();
+
+    if (innerRadius > 0) {
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, innerRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     ctx.fillStyle = '#e2e8f0';
     ctx.font = '14px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`Ø ${diameter.toFixed(1)} mm`, size / 2, size / 2 + radius + 20);
-  }, [diameter]);
+    ctx.fillText(`Ø ${diameter.toFixed(1)} mm`, size / 2, size / 2 + outerRadius + 20);
+  }, [diameter, innerDiameter]);
 
   return (
     <canvas
