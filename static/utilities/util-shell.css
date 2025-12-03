@@ -181,6 +181,14 @@
   display: none;
 }
 
+.utility-reactions {
+  width: min(1440px, calc(100vw - 64px));
+  max-width: 1440px;
+  margin: 48px auto 32px;
+  display: flex;
+  justify-content: center;
+}
+
 .utility-stage.is-fullscreen {
   position: fixed;
   inset: 16px;
