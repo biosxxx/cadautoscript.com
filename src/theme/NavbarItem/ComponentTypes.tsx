@@ -3,5 +3,5 @@ import NavbarAuthNavbarItem from '@site/src/theme/NavbarItem/NavbarAuth';
 
 export default {
   ...ComponentTypes,
-  navbarAuth: NavbarAuthNavbarItem,
+  'custom-navbar-auth': NavbarAuthNavbarItem,
 };

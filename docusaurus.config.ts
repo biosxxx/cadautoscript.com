@@ -76,7 +76,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Updates', position: 'left'},
         {type: 'custom-search', position: 'right'},
-        {type: 'navbarAuth', position: 'right'},
+        {type: 'custom-navbar-auth', position: 'right'},
       ],
     },
     footer: {
