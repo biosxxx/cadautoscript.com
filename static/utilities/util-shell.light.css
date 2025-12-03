@@ -45,14 +45,14 @@
   background: radial-gradient(circle at 15% 15%, rgba(33, 92, 255, 0.08), transparent 60%);
 }
 
-:root[data-theme='light'] .utility-shell .utility-about {
+:root[data-theme='light'] .utility-shell .utility-info {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
 }
 
 :root[data-theme='light'] .utility-shell .utility-card p,
-:root[data-theme='light'] .utility-shell .utility-about p,
+:root[data-theme='light'] .utility-shell .utility-info p,
 :root[data-theme='light'] .utility-shell .utility-note {
   color: #4b4f65;
 }

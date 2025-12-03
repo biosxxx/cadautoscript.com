@@ -70,31 +70,6 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
         </header>
         <section className="utility-main">
           <div className="utility-stage">
-            <button className="utility-toggle" type="button" aria-expanded="false">
-              Show panel
-            </button>
-            <aside className="utility-about" data-collapsible>
-              <h2>About this tool</h2>
-              <p>{about}</p>
-              <div className="utility-tags">
-                {tags.map((tag) => (
-                  <span key={tag} className="utility-tag">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              {note ? <p className="utility-note">{note}</p> : null}
-              {features && features.length > 0 ? (
-                <div className="utility-card">
-                  <h2>Key actions</h2>
-                  <ul>
-                    {features.map((feature) => (
-                      <li key={feature}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </aside>
             <iframe
               className="tool-frame"
               src={iframeSrc}
@@ -103,6 +78,38 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               data-noBrokenLinkCheck
             ></iframe>
           </div>
+          <div className="utility-toolbar" role="toolbar">
+            <button className="utility-toggle" type="button" aria-expanded="true">
+              Hide info
+            </button>
+            <button className="utility-fullscreen" type="button" aria-pressed="false">
+              Full screen
+            </button>
+          </div>
+          <aside className="utility-info" data-collapsible>
+            <div className="utility-info__header">
+              <h2>About this tool</h2>
+              <p>{about}</p>
+            </div>
+            <div className="utility-tags">
+              {tags.map((tag) => (
+                <span key={tag} className="utility-tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+            {note ? <p className="utility-note">{note}</p> : null}
+            {features && features.length > 0 ? (
+              <div className="utility-card">
+                <h2>Key actions</h2>
+                <ul>
+                  {features.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </aside>
         </section>
       </main>
     </Layout>
