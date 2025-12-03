@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({path: './.env.local'});
+
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
@@ -13,6 +16,10 @@ const config: Config = {
   baseUrl: '/',
   organizationName: 'biosxxx',
   projectName: 'cadautoscript.com',
+  customFields: {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+  },
   onBrokenLinks: 'ignore',
   markdown: {
     hooks: {
