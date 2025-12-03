@@ -29,7 +29,7 @@ export const AuthModalProvider = ({children}: {children: ReactNode}) => {
       openLoginModal,
       closeLoginModal,
     }),
-    [isOpen, openLoginModal, closeLoginModal],
+    [isOpen],
   );
 
   return (

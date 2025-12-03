@@ -4,7 +4,13 @@ import {supabase} from '@site/src/lib/supabaseClient';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import styles from './NavbarAuth.module.css';
 
-const reportError = (message: string) => {
+const shouldSilence = (message?: string | null) =>
+  !message || message.toLowerCase().includes('auth session missing');
+
+const reportError = (message?: string) => {
+  if (!message || shouldSilence(message)) {
+    return;
+  }
   if (typeof console !== 'undefined') {
     console.error(`[Supabase Auth] ${message}`);
   }
@@ -13,28 +19,38 @@ const reportError = (message: string) => {
 export default function NavbarAuth(): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const {openLoginModal, closeLoginModal} = useAuthModal();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     let isMounted = true;
-    supabase.auth
-      .getUser()
-      .then(({data, error: getUserError}) => {
+
+    const resolveSession = async () => {
+      try {
+        const {data, error} = await supabase.auth.getSession();
         if (!isMounted) {
           return;
         }
-        if (getUserError) {
-          reportError(getUserError.message);
+
+        if (error && !shouldSilence(error.message)) {
+          reportError(error.message);
         }
-        setUser(data?.user ?? null);
-      })
-      .catch((err) => {
-        if (isMounted) {
-          const message = err instanceof Error ? err.message : 'Unable to fetch user.';
-          reportError(message);
+        setUser(data?.session?.user ?? null);
+      } catch (err) {
+        if (!isMounted) {
+          return;
         }
-      });
+        const message = err instanceof Error ? err.message : 'Unable to fetch auth session.';
+        reportError(message);
+      }
+    };
+
+    resolveSession();
 
     const {
       data: {subscription},
@@ -48,7 +64,7 @@ export default function NavbarAuth(): JSX.Element {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [closeLoginModal]);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -66,7 +82,7 @@ export default function NavbarAuth(): JSX.Element {
 
   const handleSignOut = async () => {
     const {error: signOutError} = await supabase.auth.signOut();
-    if (signOutError) {
+    if (signOutError && !shouldSilence(signOutError.message)) {
       reportError(signOutError.message);
     }
   };
@@ -74,6 +90,16 @@ export default function NavbarAuth(): JSX.Element {
   const initials = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
   const avatarUrl = (user?.user_metadata?.avatar_url as string | undefined) ?? undefined;
   const email = user?.email ?? (user?.user_metadata?.email as string | undefined);
+
+  const renderSignedOut = () => (
+    <button type="button" className={styles.signInButton} onClick={openLoginModal}>
+      Sign In
+    </button>
+  );
+
+  if (!isMounted) {
+    return <div className={styles.container}>{renderSignedOut()}</div>;
+  }
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -97,9 +123,7 @@ export default function NavbarAuth(): JSX.Element {
           )}
         </>
       ) : (
-        <button type="button" className={styles.signInButton} onClick={openLoginModal}>
-          Sign In
-        </button>
+        renderSignedOut()
       )}
     </div>
   );
