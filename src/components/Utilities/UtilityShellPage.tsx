@@ -1,10 +1,8 @@
 import React from 'react';
-import clsx from 'clsx';
 import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
-import {useColorMode} from '@docusaurus/theme-common';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
 type HeroLink = {label: string; href: string; variant?: 'primary' | 'ghost'; external?: boolean};
@@ -34,10 +32,6 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
   const shellScriptSrc = useBaseUrl('/utilities/util-shell.js');
 
   const heroLinks = defaultHeroLinks;
-  const {colorMode} = useColorMode();
-  const shellClassName = clsx('utility-shell', {
-    'light-theme': colorMode !== 'dark',
-  });
 
   return (
     <Layout title={title} description={description}>
@@ -51,7 +45,7 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
           <script defer src={shellScriptSrc}></script>
         )}
       </Head>
-      <main className={shellClassName}>
+      <main className="utility-shell">
         <header className="utility-header">
           <div>
             <Link className="utility-logo" to="/">
