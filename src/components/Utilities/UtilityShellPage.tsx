@@ -3,6 +3,7 @@ import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
+import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
 type HeroLink = {label: string; href: string; variant?: 'primary' | 'ghost'; external?: boolean};
@@ -32,6 +33,7 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
   const shellScriptSrc = useBaseUrl('/utilities/util-shell.js');
 
   const heroLinks = defaultHeroLinks;
+  const reactionsSlug = config.reactionSlug ?? `tool-${slug}`;
 
   return (
     <Layout title={title} description={description}>
@@ -86,11 +88,8 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               Full screen
             </button>
           </div>
-          <div className="utility-fullscreen-exit-zone">
-            <div className="utility-fullscreen-indicator" aria-hidden="true"></div>
-            <button type="button" className="utility-fullscreen-exit-button">
-              Exit full screen
-            </button>
+          <div className="utility-reactions">
+            <ReactionsBar slug={reactionsSlug} />
           </div>
           <aside className="utility-info" data-collapsible>
             <div className="utility-info__header">
@@ -116,6 +115,12 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               </div>
             ) : null}
           </aside>
+          <div className="utility-fullscreen-exit-zone">
+            <div className="utility-fullscreen-indicator" aria-hidden="true"></div>
+            <button type="button" className="utility-fullscreen-exit-button">
+              Exit full screen
+            </button>
+          </div>
         </section>
       </main>
     </Layout>

@@ -20,6 +20,7 @@ export type UtilityPageConfig = {
   note?: ReactNode;
   features?: string[];
   scriptType?: 'module' | 'defer';
+  reactionSlug?: string;
 };
 
 export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
