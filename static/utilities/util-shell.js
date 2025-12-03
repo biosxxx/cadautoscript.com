@@ -1,8 +1,11 @@
+const containers = document.querySelectorAll(".utility-shell");
 const stages = document.querySelectorAll(".utility-stage");
 
 const syncFullscreenState = () => {
   const hasActive = document.querySelector(".utility-stage.is-fullscreen");
-  document.body.classList.toggle("utility-shell--fullscreen", Boolean(hasActive));
+  containers.forEach((container) => {
+    container.classList.toggle("utility-shell--fullscreen", Boolean(hasActive));
+  });
 };
 
 stages.forEach((stage) => {

@@ -2,7 +2,7 @@
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body.utility-shell {
+.utility-shell {
   margin: 0;
   min-height: 100vh;
   background: radial-gradient(circle at 10% -10%, rgba(92, 149, 255, 0.1), transparent),
@@ -214,7 +214,7 @@ body.utility-shell {
   width: 100%;
 }
 
-body.utility-shell.utility-shell--fullscreen {
+.utility-shell.utility-shell--fullscreen {
   overflow: hidden;
 }
 
