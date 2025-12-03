@@ -1,10 +1,7 @@
 import ComponentTypes from '@theme-original/NavbarItem/ComponentTypes';
-import type {ComponentTypesObject} from '@theme/NavbarItem/ComponentTypes';
-import CustomSearchNavbarItem from './CustomSearch';
+import NavbarAuthNavbarItem from '@site/src/theme/NavbarItem/NavbarAuth';
 
-const customComponentTypes: ComponentTypesObject = {
+export default {
   ...ComponentTypes,
-  'custom-search': CustomSearchNavbarItem,
+  navbarAuth: NavbarAuthNavbarItem,
 };
-
-export default customComponentTypes;

@@ -1,0 +1,104 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.signInButton {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: var(--ifm-color-primary);
+  color: var(--ifm-button-color);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.signInButton:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.signInButton:active {
+  transform: translateY(1px);
+}
+
+.avatarButton {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  color: var(--ifm-font-color-base);
+  transition: border-color 0.2s ease;
+}
+
+.avatarButton:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.avatarImage,
+.placeholderAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--ifm-color-emphasis-200);
+}
+
+.placeholderAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  min-width: 220px;
+  padding: 0.5rem;
+  z-index: 1500;
+}
+
+.email {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.dropdownButton {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ifm-font-color-base);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dropdownButton:hover {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-primary);
+}
+
+.error {
+  font-size: 0.75rem;
+  color: var(--ifm-color-danger);
+  margin-left: 0.5rem;
+}

@@ -76,11 +76,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Updates', position: 'left'},
         {type: 'custom-search', position: 'right'},
-        {
-          href: 'https://github.com/biosxxx/cadautoscript.com',
-          label: 'GitHub',
-          position: 'right',
-        },
+        {type: 'navbarAuth', position: 'right'},
       ],
     },
     footer: {
