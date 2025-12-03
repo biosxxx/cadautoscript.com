@@ -86,6 +86,12 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               Full screen
             </button>
           </div>
+          <div className="utility-fullscreen-exit-zone">
+            <div className="utility-fullscreen-indicator" aria-hidden="true"></div>
+            <button type="button" className="utility-fullscreen-exit-button">
+              Exit full screen
+            </button>
+          </div>
           <aside className="utility-info" data-collapsible>
             <div className="utility-info__header">
               <h2>About this tool</h2>

@@ -12,6 +12,7 @@ containers.forEach((container) => {
   const infoPanel = container.querySelector(".utility-info");
   const toggle = container.querySelector(".utility-toggle");
   const fullscreenBtn = container.querySelector(".utility-fullscreen");
+  const exitZone = container.querySelector(".utility-fullscreen-exit-zone");
   if (!stage) {
     return;
   }
@@ -41,7 +42,7 @@ containers.forEach((container) => {
       syncFullscreenState();
     };
 
-    fullscreenBtn.addEventListener("click", () => {
+    const handleExit = () => {
       const active = stage.classList.contains("is-fullscreen");
       if (active) {
         exitFullscreen(stage, fullscreenBtn);
@@ -58,6 +59,15 @@ containers.forEach((container) => {
       fullscreenBtn.textContent = "Exit full screen";
       fullscreenBtn.setAttribute("aria-pressed", "true");
       syncFullscreenState();
-    });
+    };
+
+    fullscreenBtn.addEventListener("click", handleExit);
+    if (exitZone) {
+      exitZone.addEventListener("click", (event) => {
+        if (event.target.closest(".utility-fullscreen-exit-button")) {
+          handleExit();
+        }
+      });
+    }
   }
 });
