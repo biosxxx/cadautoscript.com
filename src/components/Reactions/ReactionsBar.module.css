@@ -1,0 +1,56 @@
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  margin-right: 0.25rem;
+}
+
+.reactionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  padding: 0.35rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+}
+
+.reactionButton:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.reactionButton:active {
+  transform: translateY(1px);
+}
+
+.reactionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.active {
+  border-color: var(--ifm-color-primary);
+  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
+  color: var(--ifm-color-primary);
+}
+
+.emoji {
+  font-size: 1.15rem;
+}
+
+.count {
+  font-size: 0.9rem;
+  min-width: 1.3rem;
+  text-align: center;
+}

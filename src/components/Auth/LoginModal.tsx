@@ -1,13 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import type {Provider} from '@supabase/supabase-js';
 import {supabase} from '@site/src/lib/supabaseClient';
+import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import styles from './LoginModal.module.css';
-
-type Props = {
-  open: boolean;
-  onClose: () => void;
-  onError?: (message: string) => void;
-};
 
 const providers: Array<{provider: Provider; label: string; className: string; Icon: () => JSX.Element}> = [
   {
@@ -50,31 +45,37 @@ const providers: Array<{provider: Provider; label: string; className: string; Ic
   },
 ];
 
-async function handleSignIn(provider: Provider, onClose: () => void, onError?: (message: string) => void) {
-  try {
-    const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
-    const {error} = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {redirectTo},
-    });
-    if (error) {
-      onError?.(error.message);
-      return;
-    }
-    onClose();
-  } catch (error) {
-    onError?.(error instanceof Error ? error.message : 'Unable to sign in. Please try again.');
-  }
-}
+export default function LoginModal(): JSX.Element | null {
+  const {isOpen, closeLoginModal} = useAuthModal();
+  const [error, setError] = useState<string | null>(null);
 
-export function LoginModal({open, onClose, onError}: Props): JSX.Element | null {
-  if (!open) {
+  if (!isOpen) {
     return null;
   }
 
+  const handleSignIn = async (provider: Provider) => {
+    setError(null);
+    try {
+      const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
+      const {error: signInError} = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {redirectTo},
+      });
+      if (signInError) {
+        throw signInError;
+      }
+      closeLoginModal();
+    } catch (error_) {
+      const message =
+        error_ instanceof Error ? error_.message : 'Unable to sign in. Please try again.';
+      console.error('[Supabase Auth] Unable to sign in', message);
+      setError(message);
+    }
+  };
+
   const onBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
-      onClose();
+      closeLoginModal();
     }
   };
 
@@ -89,19 +90,18 @@ export function LoginModal({open, onClose, onError}: Props): JSX.Element | null 
               key={provider}
               type="button"
               className={`${styles.providerButton} ${className}`}
-              onClick={() => handleSignIn(provider, onClose, onError)}
+              onClick={() => handleSignIn(provider)}
             >
               <Icon />
               {label}
             </button>
           ))}
-          <button type="button" className={styles.closeButton} onClick={onClose}>
+          <button type="button" className={styles.closeButton} onClick={closeLoginModal}>
             Cancel
           </button>
+          {error ? <p className={styles.error}>{error}</p> : null}
         </div>
       </div>
     </div>
   );
 }
-
-export default LoginModal;

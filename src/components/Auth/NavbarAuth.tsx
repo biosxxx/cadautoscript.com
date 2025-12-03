@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import type {User} from '@supabase/supabase-js';
 import {supabase} from '@site/src/lib/supabaseClient';
-import LoginModal from './LoginModal';
+import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import styles from './NavbarAuth.module.css';
 
 const reportError = (message: string) => {
@@ -12,8 +12,8 @@ const reportError = (message: string) => {
 
 export default function NavbarAuth(): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const {openLoginModal, closeLoginModal} = useAuthModal();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function NavbarAuth(): JSX.Element {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setMenuOpen(false);
-      setModalOpen(false);
+      closeLoginModal();
     });
 
     return () => {
@@ -97,11 +97,10 @@ export default function NavbarAuth(): JSX.Element {
           )}
         </>
       ) : (
-        <button type="button" className={styles.signInButton} onClick={() => setModalOpen(true)}>
+        <button type="button" className={styles.signInButton} onClick={openLoginModal}>
           Sign In
         </button>
       )}
-      <LoginModal open={modalOpen} onClose={() => setModalOpen(false)} onError={(message) => reportError(message)} />
     </div>
   );
 }
