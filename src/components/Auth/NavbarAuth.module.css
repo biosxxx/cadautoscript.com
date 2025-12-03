@@ -96,9 +96,3 @@
   background: var(--ifm-color-emphasis-100);
   color: var(--ifm-color-primary);
 }
-
-.error {
-  font-size: 0.75rem;
-  color: var(--ifm-color-danger);
-  margin-left: 0.5rem;
-}

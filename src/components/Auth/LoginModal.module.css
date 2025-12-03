@@ -1,11 +1,14 @@
 .backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(10, 11, 13, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: var(--ifm-z-index-overlay, 2000);
   padding: 1.5rem;
 }
 

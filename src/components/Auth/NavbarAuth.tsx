@@ -4,11 +4,16 @@ import {supabase} from '@site/src/lib/supabaseClient';
 import LoginModal from './LoginModal';
 import styles from './NavbarAuth.module.css';
 
+const reportError = (message: string) => {
+  if (typeof console !== 'undefined') {
+    console.error(`[Supabase Auth] ${message}`);
+  }
+};
+
 export default function NavbarAuth(): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -20,13 +25,14 @@ export default function NavbarAuth(): JSX.Element {
           return;
         }
         if (getUserError) {
-          setError(getUserError.message);
+          reportError(getUserError.message);
         }
         setUser(data?.user ?? null);
       })
       .catch((err) => {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Unable to fetch user.');
+          const message = err instanceof Error ? err.message : 'Unable to fetch user.';
+          reportError(message);
         }
       });
 
@@ -59,10 +65,9 @@ export default function NavbarAuth(): JSX.Element {
   }, [menuOpen]);
 
   const handleSignOut = async () => {
-    setError(null);
     const {error: signOutError} = await supabase.auth.signOut();
     if (signOutError) {
-      setError(signOutError.message);
+      reportError(signOutError.message);
     }
   };
 
@@ -96,8 +101,7 @@ export default function NavbarAuth(): JSX.Element {
           Sign In
         </button>
       )}
-      <LoginModal open={modalOpen} onClose={() => setModalOpen(false)} onError={(message) => setError(message)} />
-      {error ? <span className={styles.error}>{error}</span> : null}
+      <LoginModal open={modalOpen} onClose={() => setModalOpen(false)} onError={(message) => reportError(message)} />
     </div>
   );
 }
