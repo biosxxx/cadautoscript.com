@@ -195,8 +195,17 @@
 }
 
 :global(.custom-emoji) {
+  width: 64px !important;
+  height: 64px !important;
   vertical-align: middle;
   display: inline-block;
+  object-fit: contain;
+  margin: 0 2px;
+  transition: transform 0.2s ease;
+}
+
+:global(.custom-emoji:hover) {
+  transform: scale(1.1);
 }
 
 .richInput {
