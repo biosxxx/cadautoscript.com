@@ -178,6 +178,9 @@
 .value {
   margin: 0;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .inlineNotice {
