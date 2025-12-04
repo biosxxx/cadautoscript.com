@@ -1,4 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
+import clsx from 'clsx';
 import {useHistory} from '@docusaurus/router';
 import type {User} from '@supabase/supabase-js';
 import Layout from '@theme/Layout';
