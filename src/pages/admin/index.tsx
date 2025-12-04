@@ -5,12 +5,14 @@ import Layout from '@theme/Layout';
 import {supabase} from '@site/src/lib/supabaseClient';
 import styles from './index.module.css';
 
+type RoleValue = 'user' | 'author' | 'admin';
+
 type ProfileRow = {
   id: string;
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
-  role: string | null;
+  role: RoleValue | null;
   created_at: string | null;
   email: string | null;
   last_seen_at?: string | null;
@@ -200,7 +202,7 @@ export default function AdminPage(): JSX.Element {
     return date.toLocaleString();
   };
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  const handleRoleChange = async (userId: string, newRole: RoleValue) => {
     setRoleUpdating(userId);
     setToast(null);
     const {error: roleError} = await supabase
@@ -308,7 +310,7 @@ export default function AdminPage(): JSX.Element {
                           className={styles.roleSelect}
                         >
                           <option value="user">user</option>
-                          <option value="editor">editor</option>
+                          <option value="author">author</option>
                           <option value="admin">admin</option>
                         </select>
                       </td>

@@ -12,7 +12,7 @@ type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
-  role: string | null;
+  role: 'user' | 'author' | 'admin' | null;
 };
 
 const shouldSilence = (message?: string | null) =>
@@ -293,14 +293,14 @@ export default function ProfilePage(): JSX.Element {
     if (value === 'admin') {
       return <span className={clsx(styles.badge, styles.badgeAdmin)}>🛡️ Admin</span>;
     }
-    if (value === 'editor') {
-      return <span className={clsx(styles.badge, styles.badgeEditor)}>✍️ Editor</span>;
+    if (value === 'author') {
+      return <span className={clsx(styles.badge, styles.badgeAuthor)}>✍️ Author</span>;
     }
     return <span className={clsx(styles.badge, styles.badgeUser)}>👤 User</span>;
   };
 
   const isAdmin = profile?.role === 'admin';
-  const isEditor = profile?.role === 'editor' || isAdmin;
+  const isAuthor = profile?.role === 'author' || isAdmin;
 
   return (
     <Layout title="Profile" description="Manage your CAD AutoScript profile.">
@@ -322,7 +322,7 @@ export default function ProfilePage(): JSX.Element {
                   <span className={styles.tileLabel}>Admin Dashboard</span>
                 </a>
               ) : null}
-              {isEditor ? (
+              {isAuthor ? (
                 <button type="button" className={styles.tile} disabled>
                   <span className={styles.tileIcon}>✍️</span>
                   <span className={styles.tileLabel}>Write New Post</span>
