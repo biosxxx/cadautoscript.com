@@ -12,6 +12,7 @@ type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  role: string | null;
 };
 
 const shouldSilence = (message?: string | null) =>
@@ -33,6 +34,7 @@ export default function ProfilePage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [promptedLogin, setPromptedLogin] = useState(false);
+  const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(false);
   const {openLoginModal} = useAuthModal();
 
   const fallbackName = useMemo(
@@ -116,7 +118,7 @@ export default function ProfilePage(): JSX.Element {
     const fetchProfile = async () => {
       const {data, error: profileError} = await supabase
         .from('profiles')
-        .select('id, username, full_name, avatar_url, bio')
+        .select('id, username, full_name, avatar_url, bio, role')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -226,7 +228,7 @@ export default function ProfilePage(): JSX.Element {
         bio: bio || null,
         avatar_url: avatarUrl || null,
       })
-      .select('id, username, full_name, avatar_url, bio')
+      .select('id, username, full_name, avatar_url, bio, role')
       .single();
 
     if (upsertError) {
@@ -286,9 +288,55 @@ export default function ProfilePage(): JSX.Element {
 
   const avatarInitial = (displayName || 'U').charAt(0).toUpperCase();
 
+  const roleBadge = (role?: string | null) => {
+    const value = role ?? 'user';
+    if (value === 'admin') {
+      return <span className={clsx(styles.badge, styles.badgeAdmin)}>🛡️ Admin</span>;
+    }
+    if (value === 'editor') {
+      return <span className={clsx(styles.badge, styles.badgeEditor)}>✍️ Editor</span>;
+    }
+    return <span className={clsx(styles.badge, styles.badgeUser)}>👤 User</span>;
+  };
+
+  const isAdmin = profile?.role === 'admin';
+  const isEditor = profile?.role === 'editor' || isAdmin;
+
   return (
     <Layout title="Profile" description="Manage your CAD AutoScript profile.">
       <main className={styles.main}>
+        <div className={styles.workspaceWrapper}>
+          <button
+            type="button"
+            className={clsx(styles.workspaceToggle, {[styles.workspaceOpen]: isWorkspaceOpen})}
+            onClick={() => setIsWorkspaceOpen((open) => !open)}
+          >
+            <span>{isWorkspaceOpen ? 'Close Control Center' : 'Open Workspace'}</span>
+            <span className={styles.chevron}>{isWorkspaceOpen ? '⌃' : '⌄'}</span>
+          </button>
+          <div className={clsx(styles.workspaceCurtain, {[styles.workspaceCurtainOpen]: isWorkspaceOpen})}>
+            <div className={styles.workspaceGrid}>
+              {isAdmin ? (
+                <a className={styles.tile} href="/admin">
+                  <span className={styles.tileIcon}>🛡️</span>
+                  <span className={styles.tileLabel}>Admin Dashboard</span>
+                </a>
+              ) : null}
+              {isEditor ? (
+                <button type="button" className={styles.tile} disabled>
+                  <span className={styles.tileIcon}>✍️</span>
+                  <span className={styles.tileLabel}>Write New Post</span>
+                </button>
+              ) : (
+                <button type="button" className={clsx(styles.tile, styles.tileDisabled)} disabled>
+                  <span className={styles.tileIcon}>✍️</span>
+                  <span className={styles.tileLabel}>Write New Post</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <section className={styles.panel}>
           {authChecked && !user ? (
             renderUnauthed()
@@ -305,7 +353,9 @@ export default function ProfilePage(): JSX.Element {
                   </div>
                   <div>
                     <p className={styles.eyebrow}>Profile</p>
-                    <h1 className={styles.title}>{displayName}</h1>
+                    <h1 className={styles.title}>
+                      {displayName} {roleBadge(profile?.role)}
+                    </h1>
                     {displayUsername ? (
                       <p className={styles.subtle}>@{displayUsername}</p>
                     ) : (

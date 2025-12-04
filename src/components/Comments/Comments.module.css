@@ -124,6 +124,11 @@
   gap: 0.5rem;
 }
 
+.inputStack {
+  display: grid;
+  gap: 0.4rem;
+}
+
 .form textarea {
   width: 100%;
   border-radius: 12px;
@@ -133,8 +138,10 @@
   color: inherit;
 }
 
-.form textarea:focus {
-  outline: 2px solid rgba(100, 255, 218, 0.45);
+.formFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .actions {
@@ -150,6 +157,68 @@
 
 .link {
   color: var(--ifm-color-primary);
+}
+
+.pickerWrapper {
+  position: relative;
+}
+
+.pickerButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.pickerButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pickerPopover {
+  position: absolute;
+  left: 0;
+  bottom: 110%;
+  z-index: 30;
+  width: 280px;
+  background: rgba(12, 16, 28, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+:global(.custom-emoji) {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.richInput {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.8rem 0.9rem;
+  color: inherit;
+  outline: none;
+  line-height: 1.5;
+}
+
+.richInput:focus {
+  outline: 2px solid rgba(100, 255, 218, 0.45);
+}
+
+.richInput:empty:before {
+  content: attr(data-placeholder);
+  color: #9aa5c8;
+  pointer-events: none;
 }
 
 @media (max-width: 600px) {

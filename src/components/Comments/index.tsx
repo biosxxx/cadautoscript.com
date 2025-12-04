@@ -1,8 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Link from '@docusaurus/Link';
 import type {User} from '@supabase/supabase-js';
 import {supabase} from '@site/src/lib/supabaseClient';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
+import RichCommentInput, {type RichCommentInputHandle} from './RichCommentInput';
+import EmojiPickerBtn from './EmojiPickerBtn';
 import styles from './Comments.module.css';
 
 type Props = {
@@ -39,7 +41,8 @@ export default function Comments({slug}: Props): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [content, setContent] = useState('');
+  const [editorHtml, setEditorHtml] = useState('');
+  const editorRef = useRef<RichCommentInputHandle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const {openLoginModal} = useAuthModal();
 
@@ -123,8 +126,10 @@ export default function Comments({slug}: Props): JSX.Element {
       return;
     }
 
-    const trimmed = content.trim();
-    if (!trimmed) {
+    const html = editorRef.current?.getHtml() ?? editorHtml ?? '';
+    const text = (editorRef.current?.getHtml() ?? editorHtml ?? '').replace(/<[^>]+>/g, '');
+    const hasImage = /<img/i.test(html);
+    if (!hasImage && (!text || text.trim().length === 0)) {
       setError('Please enter a comment before sending.');
       return;
     }
@@ -135,7 +140,7 @@ export default function Comments({slug}: Props): JSX.Element {
     const {error: insertError} = await supabase.from('comments').insert({
       user_id: user.id,
       post_slug: slug,
-      content: trimmed,
+      content: html,
     });
 
     if (insertError) {
@@ -145,9 +150,26 @@ export default function Comments({slug}: Props): JSX.Element {
       return;
     }
 
-    setContent('');
+    editorRef.current?.clear();
+    setEditorHtml('');
     setSubmitting(false);
     void fetchComments();
+  };
+  const handleEmojiSelect = (emojiCode: string) => {
+    if (!editorRef.current) {
+      return;
+    }
+    if (/^<img/i.test(emojiCode)) {
+      const srcMatch = emojiCode.match(/src="([^"]+)"/i);
+      const altMatch = emojiCode.match(/alt="([^"]*)"/i);
+      const src = srcMatch?.[1];
+      const alt = altMatch?.[1];
+      if (src) {
+        editorRef.current.insertCustomEmoji(src, alt);
+      }
+    } else {
+      editorRef.current.insertText(emojiCode);
+    }
   };
 
   const avatarFallback = (value: Profile | null) =>
@@ -200,7 +222,10 @@ export default function Comments({slug}: Props): JSX.Element {
                   <span className={styles.dot}>•</span>
                   <time dateTime={comment.created_at}>{formatTimestamp(comment.created_at)}</time>
                 </div>
-                <p className={styles.content}>{comment.content}</p>
+                <p
+                  className={styles.content}
+                  dangerouslySetInnerHTML={{__html: comment.content}}
+                />
               </div>
             </li>
           ))}
@@ -210,14 +235,26 @@ export default function Comments({slug}: Props): JSX.Element {
       <div className={styles.composer}>
         {user ? (
           <form className={styles.form} onSubmit={handleSubmit}>
-            <textarea
-              name="comment"
-              rows={3}
-              placeholder="Share your feedback or ask a question..."
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              disabled={submitting}
-            />
+            <div className={styles.inputStack}>
+              <RichCommentInput
+                ref={editorRef}
+                placeholder="Share your feedback or ask a question..."
+                disabled={submitting}
+                onChange={(html) => setEditorHtml(html)}
+              />
+              <div className={styles.formFooter}>
+                <EmojiPickerBtn onEmojiSelect={handleEmojiSelect} />
+                <div className={styles.actions}>
+                  <button
+                    type="submit"
+                    className="button button--primary"
+                    disabled={submitting || !hasProfileName}
+                  >
+                    {submitting ? 'Sending...' : 'Send'}
+                  </button>
+                </div>
+              </div>
+            </div>
             {notice ? (
               <p className={styles.notice}>
                 {notice}{' '}
@@ -226,15 +263,6 @@ export default function Comments({slug}: Props): JSX.Element {
                 </Link>
               </p>
             ) : null}
-            <div className={styles.actions}>
-              <button
-                type="submit"
-                className="button button--primary"
-                disabled={submitting || !hasProfileName}
-              >
-                {submitting ? 'Sending...' : 'Send'}
-              </button>
-            </div>
           </form>
         ) : (
           <button type="button" className="button button--secondary" onClick={openLoginModal}>

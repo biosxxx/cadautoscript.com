@@ -26,6 +26,7 @@
     "@supabase/supabase-js": "^2.86.0",
     "clsx": "^2.0.0",
     "dotenv": "^17.2.3",
+    "emoji-picker-react": "^4.16.1",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
