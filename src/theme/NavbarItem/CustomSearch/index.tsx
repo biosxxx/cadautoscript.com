@@ -84,7 +84,7 @@ export default function CustomSearchNavbarItem({className}: Props): JSX.Element 
                     href={record.href}
                     className={styles.resultItem}
                     onClick={() => setIsOpen(false)}
-                    data-noBrokenLinkCheck
+                    data-nobrokenlinkcheck
                   >
                     <span>
                       <strong>{record.title}</strong>

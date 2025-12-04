@@ -93,13 +93,13 @@ const config: Config = {
           title: 'Utilities',
           items: [
             {
-              html: '<a class="footer__link-item" href="/utilities/pipe-cutter/" data-noBrokenLinkCheck>Pipe Cutter</a>',
+              html: '<a class="footer__link-item" href="/utilities/pipe-cutter/" data-nobrokenlinkcheck>Pipe Cutter</a>',
             },
             {
-              html: '<a class="footer__link-item" href="/utilities/cylindrical-shell-rolling/" data-noBrokenLinkCheck>Shell Rolling</a>',
+              html: '<a class="footer__link-item" href="/utilities/cylindrical-shell-rolling/" data-nobrokenlinkcheck>Shell Rolling</a>',
             },
             {
-              html: '<a class="footer__link-item" href="/utilities/interactive-thread/" data-noBrokenLinkCheck>Thread Atlas</a>',
+              html: '<a class="footer__link-item" href="/utilities/interactive-thread/" data-nobrokenlinkcheck>Thread Atlas</a>',
             },
           ],
         },

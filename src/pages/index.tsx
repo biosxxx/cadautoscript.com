@@ -26,7 +26,7 @@ function UtilityCard({utility}: {utility: (typeof utilities)[number]}) {
         ))}
       </ul>
       <div className={styles.utilityFooter}>
-        <a className="button button--primary" href={utility.href} data-noBrokenLinkCheck>
+        <a className="button button--primary" href={utility.href} data-nobrokenlinkcheck>
           Open utility
         </a>
       </div>
@@ -97,7 +97,7 @@ export default function Home(): ReactNode {
             <Link className="button button--primary" href="/docs/utilities/embed-calculators">
               Embed utilities
             </Link>
-            <a className="button button--secondary" href="/utilities/pdf-number-extractor/" data-noBrokenLinkCheck>
+            <a className="button button--secondary" href="/utilities/pdf-number-extractor/" data-nobrokenlinkcheck>
               Launch Doc Parser
             </a>
           </div>
