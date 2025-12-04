@@ -94,6 +94,16 @@ export const utilities: UtilityDescriptor[] = [
     ],
     href: '/utilities/pdf-master/',
   },
+  {
+    id: 'pdf-batch-signer',
+    name: 'PDF Batch Signer',
+    description:
+      'Stamp a reusable signature across every page in multiple PDFs with one placement preview.',
+    tech: 'PDF-lib + JSZip',
+    standards: 'Local signing',
+    features: ['Draw or upload signature', 'Drag placement once', 'ZIP export'],
+    href: '/utilities/pdf-batch-signer/',
+  },
 ];
 
 

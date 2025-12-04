@@ -6,6 +6,7 @@ export type UtilityPageSlug =
   | 'metal-bending'
   | 'interactive-thread'
   | 'pdf-number-extractor'
+  | 'pdf-batch-signer'
   | 'qr-nameplate'
   | 'dxf-editor'
   | 'pdf-master';
@@ -96,6 +97,24 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
     tags: ['Traceability', 'QR codes', 'Branding'],
     note:
       'Supports Latin and Cyrillic character sets. Update contents on the fly and send the image directly to documentation systems.',
+    scriptType: 'module',
+  },
+  'pdf-batch-signer': {
+    slug: 'pdf-batch-signer',
+    title: 'PDF Batch Signer',
+    subtitle: 'Stamp a reusable signature across multiple PDFs at once.',
+    description:
+      'Upload drawings, design one signature, drag its placement, and export a ZIP of signed PDFs without leaving the browser.',
+    about:
+      'Build a signature by sketching, typing, or uploading a scan, position it on a live PDF preview, and apply it to every page in your stack. Optional Gemini analysis can read title blocks to prefill metadata when you provide your own API key.',
+    tags: ['PDF', 'Signatures', 'Offline'],
+    note: 'Signing runs locally with pdf-lib and JSZip. Gemini title-block extraction is opt-in and uses your key client-side.',
+    features: [
+      'Multi-file upload with per-file metadata',
+      'Drag + resize placement synced to every page',
+      'ZIP export of signed PDFs',
+      'Optional Gemini title-block extraction',
+    ],
     scriptType: 'module',
   },
   'dxf-editor': {
