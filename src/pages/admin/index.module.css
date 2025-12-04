@@ -1,0 +1,133 @@
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  margin: 0.1rem 0;
+  font-size: 1.8rem;
+}
+
+.subtle {
+  margin: 0;
+  color: #9aa5c8;
+}
+
+.tabs {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  padding: 0.6rem 1.3rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.tabActive {
+  background: rgba(100, 255, 218, 0.12);
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+}
+
+.panel {
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--card-border);
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.table th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  color: #9aa5c8;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(145deg, rgba(100, 255, 218, 0.12), rgba(33, 92, 255, 0.1));
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #e8f4ff;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.deleteBtn {
+  background: rgba(248, 113, 113, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(248, 113, 113, 0.2);
+}
+
+.muted {
+  color: #9aa5c8;
+  margin: 0.75rem 0;
+}
+
+.alert {
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #ffd2d2;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+  color: #9aa5c8;
+  font-size: 0.95rem;
+}

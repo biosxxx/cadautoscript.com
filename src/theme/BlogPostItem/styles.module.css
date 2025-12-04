@@ -1,0 +1,13 @@
+.feedbackSection {
+  margin-top: 2.5rem;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  margin: 0 0 1.5rem;
+}
+
+.reactions {
+  margin-bottom: 1.25rem;
+}

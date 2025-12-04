@@ -1,0 +1,163 @@
+.container {
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: #9ab7ff;
+  margin: 0;
+}
+
+.title {
+  margin: 0.1rem 0 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(100, 255, 218, 0.1);
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+  border: 1px solid var(--ifm-color-primary);
+}
+
+.alert {
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #ffd2d2;
+  margin-bottom: 0.75rem;
+}
+
+.muted {
+  color: #9aa5c8;
+  margin: 0.75rem 0;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(145deg, rgba(100, 255, 218, 0.12), rgba(33, 92, 255, 0.1));
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #e8f4ff;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.body {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  color: #9aa5c8;
+  margin-bottom: 0.35rem;
+}
+
+.author {
+  color: #e6edff;
+  font-weight: 600;
+}
+
+.dot {
+  color: #6b7280;
+}
+
+.content {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.composer {
+  margin-top: 1.25rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.form textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.8rem 0.9rem;
+  color: inherit;
+}
+
+.form textarea:focus {
+  outline: 2px solid rgba(100, 255, 218, 0.45);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.notice {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #fbbf24;
+}
+
+.link {
+  color: var(--ifm-color-primary);
+}
+
+@media (max-width: 600px) {
+  .comment {
+    grid-template-columns: 36px 1fr;
+  }
+
+  .body {
+    padding: 0.35rem 0.6rem;
+  }
+}

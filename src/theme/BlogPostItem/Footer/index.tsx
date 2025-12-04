@@ -5,7 +5,6 @@ import {ThemeClassNames} from '@docusaurus/theme-common';
 import EditMetaRow from '@theme/EditMetaRow';
 import TagsListInline from '@theme/TagsListInline';
 import ReadMoreLink from '@theme/BlogPostItem/Footer/ReadMoreLink';
-import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
 
 export default function BlogPostItemFooter(): ReactNode {
   const {metadata, isBlogPostPage} = useBlogPost();
@@ -54,9 +53,6 @@ export default function BlogPostItemFooter(): ReactNode {
             lastUpdatedBy={lastUpdatedBy}
           />
         )}
-        <div className="margin-top--lg">
-          <ReactionsBar slug={metadata.permalink} />
-        </div>
       </footer>
     );
   }

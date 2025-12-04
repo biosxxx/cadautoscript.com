@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import type {User} from '@supabase/supabase-js';
+import Link from '@docusaurus/Link';
 import {supabase} from '@site/src/lib/supabaseClient';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import styles from './NavbarAuth.module.css';
@@ -116,6 +117,13 @@ export default function NavbarAuth(): JSX.Element {
           {menuOpen && (
             <div className={styles.dropdown}>
               {email ? <p className={styles.email}>{email}</p> : null}
+              <Link
+                to="/profile"
+                className={styles.dropdownButton}
+                onClick={() => setMenuOpen(false)}
+              >
+                My Profile
+              </Link>
               <button type="button" className={styles.dropdownButton} onClick={handleSignOut}>
                 Sign Out
               </button>

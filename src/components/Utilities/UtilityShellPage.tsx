@@ -4,6 +4,7 @@ import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
+import Comments from '@site/src/components/Comments';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
 type HeroLink = {label: string; href: string; variant?: 'primary' | 'ghost'; external?: boolean};
@@ -77,7 +78,7 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               src={iframeSrc}
               title={title}
               loading="lazy"
-              data-noBrokenLinkCheck
+              data-nobrokenlinkcheck
             ></iframe>
           </div>
           <div className="utility-toolbar" role="toolbar">
@@ -90,6 +91,9 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
           </div>
           <div className="utility-reactions">
             <ReactionsBar slug={reactionsSlug} />
+          </div>
+          <div className="utility-comments">
+            <Comments slug={reactionsSlug} />
           </div>
           <aside className="utility-info" data-collapsible>
             <div className="utility-info__header">
