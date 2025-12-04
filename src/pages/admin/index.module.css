@@ -131,3 +131,17 @@
   color: #9aa5c8;
   font-size: 0.95rem;
 }
+
+.roleSelect {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  color: inherit;
+}
+
+.alertSuccess {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: #d5f7e0;
+}

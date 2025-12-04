@@ -68,6 +68,31 @@ export default function NavbarAuth(): JSX.Element {
   }, [closeLoginModal]);
 
   useEffect(() => {
+    if (!user) return;
+    let didUpdate = false;
+    const updatePresence = async () => {
+      try {
+        const now = new Date().toISOString();
+        const lastSeen = window.localStorage.getItem('lastSeenAt');
+        if (lastSeen && Date.now() - new Date(lastSeen).getTime() < 5 * 60 * 1000) {
+          return;
+        }
+        window.localStorage.setItem('lastSeenAt', now);
+        didUpdate = true;
+        await supabase.from('profiles').update({last_seen_at: now}).eq('id', user.id);
+      } catch (err) {
+        console.error('[Supabase Presence] Unable to update last_seen_at', err);
+      }
+    };
+    void updatePresence();
+    return () => {
+      if (didUpdate) {
+        window.localStorage.removeItem('lastSeenAt');
+      }
+    };
+  }, [user]);
+
+  useEffect(() => {
     if (!menuOpen) {
       return undefined;
     }

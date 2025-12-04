@@ -12,6 +12,8 @@ type ProfileRow = {
   avatar_url: string | null;
   role: string | null;
   created_at: string | null;
+  email: string | null;
+  last_seen_at?: string | null;
 };
 
 type CommentRow = {
@@ -56,6 +58,8 @@ export default function AdminPage(): JSX.Element {
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [roleUpdating, setRoleUpdating] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   // Access control: fetch session + profile, redirect if not admin.
   useEffect(() => {
@@ -114,8 +118,7 @@ export default function AdminPage(): JSX.Element {
       setLoadingUsers(true);
       setError(null);
       const {data: profiles, error: profilesError} = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url, role, created_at')
+        .rpc('get_admin_users_list')
         .order('created_at', {ascending: false});
 
       if (profilesError) {
@@ -182,6 +185,42 @@ export default function AdminPage(): JSX.Element {
     [profile?.full_name, profile?.username, sessionUser?.email],
   );
 
+  const formatRelative = (value?: string | null) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    const now = Date.now();
+    const diffMs = now - date.getTime();
+    const minutes = Math.floor(diffMs / 60000);
+    if (minutes < 1) return 'Online';
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    return date.toLocaleString();
+  };
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setRoleUpdating(userId);
+    setToast(null);
+    const {error: roleError} = await supabase
+      .from('profiles')
+      .update({role: newRole})
+      .eq('id', userId);
+    if (roleError) {
+      console.error('[Admin] Unable to update role', roleError.message);
+      setError('Unable to update role.');
+      setRoleUpdating(null);
+      return;
+    }
+    setData((prev) => ({
+      ...prev,
+      profiles: prev.profiles.map((p) => (p.id === userId ? {...p, role: newRole} : p)),
+    }));
+    setRoleUpdating(null);
+    setToast('Role updated');
+  };
+
   if (loadingAuth) {
     return (
       <Layout title="Admin">
@@ -224,6 +263,7 @@ export default function AdminPage(): JSX.Element {
         </div>
 
         {error ? <div className={styles.alert}>{error}</div> : null}
+        {toast ? <div className={clsx(styles.alert, styles.alertSuccess)}>{toast}</div> : null}
 
         {activeTab === 'users' ? (
           <section className={styles.panel}>
@@ -238,8 +278,10 @@ export default function AdminPage(): JSX.Element {
                   <tr>
                     <th>Avatar</th>
                     <th>Name</th>
+                    <th>Email</th>
                     <th>Username</th>
                     <th>Role</th>
+                    <th>Last Seen</th>
                     <th>Created</th>
                   </tr>
                 </thead>
@@ -256,8 +298,21 @@ export default function AdminPage(): JSX.Element {
                         </div>
                       </td>
                       <td>{row.full_name || '—'}</td>
+                      <td>{row.email || '—'}</td>
                       <td>{row.username || '—'}</td>
-                      <td>{row.role || 'user'}</td>
+                      <td>
+                        <select
+                          value={row.role || 'user'}
+                          onChange={(event) => handleRoleChange(row.id, event.target.value)}
+                          disabled={roleUpdating === row.id}
+                          className={styles.roleSelect}
+                        >
+                          <option value="user">user</option>
+                          <option value="editor">editor</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      </td>
+                      <td>{formatRelative(row.last_seen_at)}</td>
                       <td>{formatDate(row.created_at)}</td>
                     </tr>
                   ))}
@@ -300,7 +355,9 @@ export default function AdminPage(): JSX.Element {
                             )}
                           </div>
                         </td>
-                        <td>{snippet}</td>
+                    <td>
+                      <span dangerouslySetInnerHTML={{__html: row.content}} />
+                    </td>
                         <td>{row.post_slug}</td>
                         <td>{formatDate(row.created_at)}</td>
                         <td>
