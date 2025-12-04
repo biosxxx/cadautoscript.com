@@ -3,6 +3,7 @@
 
 # Production
 /build
+/dev new utility
 
 # Generated files
 .docusaurus
