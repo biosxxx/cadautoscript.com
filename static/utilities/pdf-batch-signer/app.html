@@ -2,974 +2,825 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Batch Signer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PDF Batch Signer (Pro)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Caveat:wght@600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Google+Sans:wght@400;500;700&family=Caveat:wght@600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../../vendor/tailwind.min.css" />
-    <script src="../../vendor/pdf-lib.min.js"></script>
-    <script src="../../vendor/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       if (window.pdfjsLib) {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdf.worker.min.js';
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+      }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              md: {
+                sys: {
+                  primary: '#D0BCFF',
+                  onPrimary: '#381E72',
+                  primaryContainer: '#4F378B',
+                  onPrimaryContainer: '#EADDFF',
+                  secondary: '#CCC2DC',
+                  onSecondary: '#332D41',
+                  secondaryContainer: '#4A4458',
+                  onSecondaryContainer: '#E8DEF8',
+                  tertiary: '#EFB8C8',
+                  onTertiary: '#492532',
+                  tertiaryContainer: '#633B48',
+                  onTertiaryContainer: '#FFD8E4',
+                  error: '#F2B8B5',
+                  onError: '#601410',
+                  background: '#141218',
+                  onBackground: '#E6E1E5',
+                  surface: '#141218',
+                  onSurface: '#E6E1E5',
+                  surfaceVariant: '#49454F',
+                  onSurfaceVariant: '#CAC4D0',
+                  outline: '#938F99',
+                }
+              }
+            },
+            fontFamily: {
+              sans: ['Google Sans', 'Roboto', 'sans-serif'],
+              hand: ['Caveat', 'cursive'],
+            }
+          }
+        }
       }
     </script>
     <style>
-      :root {
-        font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.16), transparent 35%),
-          radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.16), transparent 32%),
-          linear-gradient(135deg, #0b1224, #0b162c);
-        color: #e4e8f5;
-      }
-      * {
-        box-sizing: border-box;
-      }
       body {
-        margin: 0;
-        min-height: 100vh;
-        padding: 28px 22px 48px;
+        background-color: #141218;
+        color: #E6E1E5;
+        font-family: 'Roboto', sans-serif;
+        -webkit-tap-highlight-color: transparent;
       }
-      .app-shell {
-        max-width: 1260px;
-        margin: 0 auto;
-        backdrop-filter: blur(8px);
+      
+      .md-card {
+        background-color: #1D1B20;
+        border-radius: 24px;
+        padding: 24px;
+        transition: background-color 0.2s;
       }
-      .glass {
-        background: rgba(12, 18, 40, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 60px rgba(4, 6, 14, 0.65);
-        border-radius: 22px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 360px 1fr;
-        gap: 18px;
-        align-items: stretch;
-      }
-      @media (max-width: 1100px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
-      .pill {
+      
+      .md-btn {
+        height: 40px;
+        border-radius: 20px;
+        padding: 0 24px;
+        font-family: 'Google Sans', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: 0.1px;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #e4e8f5;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-size: 11px;
-      }
-      .tag {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 12px;
-        color: #b8c1ec;
-      }
-      .header {
-        margin-bottom: 16px;
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .header h1 {
-        margin: 6px 0 4px;
-        font-size: clamp(1.8rem, 3vw, 2.3rem);
-        letter-spacing: -0.02em;
-      }
-      .header p {
-        margin: 0;
-        color: #94a3c6;
-        max-width: 640px;
-        line-height: 1.5;
-      }
-      .panel {
-        padding: 18px;
-      }
-      .divider {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
-        margin: 12px 0;
-      }
-      .chip {
-        font-size: 12px;
-        letter-spacing: 0.1em;
-        color: #9aa7d7;
-      }
-      .drop-zone {
-        border: 1px dashed rgba(255, 255, 255, 0.16);
-        border-radius: 16px;
-        padding: 14px;
-        background: linear-gradient(135deg, rgba(94, 234, 212, 0.08), rgba(59, 130, 246, 0.06));
-        transition: all 0.15s ease;
-      }
-      .drop-zone.is-hovered {
-        border-color: #67e8f9;
-        box-shadow: 0 12px 28px rgba(46, 204, 255, 0.22);
-        transform: translateY(-1px);
-      }
-      .btn {
-        border: none;
-        border-radius: 12px;
-        padding: 12px 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .btn-primary {
-        background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        color: #0b1120;
-      }
-      .btn-primary:hover {
-        box-shadow: 0 14px 32px rgba(59, 130, 246, 0.32);
-        transform: translateY(-1px);
-      }
-      .btn-ghost {
-        background: rgba(255, 255, 255, 0.08);
-        color: #e4e8f5;
-      }
-      .btn-ghost:hover {
-        background: rgba(255, 255, 255, 0.14);
-      }
-      .btn[disabled] {
-        opacity: 0.45;
-        cursor: not-allowed;
-        box-shadow: none;
-      }
-      .list-tile {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 12px;
-        display: grid;
-        grid-template-columns: 1fr auto;
+        justify-content: center;
         gap: 8px;
-        background: rgba(255, 255, 255, 0.02);
-        transition: border 0.15s ease, background 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        cursor: pointer;
       }
-      .list-tile.is-active {
-        border-color: rgba(94, 234, 212, 0.5);
-        background: rgba(94, 234, 212, 0.06);
-      }
-      .status {
-        font-size: 12px;
-        color: #9aa7d7;
-      }
-      .status.success {
-        color: #6ee7b7;
-      }
-      .status.warn {
-        color: #fcd34d;
-      }
-      .status.error {
-        color: #fda4af;
-      }
-      .stage {
-        position: relative;
-        background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.08), transparent 50%),
-          rgba(6, 10, 22, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 16px;
-        padding: 12px;
-        min-height: 520px;
-        overflow: hidden;
-      }
-      .canvas-wrap {
+      .md-btn:active { transform: scale(0.98); }
+      
+      .md-btn-primary { background-color: #D0BCFF; color: #381E72; }
+      .md-btn-primary:hover { background-color: #E8DEF8; }
+      
+      .md-btn-tonal { background-color: #4A4458; color: #E8DEF8; }
+      .md-btn-tonal:hover { background-color: #635F70; }
+      
+      /* Canvas & Interaction */
+      .canvas-container {
         position: relative;
         overflow: auto;
-        max-height: 78vh;
-        display: flex;
-        justify-content: center;
+        border-radius: 16px;
+        background-color: #262429;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        background-image: linear-gradient(45deg, #302e33 25%, transparent 25%), linear-gradient(-45deg, #302e33 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #302e33 75%), linear-gradient(-45deg, transparent 75%, #302e33 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
       }
-      canvas {
-        display: block;
-      }
+
       .sig-box {
         position: absolute;
-        border: 2px dashed rgba(94, 234, 212, 0.9);
-        background: rgba(94, 234, 212, 0.08);
-        backdrop-filter: blur(2px);
-        cursor: move;
+        border: 2px solid #D0BCFF;
+        background: rgba(208, 188, 255, 0.1);
+        cursor: grab;
         user-select: none;
+        touch-action: none;
+        box-sizing: border-box;
       }
-      .sig-handle {
-        width: 14px;
-        height: 14px;
+      .sig-box.selected {
+        border-color: #FFF;
+        background: rgba(208, 188, 255, 0.2);
+        z-index: 10;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+      }
+      .sig-box:active { cursor: grabbing; }
+
+      .resize-handle {
+        width: 12px;
+        height: 12px;
+        background-color: #FFF;
+        border: 2px solid #381E72;
         border-radius: 50%;
-        border: 2px solid #0b1224;
-        background: #67e8f9;
         position: absolute;
-        right: -9px;
-        bottom: -9px;
+        bottom: -6px;
+        right: -6px;
         cursor: se-resize;
+        z-index: 11;
       }
-      .sig-preview {
-        border-radius: 10px;
-        border: 1px dashed rgba(255, 255, 255, 0.12);
-        padding: 10px;
-        min-height: 120px;
-        display: grid;
-        place-items: center;
-        background: rgba(255, 255, 255, 0.03);
-      }
-      .tab-group {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-      }
-      .tab-btn {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.04);
-        color: #cbd5f5;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.15s ease;
-      }
-      .tab-btn.is-active {
-        border-color: rgba(94, 234, 212, 0.6);
-        background: rgba(94, 234, 212, 0.08);
-        color: #e4e8f5;
-      }
-      .floating-status {
-        position: fixed;
-        bottom: 18px;
-        right: 18px;
-        padding: 12px 14px;
-        border-radius: 12px;
-        background: rgba(12, 18, 40, 0.92);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-        color: #e4e8f5;
+      
+      .delete-btn {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 24px;
+        height: 24px;
+        background: #F2B8B5;
+        color: #601410;
+        border-radius: 50%;
         display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 20;
-      }
-      .badge {
-        display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 18px;
-        height: 18px;
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        z-index: 12;
+      }
+
+      .drop-zone {
+        border: 2px dashed #49454F;
+        transition: all 0.2s;
+      }
+      .drop-zone.active {
+        border-color: #D0BCFF;
+        background-color: rgba(208, 188, 255, 0.05);
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
         border-radius: 50%;
-        font-size: 11px;
-        background: #60a5fa;
-        color: #0b1120;
-        font-weight: 700;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
       }
-      .muted {
-        color: #94a3c6;
-        font-size: 14px;
-      }
-      .input {
+      @keyframes spin { to { transform: rotate(360deg); } }
+      
+      .md-input {
+        background: #25232A;
+        border: 1px solid #49454F;
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: #E6E1E5;
         width: 100%;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.04);
-        color: #e4e8f5;
-        padding: 10px 12px;
         font-size: 14px;
+        transition: all 0.2s;
       }
-      .input:focus {
-        outline: 2px solid rgba(94, 234, 212, 0.5);
-        border-color: rgba(94, 234, 212, 0.8);
+      .md-input:focus {
+        border-color: #D0BCFF;
+        outline: 2px solid rgba(208, 188, 255, 0.3);
       }
-      .banner {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 12px;
-        background: rgba(59, 130, 246, 0.08);
-        border: 1px solid rgba(59, 130, 246, 0.35);
-        color: #dbeafe;
+      
+      /* Toggle Switch */
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: #D0BCFF;
       }
-      .banner strong {
-        color: #fff;
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: #D0BCFF;
       }
-      .empty-state {
-        color: #94a3c6;
-        text-align: center;
-        padding: 30px 10px;
-        border: 1px dashed rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
+      
+      /* Custom select styling */
+      select.md-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E6E1E5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px;
+        padding-right: 30px;
       }
     </style>
   </head>
   <body>
-    <div class="app-shell">
-      <div class="header">
-        <div>
-          <div class="pill">PDF pipeline</div>
-          <h1>PDF Batch Signer</h1>
-          <p>
-            Drop a stack of drawings, design a signature once, and stamp every page in one pass. Files stay in your
-            browser; use optional Gemini analysis to pre-fill title blocks.
-          </p>
-        </div>
-        <div class="tag">Local-first / WebAssembly PDF / React</div>
-      </div>
+    <div id="app" class="min-h-screen"></div>
 
-      <div id="app"></div>
-    </div>
     <script type="module">
-  import React, {useEffect, useMemo, useRef, useState} from "https://esm.sh/react@18.3.1";
-  import {createRoot} from "https://esm.sh/react-dom@18.3.1/client";
-  import htm from "https://esm.sh/htm@3.1.1";
-  const html = htm.bind(React.createElement);
+      import React, {useEffect, useMemo, useRef, useState, useCallback} from "https://esm.sh/react@18.3.1";
+      import {createRoot} from "https://esm.sh/react-dom@18.3.1/client";
+      import htm from "https://esm.sh/htm@3.1.1";
+      const html = htm.bind(React.createElement);
 
-  const {PDFDocument} = window.PDFLib;
-  const JSZip = window.JSZip;
+      const {PDFDocument} = window.PDFLib;
+      const JSZip = window.JSZip;
 
-  const generateId = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+      const generateId = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-  const usePersistentState = (key, fallback) => {
-    const [value, setValue] = useState(() => {
-      try {
-        const stored = localStorage.getItem(key);
-        if (stored !== null) return JSON.parse(stored);
-      } catch (err) {
-        console.warn('Local storage unavailable', err);
-      }
-      return fallback;
-    });
-    useEffect(() => {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-      } catch (err) {
-        console.warn('Local storage unavailable', err);
-      }
-    }, [key, value]);
-    return [value, setValue];
-  };
-
-  const SignaturePad = ({mode, onChange}) => {
-    const canvasRef = useRef(null);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [color, setColor] = useState('#0ea5e9');
-    const [text, setText] = useState('QA Approved');
-
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.lineWidth = 2.4;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = color;
-    }, [color]);
-
-    const emitFromCanvas = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      onChange(canvas.toDataURL('image/png'));
-    };
-
-    const handlePointerDown = (event) => {
-      if (mode !== 'draw') return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const ctx = canvas.getContext('2d');
-      ctx.strokeStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
-      setIsDrawing(true);
-    };
-
-    const handlePointerMove = (event) => {
-      if (!isDrawing || mode !== 'draw') return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const ctx = canvas.getContext('2d');
-      ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-      ctx.stroke();
-    };
-
-    const handlePointerUp = () => {
-      if (!isDrawing) return;
-      setIsDrawing(false);
-      emitFromCanvas();
-    };
-
-    const clear = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      onChange(null);
-    };
-
-    useEffect(() => {
-      if (mode !== 'text') return;
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const size = 48;
-      const padding = 22;
-      ctx.font = `${size}px "Caveat", "Space Grotesk", system-ui`;
-      const metrics = ctx.measureText(text || '');
-      canvas.width = Math.max(metrics.width + padding * 2, 260);
-      canvas.height = size + padding * 2;
-      ctx.font = `${size}px "Caveat", "Space Grotesk", system-ui`;
-      ctx.fillStyle = color;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text || '', canvas.width / 2, canvas.height / 2);
-      onChange(text ? canvas.toDataURL('image/png') : null);
-    }, [mode, text, color, onChange]);
-
-    const handleUpload = (event) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => onChange(reader.result);
-      reader.readAsDataURL(file);
-    };
-
-    return html`<div className="space-y-3">
-      ${mode === 'draw' && html`<div>
-        <div className="sig-preview">
-          <canvas
-            ref=${canvasRef}
-            width="420"
-            height="180"
-            onPointerDown=${handlePointerDown}
-            onPointerMove=${handlePointerMove}
-            onPointerUp=${handlePointerUp}
-            onPointerLeave=${handlePointerUp}
-            style=${{width: '100%', height: '180px', touchAction: 'none'}}
-          ></canvas>
-        </div>
-        <div className="flex items-center justify-between mt-2 gap-2">
-          <label className="flex items-center gap-2 text-sm text-slate-300">
-            Ink
-            <input type="color" value=${color} onChange=${(e) => setColor(e.target.value)} aria-label="Signature color" />
-          </label>
-          <button className="btn btn-ghost text-sm px-3 py-2" type="button" onClick=${clear}>Clear pad</button>
-        </div>
-      </div>`}
-
-      ${mode === 'text' && html`<div className="space-y-3">
-        <input
-          className="input"
-          placeholder="Type the signer name or initials"
-          value=${text}
-          onChange=${(e) => setText(e.target.value)}
-        />
-        <label className="flex items-center gap-2 text-sm text-slate-300">
-          Ink
-          <input type="color" value=${color} onChange=${(e) => setColor(e.target.value)} aria-label="Signature color" />
-        </label>
-        <div className="sig-preview text-center text-slate-400">
-          <span className="chip">Live preview</span>
-        </div>
-      </div>`}
-
-      ${mode === 'image' && html`<label className="sig-preview cursor-pointer border border-dashed border-slate-600 hover:border-slate-400 transition">
-        <input type="file" accept="image/png,image/jpeg" hidden onChange=${handleUpload} />
-        <div className="text-sm text-slate-300">Upload a scanned signature (PNG/JPG)</div>
-      </label>`}
-    </div>`;
-  };
-
-  const FileList = ({files, activeId, onAdd, onSelect, onRemove, onAnalyze, geminiKey, setGeminiKey, analyzing}) => {
-    const inputRef = useRef(null);
-    const dropRef = useRef(null);
-
-    const handleFiles = (list) => {
-      const pdfs = Array.from(list || []).filter((file) => file.type === 'application/pdf');
-      if (!pdfs.length) return;
-      onAdd(pdfs);
-    };
-
-    useEffect(() => {
-      const node = dropRef.current;
-      if (!node) return;
-      const onDragOver = (event) => {
-        event.preventDefault();
-        node.classList.add('is-hovered');
+      const usePersistentState = (key, fallback) => {
+        const [value, setValue] = useState(() => {
+          try {
+            const stored = localStorage.getItem(key);
+            if (stored !== null) return JSON.parse(stored);
+          } catch (err) { console.warn(err); }
+          return fallback;
+        });
+        useEffect(() => {
+          try {
+            localStorage.setItem(key, JSON.stringify(value));
+          } catch (err) {}
+        }, [key, value]);
+        return [value, setValue];
       };
-      const onLeave = (event) => {
-        event.preventDefault();
-        node.classList.remove('is-hovered');
-      };
-      const onDrop = (event) => {
-        event.preventDefault();
-        node.classList.remove('is-hovered');
-        if (event.dataTransfer?.files?.length) {
-          handleFiles(event.dataTransfer.files);
+
+      // --- SignaturePad Component ---
+      const SignaturePad = ({mode, onChange}) => {
+        const canvasRef = useRef(null);
+        const [isDrawing, setIsDrawing] = useState(false);
+        const [color, setColor] = useState('#000000');
+        const [text, setText] = useState('Approved');
+        
+        const initCanvas = useCallback(() => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = color;
+        }, [color]);
+
+        useEffect(() => {
+          if (mode === 'draw') initCanvas();
+        }, [mode, initCanvas]);
+
+        const emitFromCanvas = () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          onChange(canvas.toDataURL('image/png'));
+        };
+
+        const getCoords = (e) => {
+          const canvas = canvasRef.current;
+          const rect = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - rect.left, y: clientY - rect.top };
         }
-      };
-      node.addEventListener('dragover', onDragOver);
-      node.addEventListener('dragenter', onDragOver);
-      node.addEventListener('dragleave', onLeave);
-      node.addEventListener('drop', onDrop);
-      return () => {
-        node.removeEventListener('dragover', onDragOver);
-        node.removeEventListener('dragenter', onDragOver);
-        node.removeEventListener('dragleave', onLeave);
-        node.removeEventListener('drop', onDrop);
-      };
-    }, []);
 
-    return html`<div className="glass panel space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <div className="chip">Step 1</div>
-          <h2 className="text-xl font-semibold mt-1 mb-0">Load drawings</h2>
-        </div>
-        <button className="btn btn-ghost text-sm" type="button" onClick=${() => inputRef.current?.click()}>
-          Browse PDFs
-        </button>
-        <input
-          ref=${inputRef}
-          type="file"
-          accept="application/pdf"
-          multiple
-          hidden
-          onChange=${(e) => handleFiles(e.target.files)}
-        />
-      </div>
+        const startDraw = (e) => {
+          if (mode !== 'draw') return;
+          e.preventDefault();
+          const {x, y} = getCoords(e);
+          const ctx = canvasRef.current.getContext('2d');
+          ctx.strokeStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          setIsDrawing(true);
+        };
 
-      <div ref=${dropRef} className="drop-zone">
-        <div className="flex items-center gap-3">
-          <div className="badge">+</div>
-          <div>
-            <div className="text-lg font-semibold">Drop PDF files</div>
-            <div className="muted">We keep everything client-side.</div>
-          </div>
-        </div>
-      </div>
+        const draw = (e) => {
+          if (!isDrawing || mode !== 'draw') return;
+          e.preventDefault();
+          const {x, y} = getCoords(e);
+          const ctx = canvasRef.current.getContext('2d');
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        };
 
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-        ${files.length === 0 && html`<div className="muted text-sm">Nothing loaded yet.</div>`}
-        ${files.map(
-          (file) => html`<div
-            key=${file.id}
-            className=${`list-tile ${activeId === file.id ? 'is-active' : ''}`}
-            onClick=${() => onSelect(file.id)}
-          >
-            <div>
-              <div className="font-semibold">${file.name}</div>
-              <div className="status flex items-center gap-2">
-                ${file.meta.status === 'done' && html`<span className="status success">Title: ${file.meta.title || '-'}</span>`}
-                ${file.meta.status === 'analyzing' && html`<span className="status warn">Analyzing...</span>`}
-                ${file.meta.status === 'error' && html`<span className="status error">Analysis failed</span>`}
-                ${file.meta.status === 'pending' && html`<span className="status">Pending</span>`}
+        const stopDraw = () => {
+          if (!isDrawing) return;
+          setIsDrawing(false);
+          emitFromCanvas();
+        };
+
+        const clear = () => {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          onChange(null);
+        };
+
+        useEffect(() => {
+          if (mode !== 'text') return;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const fontSize = 64;
+          ctx.font = `${fontSize}px "Caveat"`;
+          const metrics = ctx.measureText(text || ' ');
+          canvas.width = metrics.width + 40;
+          canvas.height = fontSize + 40;
+          ctx.font = `${fontSize}px "Caveat"`;
+          ctx.fillStyle = color;
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'center';
+          ctx.fillText(text || '', canvas.width / 2, canvas.height / 2);
+          onChange(canvas.toDataURL('image/png'));
+        }, [mode, text, color]);
+
+        const handleUpload = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => onChange(reader.result);
+          reader.readAsDataURL(file);
+        };
+
+        return html`
+          <div className="flex flex-col gap-4">
+            ${mode === 'draw' && html`
+              <div className="relative bg-md-sys-surfaceVariant/30 rounded-xl overflow-hidden touch-none border border-md-sys-outline/20">
+                <canvas
+                  ref=${canvasRef}
+                  width="500"
+                  height="200"
+                  className="w-full h-[200px] cursor-crosshair touch-none"
+                  onPointerDown=${startDraw}
+                  onPointerMove=${draw}
+                  onPointerUp=${stopDraw}
+                  onPointerLeave=${stopDraw}
+                ></canvas>
+                <button className="absolute top-2 right-2 p-2 bg-md-sys-surface/80 rounded-full hover:bg-md-sys-error/20 text-md-sys-onSurface transition-colors" onClick=${clear} title="Clear">
+                  <span className="mdi mdi-delete-outline"></span>
+                </button>
               </div>
-            </div>
-            <button
-              className="btn btn-ghost text-xs px-3 py-2"
-              type="button"
-              onClick=${(event) => {
-                event.stopPropagation();
-                onRemove(file.id);
-              }}
-            >
-              Remove
-            </button>
-          </div>`,
-        )}
-      </div>
-
-      <div className="divider"></div>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <div className="chip">Optional</div>
-            <p className="muted mb-0">Use Gemini to prefill drawing title and number.</p>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-md-sys-onSurfaceVariant">Ink Color:</span>
+                <input type="color" value=${color} onChange=${(e) => setColor(e.target.value)} className="w-8 h-8 rounded-full border-none cursor-pointer bg-transparent" />
+              </div>
+            `}
+            ${mode === 'text' && html`
+              <div className="space-y-3">
+                <input type="text" className="md-input font-hand text-2xl" placeholder="Signature text..." value=${text} onChange=${(e) => setText(e.target.value)} />
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-md-sys-onSurfaceVariant">Color:</span>
+                  <input type="color" value=${color} onChange=${(e) => setColor(e.target.value)} className="w-8 h-8 rounded-full border-none cursor-pointer bg-transparent" />
+                </div>
+              </div>
+            `}
+            ${mode === 'image' && html`
+              <div className="border-2 border-dashed border-md-sys-outline/40 rounded-xl p-8 text-center hover:bg-md-sys-primary/5 transition-colors cursor-pointer relative">
+                <input type="file" accept="image/*" onChange=${handleUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                <div className="mdi mdi-upload text-4xl text-md-sys-primary mb-2"></div>
+                <div className="text-md-sys-onSurfaceVariant">Upload signature image</div>
+              </div>
+            `}
           </div>
-          <button className="btn btn-primary text-sm" type="button" onClick=${onAnalyze} disabled=${analyzing || files.length === 0}>
-            ${analyzing ? 'Analyzing...' : 'Run analysis'}
-          </button>
-        </div>
-        <input
-          className="input"
-          placeholder="Gemini API key (stored locally)"
-          value=${geminiKey}
-          onChange=${(e) => setGeminiKey(e.target.value)}
-        />
-      </div>
-    </div>`;
-  };
-
-  const PdfStage = ({file, signature, box, setBox, setCanvasSize}) => {
-    const canvasRef = useRef(null);
-    const containerRef = useRef(null);
-    const dragRef = useRef(null);
-
-    useEffect(() => {
-      let cancelled = false;
-      const render = async () => {
-        if (!file) return;
-        const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = window.pdfjsLib.getDocument({data: arrayBuffer});
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({scale: 1.35});
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        setCanvasSize({width: viewport.width, height: viewport.height});
-        await page.render({canvasContext: ctx, viewport}).promise;
-        if (cancelled) return;
+        `;
       };
-      render();
-      return () => {
-        cancelled = true;
-      };
-    }, [file, setCanvasSize]);
 
-    useEffect(() => {
-      const handleMove = (event) => {
-        if (!dragRef.current) return;
-        const {mode, startX, startY, startBox} = dragRef.current;
-        const rect = containerRef.current.getBoundingClientRect();
-        const dx = event.clientX - startX;
-        const dy = event.clientY - startY;
-        let next = {...startBox};
-        if (mode === 'move') {
-          next.x = startBox.x + dx;
-          next.y = startBox.y + dy;
-        } else if (mode === 'resize') {
-          next.width = Math.max(40, startBox.width + dx);
-          next.height = Math.max(30, startBox.height + dy);
+      // --- PdfStage Component ---
+      const PdfStage = ({file, signatures, selectedId, onUpdateSignatures, onSelect, scale}) => {
+        const canvasRef = useRef(null);
+        const containerRef = useRef(null);
+        
+        useEffect(() => {
+          let active = true;
+          const render = async () => {
+            if (!file) return;
+            try {
+              const arrayBuffer = await file.arrayBuffer();
+              const loadingTask = window.pdfjsLib.getDocument({data: arrayBuffer});
+              const pdf = await loadingTask.promise;
+              const page = await pdf.getPage(1);
+              const viewport = page.getViewport({scale: scale || 1.5});
+              const canvas = canvasRef.current;
+              if (!canvas || !active) return;
+              const ctx = canvas.getContext('2d');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              await page.render({canvasContext: ctx, viewport}).promise;
+            } catch (e) { console.error(e); }
+          };
+          render();
+          return () => { active = false; };
+        }, [file, scale]);
+
+        const handlePointerDown = (e, sigId, type) => {
+          e.stopPropagation();
+          e.target.setPointerCapture(e.pointerId);
+          onSelect(sigId);
+          const sig = signatures.find(s => s.id === sigId);
+          const startX = e.clientX;
+          const startY = e.clientY;
+          
+          const handleMove = (ev) => {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            const updated = signatures.map(s => {
+              if (s.id !== sigId) return s;
+              if (type === 'move') {
+                return { ...s, x: sig.x + dx, y: sig.y + dy };
+              } else if (type === 'resize') {
+                return { ...s, width: Math.max(20, sig.width + dx), height: Math.max(20, sig.height + dy) };
+              }
+              return s;
+            });
+            onUpdateSignatures(updated);
+          };
+
+          const handleUp = (ev) => {
+             e.target.releasePointerCapture(ev.pointerId);
+             window.removeEventListener('pointermove', handleMove);
+             window.removeEventListener('pointerup', handleUp);
+          };
+
+          window.addEventListener('pointermove', handleMove);
+          window.addEventListener('pointerup', handleUp);
+        };
+
+        const deleteSig = (e, id) => {
+          e.stopPropagation();
+          onUpdateSignatures(signatures.filter(s => s.id !== id));
+        };
+
+        if (!file) {
+          return html`<div className="flex flex-col items-center justify-center h-[400px] text-md-sys-onSurfaceVariant bg-[#1D1B20] rounded-2xl border border-md-sys-outline/10"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
         }
-        const maxX = Math.max(0, rect.width - next.width);
-        const maxY = Math.max(0, rect.height - next.height);
-        next.x = Math.min(Math.max(0, next.x), maxX);
-        next.y = Math.min(Math.max(0, next.y), maxY);
-        setBox(next);
-      };
 
-      const handleUp = () => {
-        dragRef.current = null;
-        window.removeEventListener('pointermove', handleMove);
-        window.removeEventListener('pointerup', handleUp);
-      };
-
-      if (dragRef.current) {
-        window.addEventListener('pointermove', handleMove);
-        window.addEventListener('pointerup', handleUp);
-      }
-
-      return () => {
-        window.removeEventListener('pointermove', handleMove);
-        window.removeEventListener('pointerup', handleUp);
-      };
-    }, [setBox]);
-
-    const startDrag = (mode) => (event) => {
-      event.preventDefault();
-      dragRef.current = {
-        mode,
-        startX: event.clientX,
-        startY: event.clientY,
-        startBox: {...box},
-      };
-    };
-
-    return html`<div className="stage">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="chip">Step 3</div>
-          <h2 className="text-lg font-semibold mb-0">Position signature</h2>
-        </div>
-        <div className="text-sm text-slate-300">
-          <span className="badge">${signature ? 'OK' : '--'}</span> ${signature ? 'Ready to apply' : 'Add a signature first'}
-        </div>
-      </div>
-      <div ref=${containerRef} className="canvas-wrap">
-        ${file
-          ? html`<${React.Fragment}>
+        return html`
+          <div className="canvas-container" ref=${containerRef}>
+            <div className="relative inline-block origin-top-left">
               <canvas ref=${canvasRef}></canvas>
-              ${signature && html`<div
-                className="sig-box"
-                style=${{
-                  left: box.x + 'px',
-                  top: box.y + 'px',
-                  width: box.width + 'px',
-                  height: box.height + 'px',
-                }}
-                onPointerDown=${startDrag('move')}
-              >
-                <img
-                  src=${signature}
-                  alt="Signature preview"
-                  style=${{width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none'}}
-                />
-                <div className="sig-handle" onPointerDown=${startDrag('resize')}></div>
-              </div>`}
-            </${React.Fragment}>`
-          : html`<div className="empty-state">Load a PDF to see the first page preview.</div>`}
-      </div>
-    </div>`;
-  };
-
-  const SigningPanel = ({mode, setMode, signature, setSignature}) => {
-    return html`<div className="glass panel space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="chip">Step 2</div>
-          <h2 className="text-xl font-semibold mt-1 mb-0">Design signature</h2>
-        </div>
-        <div className="text-sm text-slate-300">${signature ? 'Saved locally' : 'No signature yet'}</div>
-      </div>
-      <div className="tab-group">
-        ${['draw', 'text', 'image'].map(
-          (key) => html`<button
-            key=${key}
-            type="button"
-            className=${`tab-btn ${mode === key ? 'is-active' : ''}`}
-            onClick=${() => setMode(key)}
-          >
-            ${key === 'draw' ? 'Sketch' : key === 'text' ? 'Typed' : 'Upload'}
-          </button>`,
-        )}
-      </div>
-      <${SignaturePad} mode=${mode} onChange=${(data) => setSignature(data)} />
-      <div className="sig-preview">
-        ${signature
-          ? html`<img src=${signature} alt="Signature preview" style=${{maxWidth: '100%', maxHeight: '140px', objectFit: 'contain'}} />`
-          : html`<div className="muted">Your signature preview appears here.</div>`}
-      </div>
-    </div>`;
-  };
-
-  const App = () => {
-    const [files, setFiles] = useState([]);
-    const [activeId, setActiveId] = useState(null);
-    const [signature, setSignature] = usePersistentState('pdf-batch-signer-signature', null);
-    const [sigMode, setSigMode] = useState('draw');
-    const [box, setBox] = useState({x: 120, y: 160, width: 220, height: 90});
-    const [canvasSize, setCanvasSize] = useState({width: 0, height: 0});
-    const [isSigning, setIsSigning] = useState(false);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [geminiKey, setGeminiKey] = usePersistentState('pdf-batch-signer-gemini-key', '');
-    const [status, setStatus] = useState('Waiting for files');
-
-    const selectedFile = useMemo(() => files.find((f) => f.id === activeId) || files[0] || null, [files, activeId]);
-    const canSign = files.length > 0 && !!signature && canvasSize.width > 0 && canvasSize.height > 0;
-
-    const addFiles = (fileList) => {
-      const entries = fileList.map((file) => ({
-        id: generateId(),
-        file,
-        name: file.name,
-        meta: {title: '', drawingNumber: '', status: 'pending'},
-      }));
-      setFiles((prev) => {
-        const merged = [...prev, ...entries];
-        if (!activeId && merged.length) setActiveId(merged[0].id);
-        return merged;
-      });
-      setStatus('Loaded ' + entries.length + ' file(s).');
-    };
-
-    const removeFile = (id) => {
-      setFiles((prev) => prev.filter((f) => f.id !== id));
-      setActiveId((current) => (current === id ? null : current));
-    };
-
-    const runAnalysis = async () => {
-      if (!geminiKey) {
-        setStatus('Add a Gemini API key to run analysis.');
-        return;
-      }
-      if (!files.length) return;
-      setIsAnalyzing(true);
-      setStatus('Analyzing title blocks with Gemini...');
-
-      const prompt =
-        'Extract the drawing title and drawing number from this PDF page. Return JSON with keys "title" and "drawingNumber". Keep it short.';
-
-      const renderPageAsPng = async (file) => {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await window.pdfjsLib.getDocument({data: arrayBuffer}).promise;
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({scale: 1.1});
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({canvasContext: ctx, viewport}).promise;
-        return canvas.toDataURL('image/png').split(',')[1];
+              ${signatures.map(sig => html`
+                <div key=${sig.id} className=${`sig-box ${selectedId === sig.id ? 'selected' : ''}`} style=${{left: `${sig.x}px`, top: `${sig.y}px`, width: `${sig.width}px`, height: `${sig.height}px`}} onPointerDown=${(e) => handlePointerDown(e, sig.id, 'move')}>
+                  <img src=${sig.src} className="w-full h-full object-contain pointer-events-none" />
+                  ${selectedId === sig.id && html`
+                    <div className="resize-handle" onPointerDown=${(e) => handlePointerDown(e, sig.id, 'resize')}></div>
+                    <div className="delete-btn" onClick=${(e) => deleteSig(e, sig.id)}><span className="mdi mdi-close"></span></div>
+                  `}
+                </div>
+              `)}
+            </div>
+          </div>
+        `;
       };
 
-      const parseJson = (text) => {
-        try {
-          const trimmed = text.trim();
-          const start = trimmed.indexOf('{');
-          const end = trimmed.lastIndexOf('}');
-          if (start !== -1 && end !== -1) {
-            return JSON.parse(trimmed.slice(start, end + 1));
+      // --- App Component ---
+      const App = () => {
+        // State
+        const [files, setFiles] = useState([]); // Array of { id, file, name, status, config: { pageMode, pageNum, uniqueLayout, uniqueSignatures } }
+        const [activeFileId, setActiveFileId] = useState(null);
+        
+        // Global Signature Template
+        const [globalSignatures, setGlobalSignatures] = useState([]);
+        
+        const [currentSignature, setCurrentSignature] = usePersistentState('batch-signer-current-sig', null);
+        const [sigMode, setSigMode] = useState('draw');
+        const [selectedSigId, setSelectedSigId] = useState(null);
+        const [status, setStatus] = useState({ text: 'Ready', type: 'idle' });
+        const [geminiKey, setGeminiKey] = usePersistentState('gemini-api-key', '');
+        const [isProcessing, setIsProcessing] = useState(false);
+
+        const activeFile = useMemo(() => files.find(f => f.id === activeFileId), [files, activeFileId]);
+
+        // Helpers for signature logic
+        // Если файл использует уникальный лэйаут - берем его, иначе - глобальный
+        const visibleSignatures = useMemo(() => {
+          if (activeFile && activeFile.config.uniqueLayout) {
+            return activeFile.config.uniqueSignatures || [];
           }
-          return JSON.parse(trimmed);
-        } catch {
-          return {title: '', drawingNumber: ''};
-        }
+          return globalSignatures;
+        }, [activeFile, globalSignatures]);
+
+        // Update signatures: determines whether to update specific file or global
+        const handleUpdateSignatures = (newSigs) => {
+          if (activeFile && activeFile.config.uniqueLayout) {
+             // Update only this file
+             setFiles(prev => prev.map(f => {
+                if (f.id === activeFileId) {
+                   return { ...f, config: { ...f.config, uniqueSignatures: newSigs } };
+                }
+                return f;
+             }));
+          } else {
+             // Update global
+             setGlobalSignatures(newSigs);
+          }
+        };
+
+        const handleAddFiles = (e) => {
+          const newFiles = Array.from(e.target.files || []).filter(f => f.type === 'application/pdf');
+          if (!newFiles.length) return;
+
+          const entries = newFiles.map(f => ({
+            id: generateId(),
+            file: f,
+            name: f.name,
+            status: 'pending',
+            config: {
+              pageMode: 'first', // 'first', 'all', 'custom'
+              pageNum: 1,
+              uniqueLayout: false,
+              uniqueSignatures: [] // will be copy of global if enabled
+            }
+          }));
+
+          setFiles(prev => [...prev, ...entries]);
+          if (!activeFileId && entries.length) setActiveFileId(entries[0].id);
+          setStatus({ text: `Added ${entries.length} files`, type: 'success' });
+        };
+
+        const updateFileConfig = (id, key, value) => {
+           setFiles(prev => prev.map(f => {
+              if (f.id !== id) return f;
+              
+              // Если включаем уникальный лэйаут, копируем текущие глобальные подписи
+              let newConfig = { ...f.config, [key]: value };
+              if (key === 'uniqueLayout' && value === true && f.config.uniqueSignatures.length === 0) {
+                 newConfig.uniqueSignatures = [...globalSignatures];
+              }
+              
+              return { ...f, config: newConfig };
+           }));
+        };
+
+        const removeFile = (e, id) => {
+          e.stopPropagation();
+          setFiles(prev => prev.filter(f => f.id !== id));
+          if (activeFileId === id) setActiveFileId(null);
+        };
+
+        const addSignatureToCanvas = () => {
+          if (!currentSignature) return setStatus({ text: 'Create a signature first', type: 'error' });
+          if (!activeFile) return setStatus({ text: 'Load a document first', type: 'error' });
+          
+          const newSig = {
+            id: generateId(),
+            src: currentSignature,
+            x: 100 + (visibleSignatures.length * 20),
+            y: 100 + (visibleSignatures.length * 20),
+            width: 200,
+            height: 100
+          };
+          
+          handleUpdateSignatures([...visibleSignatures, newSig]);
+          setSelectedSigId(newSig.id);
+        };
+
+        const handleSignAll = async () => {
+          if (files.length === 0) return;
+          setIsProcessing(true);
+          setStatus({ text: 'Processing...', type: 'loading' });
+
+          try {
+            const zip = new JSZip();
+            const VIEW_SCALE = 1.5;
+
+            for (const entry of files) {
+              const arrayBuffer = await entry.file.arrayBuffer();
+              const pdfDoc = await PDFDocument.load(arrayBuffer);
+              const pages = pdfDoc.getPages();
+              const totalPages = pages.length;
+
+              // Determine which pages to sign
+              let pagesToSign = [];
+              if (entry.config.pageMode === 'first') {
+                pagesToSign.push(0);
+              } else if (entry.config.pageMode === 'all') {
+                pagesToSign = pages.map((_, i) => i);
+              } else if (entry.config.pageMode === 'custom') {
+                const pIndex = (entry.config.pageNum || 1) - 1;
+                if (pIndex >= 0 && pIndex < totalPages) {
+                  pagesToSign.push(pIndex);
+                }
+              }
+
+              // Determine signatures to use
+              const signaturesToApply = entry.config.uniqueLayout ? entry.config.uniqueSignatures : globalSignatures;
+              
+              if (signaturesToApply.length === 0 || pagesToSign.length === 0) {
+                 // Если нечего подписывать, просто сохраняем оригинал (или пропускаем)
+                 // Добавим в зип оригинал для консистентности
+                 zip.file(entry.name, arrayBuffer);
+                 continue;
+              }
+
+              // Embed images
+              const imageCache = {};
+              for (const sig of signaturesToApply) {
+                if (!imageCache[sig.src]) {
+                   if (sig.src.startsWith('data:image/png')) {
+                     imageCache[sig.src] = await pdfDoc.embedPng(sig.src);
+                   } else {
+                     imageCache[sig.src] = await pdfDoc.embedJpg(sig.src);
+                   }
+                }
+              }
+
+              // Draw
+              for (const pageIndex of pagesToSign) {
+                const page = pages[pageIndex];
+                const {width, height} = page.getSize();
+                
+                for (const sig of signaturesToApply) {
+                   const img = imageCache[sig.src];
+                   const boxX = sig.x / VIEW_SCALE;
+                   const boxY = height - ((sig.y + sig.height) / VIEW_SCALE);
+                   const boxW = sig.width / VIEW_SCALE;
+                   const boxH = sig.height / VIEW_SCALE;
+                   
+                   // Aspect ratio fit
+                   const scale = Math.min(boxW / img.width, boxH / img.height);
+                   const drawnW = img.width * scale;
+                   const drawnH = img.height * scale;
+                   const offsetX = (boxW - drawnW) / 2;
+                   const offsetY = (boxH - drawnH) / 2;
+
+                   page.drawImage(img, {
+                     x: boxX + offsetX,
+                     y: boxY + offsetY,
+                     width: drawnW,
+                     height: drawnH
+                   });
+                }
+              }
+              
+              const modifiedBytes = await pdfDoc.save();
+              zip.file(entry.name.replace('.pdf', '') + '_signed.pdf', modifiedBytes);
+            }
+
+            const content = await zip.generateAsync({type: 'blob'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = 'signed_bundle.zip';
+            link.click();
+            setStatus({ text: 'Done!', type: 'success' });
+          } catch (e) {
+            console.error(e);
+            setStatus({ text: 'Error', type: 'error' });
+          } finally {
+            setIsProcessing(false);
+          }
+        };
+
+        const runAnalysis = async () => {
+          if (!geminiKey) return setStatus({text: 'API Key Required', type: 'error'});
+          setIsProcessing(true);
+          setTimeout(() => { setIsProcessing(false); setStatus({text: 'Demo Analysis Complete', type: 'success'}); }, 1000);
+        };
+
+        return html`
+          <div className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Panel -->
+            <div className="lg:col-span-4 space-y-5 flex flex-col h-[calc(100vh-48px)] overflow-y-auto custom-scroll pr-1">
+              <div>
+                <h1 className="text-2xl font-bold text-md-sys-onBackground">Batch Signer Pro</h1>
+                <p className="text-md-sys-onSurfaceVariant text-xs">Smart Document Signing</p>
+              </div>
+
+              <!-- File List -->
+              <div className="md-card flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                   <h2 className="text-base font-medium text-md-sys-primary">1. Files</h2>
+                   <label className="md-btn md-btn-tonal text-xs h-8 px-3 cursor-pointer">
+                      <span className="mdi mdi-plus mr-1"></span> Add
+                      <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
+                   </label>
+                </div>
+                
+                <div className="space-y-3">
+                   ${files.length === 0 && html`<div className="text-center text-sm text-md-sys-onSurfaceVariant py-4 border border-dashed border-md-sys-outline/30 rounded-xl">List is empty</div>`}
+                   
+                   ${files.map(f => html`
+                     <div key=${f.id} 
+                          className=${`rounded-xl border transition-all overflow-hidden ${activeFileId === f.id ? 'border-md-sys-primary bg-md-sys-primary/5' : 'border-md-sys-outline/20 bg-md-sys-surface'}`}
+                          onClick=${() => setActiveFileId(f.id)}
+                     >
+                        <div className="p-3 flex items-center gap-3 cursor-pointer">
+                           <div className="w-8 h-8 rounded-full bg-md-sys-secondaryContainer flex items-center justify-center text-md-sys-onSecondaryContainer font-bold text-xs shrink-0">
+                             PDF
+                           </div>
+                           <div className="flex-1 min-w-0">
+                              <div className="truncate text-sm font-medium text-md-sys-onSurface">${f.name}</div>
+                              <div className="text-xs text-md-sys-onSurfaceVariant">
+                                 ${f.config.pageMode === 'first' ? 'First page only' : f.config.pageMode === 'all' ? 'All pages' : `Page ${f.config.pageNum}`}
+                              </div>
+                           </div>
+                           <button onClick=${(e) => removeFile(e, f.id)} className="w-8 h-8 rounded-full hover:bg-md-sys-error/10 text-md-sys-error flex items-center justify-center">
+                              <span className="mdi mdi-close"></span>
+                           </button>
+                        </div>
+
+                        <!-- Expanded Settings for Active File -->
+                        ${activeFileId === f.id && html`
+                          <div className="px-3 pb-3 pt-0 border-t border-md-sys-outline/10 mt-1 bg-black/20">
+                             <div className="grid grid-cols-2 gap-2 mt-3">
+                                <div>
+                                   <label className="text-[10px] text-md-sys-onSurfaceVariant uppercase tracking-wider mb-1 block">Where to sign?</label>
+                                   <select 
+                                     className="md-input text-xs" 
+                                     value=${f.config.pageMode}
+                                     onChange=${(e) => updateFileConfig(f.id, 'pageMode', e.target.value)}
+                                   >
+                                     <option value="first">First page</option>
+                                     <option value="all">All pages</option>
+                                     <option value="custom">Page number</option>
+                                   </select>
+                                </div>
+                                ${f.config.pageMode === 'custom' && html`
+                                  <div>
+                                     <label className="text-[10px] text-md-sys-onSurfaceVariant uppercase tracking-wider mb-1 block">Number</label>
+                                     <input 
+                                       type="number" 
+                                       min="1" 
+                                       className="md-input text-xs" 
+                                       value=${f.config.pageNum}
+                                       onChange=${(e) => updateFileConfig(f.id, 'pageNum', parseInt(e.target.value) || 1)}
+                                     />
+                                  </div>
+                                `}
+                             </div>
+
+                             <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+                                <label className="text-xs text-md-sys-onSurface flex items-center gap-2 cursor-pointer select-none">
+                                   <input 
+                                     type="checkbox" 
+                                     className="accent-md-sys-primary w-4 h-4"
+                                     checked=${f.config.uniqueLayout}
+                                     onChange=${(e) => updateFileConfig(f.id, 'uniqueLayout', e.target.checked)}
+                                   />
+                                   Unique layout
+                                </label>
+                                ${f.config.uniqueLayout && html`
+                                   <span className="text-[10px] bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer px-2 py-0.5 rounded-full">Active</span>
+                                `}
+                             </div>
+                          </div>
+                        `}
+                     </div>
+                   `)}
+                </div>
+              </div>
+
+              <!-- Signature Pad -->
+              <div className="md-card">
+                 <h2 className="text-base font-medium text-md-sys-primary mb-3">2. Signature</h2>
+                 <div className="flex bg-md-sys-surface rounded-lg p-1 mb-3 border border-md-sys-outline/20">
+                    ${['draw', 'text', 'image'].map(m => html`
+                       <button key=${m} className=${`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${sigMode === m ? 'bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer' : 'text-md-sys-onSurfaceVariant'}`} onClick=${() => setSigMode(m)}>
+                         ${m === 'draw' ? 'Draw' : m === 'text' ? 'Text' : 'Upload'}
+                       </button>
+                    `)}
+                 </div>
+                 <${SignaturePad} mode=${sigMode} onChange=${setCurrentSignature} />
+                 <button className="md-btn md-btn-tonal w-full mt-4" disabled=${!currentSignature || !activeFile} onClick=${addSignatureToCanvas}>
+                    <span className="mdi mdi-stamp mr-1"></span> Add to canvas
+                 </button>
+              </div>
+
+              <!-- Actions -->
+               <div className="md-card bg-[#2a2533]">
+                  <h2 className="text-base font-medium text-white mb-2">3. Export</h2>
+                  <p className="text-xs text-white/60 mb-4">All files will be processed according to their settings.</p>
+                  <button className="md-btn md-btn-primary w-full" onClick=${handleSignAll} disabled=${isProcessing || !files.length}>
+                     ${isProcessing ? html`<div className="spinner mr-2"></div> Processing...` : html`<span className="mdi mdi-download mr-2"></span> Download ZIP`}
+                  </button>
+               </div>
+            </div>
+
+            <!-- Right Panel (Canvas) -->
+            <div className="lg:col-span-8 flex flex-col h-[calc(100vh-48px)]">
+               <div className="bg-[#1D1B20] p-3 rounded-xl border border-md-sys-outline/10 mb-4 flex justify-between items-center">
+                  <div className="text-sm px-2">
+                     ${activeFile ? html`
+                        <span className="text-md-sys-onSurface font-medium">${activeFile.name}</span>
+                        ${activeFile.config.uniqueLayout ? 
+                           html`<span className="ml-2 text-xs text-amber-300 border border-amber-300/30 px-1.5 py-0.5 rounded">Custom Layout</span>` : 
+                           html`<span className="ml-2 text-xs text-md-sys-outline border border-md-sys-outline/30 px-1.5 py-0.5 rounded">Global Template</span>`
+                        }
+                     ` : 'Select a file on the left'}
+                  </div>
+               </div>
+
+               <div className="flex-1 bg-[#100E13] rounded-2xl p-4 overflow-hidden relative flex items-center justify-center border border-md-sys-outline/10">
+                  <${PdfStage} 
+                     file=${activeFile?.file} 
+                     signatures=${visibleSignatures}
+                     selectedId=${selectedSigId}
+                     onSelect=${setSelectedSigId}
+                     onUpdateSignatures=${handleUpdateSignatures}
+                     scale=${1.5}
+                  />
+                  <!-- Status Toast -->
+                  <div className=${`absolute bottom-6 bg-md-sys-inverseSurface text-md-sys-inverseOnSurface px-4 py-2 rounded-full shadow-xl text-sm font-medium flex items-center gap-2 transition-opacity duration-300 ${status.type === 'idle' ? 'opacity-0' : 'opacity-100'}`}>
+                     ${status.text}
+                  </div>
+               </div>
+            </div>
+          </div>
+        `;
       };
 
-      for (const file of files) {
-        setFiles((prev) => prev.map((entry) => (entry.id === file.id ? {...entry, meta: {...entry.meta, status: 'analyzing'}} : entry)));
-        try {
-          const base64 = await renderPageAsPng(file.file);
-          const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + geminiKey,
-            {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({
-                contents: [{parts: [{inlineData: {mimeType: 'image/png', data: base64}}, {text: prompt}]}],
-                generationConfig: {responseMimeType: 'application/json'},
-              }),
-            },
-          );
-          const payload = await response.json();
-          const text = payload?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || JSON.stringify(payload);
-          const parsed = parseJson(text);
-          setFiles((prev) =>
-            prev.map((entry) =>
-              entry.id === file.id
-                ? {
-                    ...entry,
-                    meta: {
-                      title: parsed.title || '',
-                      drawingNumber: parsed.drawingNumber || '',
-                      status: 'done',
-                    },
-                  }
-                : entry,
-            ),
-          );
-        } catch (error) {
-          console.error(error);
-          setFiles((prev) =>
-            prev.map((entry) =>
-              entry.id === file.id
-                ? {
-                    ...entry,
-                    meta: {...entry.meta, status: 'error'},
-                  }
-                : entry,
-            ),
-          );
-        }
-      }
-      setIsAnalyzing(false);
-      setStatus('Analysis complete.');
-    };
-
-    const signAll = async () => {
-      if (!canSign) {
-        setStatus('Add files and a signature before signing.');
-        return;
-      }
-      setIsSigning(true);
-      setStatus('Stamping pages and building ZIP...');
-      const zip = new JSZip();
-      const isPng = signature.startsWith('data:image/png');
-
-      for (const entry of files) {
-        const pdfDoc = await PDFDocument.load(await entry.file.arrayBuffer());
-        const sigImage = isPng ? await pdfDoc.embedPng(signature) : await pdfDoc.embedJpg(signature);
-        const pages = pdfDoc.getPages();
-        for (const page of pages) {
-          const {width: pageW, height: pageH} = page.getSize();
-          const scaleX = pageW / (canvasSize.width || 1);
-          const scaleY = pageH / (canvasSize.height || 1);
-          const pdfX = box.x * scaleX;
-          const pdfY = pageH - (box.y + box.height) * scaleY;
-          const pdfW = box.width * scaleX;
-          const pdfH = box.height * scaleY;
-          page.drawImage(sigImage, {x: pdfX, y: pdfY, width: pdfW, height: pdfH});
-        }
-        const bytes = await pdfDoc.save();
-        const filename = entry.name.replace(/\.pdf$/i, '') + '-signed.pdf';
-        zip.file(filename, bytes);
-      }
-
-      const blob = await zip.generateAsync({type: 'blob'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'signed-drawings.zip';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1200);
-      setIsSigning(false);
-      setStatus('ZIP ready. Check your downloads.');
-    };
-
-    return html`<${React.Fragment}>
-      <div className="grid">
-        <div className="space-y-3">
-          <${FileList}
-            files=${files}
-            activeId=${selectedFile?.id || null}
-            onAdd=${addFiles}
-            onSelect=${setActiveId}
-            onRemove=${removeFile}
-            onAnalyze=${runAnalysis}
-            geminiKey=${geminiKey}
-            setGeminiKey=${setGeminiKey}
-            analyzing=${isAnalyzing}
-          />
-          <${SigningPanel} mode=${sigMode} setMode=${setSigMode} signature=${signature} setSignature=${setSignature} />
-          <div className="banner">
-            <div className="badge">i</div>
-            <div className="text-sm">
-              <strong>Privacy:</strong> PDFs, signatures, and AI results stay in your browser. The Gemini call only runs if you provide a key.
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <${PdfStage} file=${selectedFile?.file || null} signature=${signature} box=${box} setBox=${setBox} setCanvasSize=${setCanvasSize} />
-          <div className="glass panel flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="chip">Finalize</div>
-              <div className="text-sm text-slate-300">Applies the signature to every page across all PDFs.</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="btn btn-ghost" type="button" onClick=${() => setBox({x: 120, y: 160, width: 220, height: 90})}>
-                Reset placement
-              </button>
-              <button className="btn btn-primary" type="button" onClick=${signAll} disabled=${!canSign || isSigning || isAnalyzing}>
-                ${isSigning ? 'Signing...' : 'Apply to all & download ZIP'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="floating-status">
-        <div className="badge">${isSigning ? '!' : isAnalyzing ? 'AI' : 'i'}</div>
-        <div className="text-sm">${status}</div>
-      </div>
-    </${React.Fragment}>`;
-  };
-
-  const root = createRoot(document.getElementById('app'));
-  root.render(html`<${App} />`);
-</script>
-
+      const root = createRoot(document.getElementById('app'));
+      root.render(html`<${App} />`);
+    </script>
   </body>
 </html>
