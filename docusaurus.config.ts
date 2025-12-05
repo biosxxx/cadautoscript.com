@@ -8,7 +8,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'CAD AutoScript',
   tagline: 'SolidWorks macros, web calculators, and QA generators',
-  favicon: 'img/favicon.png',
+  favicon: 'img/favicon.ico',
   future: {
     v4: true,
   },
@@ -56,7 +56,7 @@ const config: Config = {
     ],
   ],
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/cadautoscript-social-card.jpg',
     colorMode: {
       defaultMode: 'dark',
       respectPrefersColorScheme: false,
