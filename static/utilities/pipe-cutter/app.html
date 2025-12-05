@@ -1,857 +1,665 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-lang-key="docTitle">Генератор шаблона врезки труб</title>
+    <title>Pipe Notch Template Generator</title>
     
-    <!-- Подключение three.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Подключение OrbitControls --><script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Google Fonts (Roboto for MD3 look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Дополнительные стили для Inter и холста */
         body {
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Убираем прокрутку */
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #e2e2e2;
+            overflow: hidden;
         }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        /* MD3 Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Inputs */
+        .md-input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .md-input {
+            width: 100%;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .md-input:focus {
+            border-color: #a8c7fa; /* MD3 Primary Light */
+            background-color: #363636;
+            box-shadow: 0 0 0 1px #a8c7fa;
+        }
+        .md-label {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background-color: #1e1e1e; /* Match sidebar bg */
+            padding: 0 4px;
+            color: #a8c7fa;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .md-helper {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #a8c7fa;
+            color: #0b1d46;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 10px 24px;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #d8e6ff;
+        }
+        .btn-secondary {
+            background-color: #2d2d2d;
+            color: #a8c7fa;
+            border: 1px solid #444;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 10px 24px;
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #363636;
+        }
+
         canvas {
-            display: block;
             width: 100%;
             height: 100%;
-        }
-        #error-message {
-            display: none; /* Скрыто по умолчанию */
-            transition: opacity 0.3s ease;
+            outline: none;
         }
     </style>
 </head>
-<body class="bg-gray-200">
+<body>
 
     <div class="flex flex-col md:flex-row h-screen">
         
-        <!-- Панель управления (слева) --><div class="w-full md:w-1/3 lg:w-1/4 bg-white shadow-lg p-6 overflow-y-auto h-screen">
-            
-            <!-- Переключатель языка --><div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Язык / Language / Keel</label>
-                <div class="flex space-x-2 mt-1">
-                    <button id="lang-ru" class="lang-button w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md shadow-sm transition-colors">
-                        Русский
+        <!-- Sidebar Controls -->
+        <div class="w-full md:w-[400px] flex-shrink-0 bg-[#1e1e1e] shadow-2xl z-10 overflow-y-auto h-screen border-r border-[#333]">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold mb-2 text-[#e2e2e2]">Pipe Notch Generator</h1>
+                <p class="text-sm text-[#aaaaaa] mb-8">
+                    Calculate 2D templates and visualize intersections with precise 3D cutting geometry.
+                </p>
+
+                <!-- Input Groups -->
+                <div class="space-y-1">
+                    
+                    <div class="md-input-group">
+                        <label class="md-label">Main Pipe Diameter (D1)</label>
+                        <input type="number" id="diameter1" value="100" class="md-input">
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Notch Pipe Diameter (D2)</label>
+                        <input type="number" id="diameter2" value="50" class="md-input">
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Wall Thickness (T)</label>
+                        <input type="number" id="thicknessD2" value="2" class="md-input">
+                        <div class="md-helper">Determines inner diameter visual.</div>
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Welding Gap</label>
+                        <input type="number" id="weldingGap" value="0" class="md-input">
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Intersection Angle (°)</label>
+                        <input type="number" id="intersectAngle" value="45" class="md-input">
+                        <div class="md-helper">Angle between pipe axes (1-90).</div>
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Center Offset</label>
+                        <input type="number" id="centerOffset" value="0" class="md-input">
+                        <div class="md-helper">Offset from main pipe center.</div>
+                    </div>
+
+                    <div class="md-input-group">
+                        <label class="md-label">Unwrap Start Angle (°)</label>
+                        <input type="number" id="startAngle" value="0" class="md-input">
+                        <div class="md-helper">Rotates the seam position.</div>
+                    </div>
+                    
+                    <!-- Padding Inputs hidden in a detail view or just smaller since less used -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="md-input-group">
+                            <label class="md-label">Pad D2 (mm)</label>
+                            <input type="number" id="paddingD2" value="20" class="md-input">
+                        </div>
+                        <div class="md-input-group">
+                            <label class="md-label">Pad D1 (mm)</label>
+                            <input type="number" id="paddingD1" value="20" class="md-input">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Error Box -->
+                <div id="error-message" class="hidden mb-6 p-4 bg-[#3c1e1e] border border-[#f2b8b5] text-[#f2b8b5] rounded-lg text-sm">
+                </div>
+
+                <!-- Actions -->
+                <div class="space-y-3 mt-2 pb-8">
+                    <button id="download-dxf-pipe" class="btn-primary w-full flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download D2 Template (DXF)
                     </button>
-                    <button id="lang-en" class="lang-button w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                        English
-                    </button>
-                    <button id="lang-et" class="lang-button w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                        Eesti
+                    <button id="download-dxf-hole" class="btn-secondary w-full flex justify-center items-center gap-2">
+                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download D1 Hole (DXF)
                     </button>
                 </div>
             </div>
-
-            <h1 class="text-2xl font-bold mb-6 text-gray-800" data-lang-key="title">Шаблон врезки трубы</h1>
-            <p class="text-sm text-gray-600 mb-6" data-lang-key="description">
-                Приложение рассчитывает 2D-шаблон для врезки одной трубы (Труба 2) в другую (Труба 1).
-            </p>
-
-            <!-- Ввод данных --><div class="space-y-4">
-                <div>
-                    <label for="diameter1" class="block text-sm font-medium text-gray-700" data-lang-key="d1Label">
-                        Диаметр 1 (D1) - Основная труба (мм)
-                    </label>
-                    <input type="number" id="diameter1" value="100" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <div>
-                    <label for="diameter2" class="block text-sm font-medium text-gray-700" data-lang-key="d2Label">
-                        Диаметр 2 (D2) - Врезаемая труба (мм)
-                    </label>
-                    <input type="number" id="diameter2" value="50" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <div>
-                    <label for="thicknessD2" class="block text-sm font-medium text-gray-700" data-lang-key="thicknessLabel">
-                        Толщина стенки трубы 2 (мм)
-                    </label>
-                    <input type="number" id="thicknessD2" value="2" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="thicknessDesc">Для расчета шаблона отверстия (внутр. D).</p>
-                </div>
-
-                <div>
-                    <label for="weldingGap" class="block text-sm font-medium text-gray-700" data-lang-key="gapLabel">
-                        Зазор под сварку (мм)
-                    </label>
-                    <input type="number" id="weldingGap" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="gapDesc">Зазор (G) добавляется к радиусу выреза D2.</p>
-                </div>
-
-                <div>
-                    <label for="intersectAngle" class="block text-sm font-medium text-gray-700" data-lang-key="angleCLabel">
-                        Угол врезки (°)
-                    </label>
-                    <input type="number" id="intersectAngle" value="90" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="angleCDesc">Угол между осями труб. 90° = перпендикулярно.</p>
-                </div>
-
-                <div>
-                    <label for="centerOffset" class="block text-sm font-medium text-gray-700" data-lang-key="offsetLabel">
-                        Смещение от центра (мм)
-                    </label>
-                    <input type="number" id="centerOffset" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="offsetDesc">Смещение оси трубы 2 от центра трубы 1.</p>
-                </div>
-
-                <div>
-                    <label for="startAngle" class="block text-sm font-medium text-gray-700" data-lang-key="angleLabel">
-                        Начальный угол развертки (° D2)
-                    </label>
-                    <input type="number" id="startAngle" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="angleDesc">Смещение начала шаблона D2. 0° = сбоку.</p>
-                </div>
-
-                <div>
-                    <label for="paddingD2" class="block text-sm font-medium text-gray-700" data-lang-key="paddingD2Label">
-                        Отступ шаблона D2 (мм)
-                    </label>
-                    <input type="number" id="paddingD2" value="50" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="paddingD2Desc">Добавляет 'бумагу' ниже линии реза для D2.</p>
-                </div>
-
-                <div>
-                    <label for="paddingD1" class="block text-sm font-medium text-gray-700" data-lang-key="paddingD1Label">
-                        Отступ шаблона D1 (мм)
-                    </label>
-                    <input type="number" id="paddingD1" value="50" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <p class="mt-1 text-xs text-gray-500" data-lang-key="paddingD1Desc">Добавляет 'бумагу' выше/ниже отверстия для D1.</p>
-                </div>
-            </div>
-
-            <!-- Сообщение об ошибке --><div id="error-message" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
-                <!-- Текст ошибки будет вставлен сюда --></div>
-
-            <!-- Кнопка генерации --><div class="mt-6 space-y-3">
-                <button id="download-dxf-pipe" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span data-lang-key="dxfButtonPipe">Скачать DXF (Шаблон D2)</span>
-                </button>
-                <button id="download-dxf-hole" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span data-lang-key="dxfButtonHole">Скачать DXF (Отверстие в D1)</span>
-                </button>
-            </div>
-
         </div>
 
-        <!-- 3D Превью (справа) --><div id="3d-container" class="flex-1 bg-gray-200">
-            <!-- Canvas three.js будет здесь --></div>
+        <!-- 3D Viewport -->
+        <div id="3d-container" class="flex-1 bg-[#0f0f0f] relative overflow-hidden">
+            <!-- Canvas Injected Here -->
+            <div class="absolute bottom-4 right-4 text-[#666] text-xs select-none pointer-events-none">
+                Left Click: Rotate | Right Click: Pan | Scroll: Zoom
+            </div>
+        </div>
 
     </div>
 
     <script type="module">
-        // --- Языковые константы ---
-        const translations = {
-            'ru': {
-                'docTitle': "Генератор шаблона врезки труб",
-                'title': "Шаблон врезки трубы",
-                'description': "Приложение рассчитывает 2D-шаблон для врезки одной трубы (Труба 2) в другую (Труба 1).",
-                'd1Label': "Диаметр 1 (D1) - Основная труба (мм)",
-                'd2Label': "Диаметр 2 (D2) - Врезаемая труба (мм)",
-                'thicknessLabel': "Толщина стенки трубы 2 (мм)",
-                'thicknessDesc': "Для расчета шаблона отверстия (внутр. D).",
-                'gapLabel': "Зазор под сварку (мм)",
-                'gapDesc': "Зазор (G) добавляется к радиусу выреза D2.",
-                'angleCLabel': "Угол врезки (°)",
-                'angleCDesc': "Угол между осями труб. 90° = перпендикулярно.",
-                'offsetLabel': "Смещение от центра (мм)",
-                'offsetDesc': "Смещение оси трубы 2 от центра трубы 1.",
-                'angleLabel': "Начальный угол развертки (° D2)",
-                'angleDesc': "Смещение начала шаблона D2. 0° = сбоку.",
-                'paddingD2Label': "Отступ шаблона D2 (мм)",
-                'paddingD2Desc': "Добавляет 'бумагу' ниже линии реза для D2.",
-                'paddingD1Label': "Отступ шаблона D1 (мм)",
-                'paddingD1Desc': "Добавляет 'бумагу' выше/ниже отверстия для D1.",
-                'dxfButtonPipe': "Скачать DXF (Шаблон D2)",
-                'dxfButtonHole': "Скачать DXF (Отверстие в D1)",
-                'errorPositive': "Диаметры > 0. Толщина/Зазор/Отступ >= 0. Угол 1°-90°.",
-                'errorThickness': "Толщина стенки (T) должна быть меньше половины D2.",
-                'errorInvalidIntersectionPipe': "Ошибка: Труба 2 (внешний D) не пересекает Трубу 1. Уменьшите смещение или увеличьте D1/Зазор.",
-                'errorInvalidIntersectionHole': "Ошибка: Труба 2 (внутренний D) не пересекает Трубу 1. Уменьшите смещение/толщину или увеличьте D1."
-            },
-            'en': {
-                'docTitle': "Pipe Notch Template Generator",
-                'title': "Pipe Notch Template",
-                'description': "This app calculates a 2D template for notching one pipe (Pipe 2) to fit another (Pipe 1).",
-                'd1Label': "Diameter 1 (D1) - Main Pipe (mm)",
-                'd2Label': "Diameter 2 (D2) - Notched Pipe (mm)",
-                'thicknessLabel': "Pipe 2 Wall Thickness (mm)",
-                'thicknessDesc': "For hole template calculation (inner D).",
-                'gapLabel': "Welding Gap (mm)",
-                'gapDesc': "Gap (G) is added to the D2 cut radius.",
-                'angleCLabel': "Intersection Angle (°)",
-                'angleCDesc': "Angle between pipe centerlines. 90° = perpendicular.",
-                'offsetLabel': "Center Offset (mm)",
-                'offsetDesc': "Offset of Pipe 2 centerline from Pipe 1 center.",
-                'angleLabel': "Unwrap Start Angle (° D2)",
-                'angleDesc': "Shifts the D2 template start. 0° = side.",
-                'paddingD2Label': "Pipe D2 Template Padding (mm)",
-                'paddingD2Desc': "Adds 'paper' below the cut line for D2.",
-                'paddingD1Label': "Pipe D1 Hole Template Padding (mm)",
-                'paddingD1Desc': "Adds 'paper' above/below the hole for D1.",
-                'dxfButtonPipe': "Download DXF (Pipe D2 Template)",
-                'dxfButtonHole': "Download DXF (Hole in D1 Template)",
-                'errorPositive': "Diameters > 0. Thickness/Gap/Padding >= 0. Angle 1°-90°.",
-                'errorThickness': "Wall Thickness (T) must be less than half of D2.",
-                'errorInvalidIntersectionPipe': "Error: Pipe 2 (outer D) does not intersect Pipe 1. Reduce offset or increase D1/Gap.",
-                'errorInvalidIntersectionHole': "Error: Pipe 2 (inner D) does not intersect Pipe 1. Reduce offset/thickness or increase D1."
-            },
-            'et': {
-                'docTitle': "Toru sisselõike šablooni generaator",
-                'title': "Toru sisselõike šabloon",
-                'description': "Rakendus arvutab 2D-šablooni ühe toru (Toru 2) sobitamiseks teise toruga (Toru 1).",
-                'd1Label': "Läbimõõt 1 (D1) - Põhitoru (mm)",
-                'd2Label': "Läbimõõt 2 (D2) - Sisselõigatav toru (mm)",
-                'thicknessLabel': "Toru 2 seina paksus (mm)",
-                'thicknessDesc': "Ava šablooni arvutamiseks (sisemine D).",
-                'gapLabel': "Keevituspilu (mm)",
-                'gapDesc': "Pilu (G) lisatakse D2 lõikeraadiusele.",
-                'angleCLabel': "Ristumisnurk (°)",
-                'angleCDesc': "Torude telgede vaheline nurk. 90° = risti.",
-                'offsetLabel': "Tsentri nihe (mm)",
-                'offsetDesc': "Toru 2 telje nihe Toru 1 tsentrist.",
-                'angleLabel': "Lahtivõtu algusnurk (° D2)",
-                'angleDesc': "Nihutab D2 šablooni algust. 0° = külg.",
-                'paddingD2Label': "Toru D2 šablooni polsterdus (mm)",
-                'paddingD2Desc': "Lisab 'paberit' allapoole lõikejoont D2 jaoks.",
-                'paddingD1Label': "Toru D1 ava šablooni polsterdus (mm)",
-                'paddingD1Desc': "Lisab 'paberit' ava kohale/alla D1 jaoks.",
-                'dxfButtonPipe': "Laadi alla DXF (Toru D2 šabloon)",
-                'dxfButtonHole': "Laadi alla DXF (Ava D1 šabloon)",
-                'errorPositive': "Läbimõõdud > 0. Paksus/Pilu/Polsterdus >= 0. Nurk 1°-90°.",
-                'errorThickness': "Seina paksus (T) peab olema vähem kui pool D2-st.",
-                'errorInvalidIntersectionPipe': "Viga: Toru 2 (välimine D) ei ristu Toruga 1. Vähendage nihet või suurendage D1/Pilu.",
-                'errorInvalidIntersectionHole': "Viga: Toru 2 (sisemine D) ei ristu Toruga 1. Vähendage nihet/paksust või suurendage D1."
-            }
-        };
-        let currentLanguage = 'ru'; // Язык по умолчанию
-
-        // --- Управление языком ---
-        function setLanguage(lang) {
-            if (!translations[lang]) return;
-            currentLanguage = lang;
-            localStorage.setItem('pipe_lang', lang);
-
-            // Обновление кнопок
-            document.querySelectorAll('.lang-button').forEach(btn => {
-                if (btn.id === `lang-${lang}`) {
-                    btn.classList.add('bg-indigo-600', 'text-white');
-                    btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                } else {
-                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                    btn.classList.remove('bg-indigo-600', 'text-white');
-                }
-            });
-
-            // Обновление текста
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.getAttribute('data-lang-key');
-                if (translations[lang][key]) {
-                    el.innerText = translations[lang][key];
-                }
-            });
-
-            // Обновление сообщения об ошибке, если оно видимо
-            if (errorDiv.style.display === 'block') {
-                const currentErrorKey = errorDiv.dataset.currentError;
-                if (currentErrorKey) {
-                    showError(currentErrorKey);
-                }
-            }
-        }
-
-        // --- Управление ошибками ---
-        const errorDiv = document.getElementById('error-message');
-        function showError(langKey) {
-            if (translations[currentLanguage][langKey]) {
-                errorDiv.innerText = translations[currentLanguage][langKey];
-                errorDiv.dataset.currentError = langKey;
-                errorDiv.style.display = 'block';
-                errorDiv.style.opacity = 1;
-            }
-        }
-        function hideError() {
-            errorDiv.style.opacity = 0;
-            errorDiv.style.display = 'none';
-            errorDiv.dataset.currentError = "";
-        }
-
-        // --- Глобальные переменные 3D ---
+        // --- Core Variables ---
         let scene, camera, renderer, controls;
-        let pipe1Mesh, pipe2Mesh, pipe2InnerMesh, gapVizMesh, seamLineMesh;
-        const pipeMaterial1 = new THREE.MeshStandardMaterial({ color: 0x6b7280, side: THREE.DoubleSide, metalness: 0.5, roughness: 0.5 });
-        const pipeMaterial2 = new THREE.MeshStandardMaterial({ color: 0x3b82f6, side: THREE.DoubleSide, metalness: 0.5, roughness: 0.5 });
-        const pipeMaterial2Inner = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.7 });
-        const gapMaterial = new THREE.MeshStandardMaterial({ color: 0xf97316, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
-        const seamMaterial = new THREE.LineBasicMaterial({ color: 0xe11d48, linewidth: 3 });
+        let pipe1Mesh, pipe2Mesh, seamLineMesh;
+        
+        // Materials
+        const mainPipeMat = new THREE.MeshStandardMaterial({ 
+            color: 0x444444, 
+            roughness: 0.4, 
+            metalness: 0.6 
+        });
+        
+        const cutPipeMat = new THREE.MeshStandardMaterial({ 
+            color: 0x3c83f6, // Vibrant Blue
+            roughness: 0.4, 
+            metalness: 0.3,
+            side: THREE.DoubleSide
+        });
 
-        // --- Элементы DOM ---
-        const d1Input = document.getElementById('diameter1');
-        const d2Input = document.getElementById('diameter2');
-        const thicknessInput = document.getElementById('thicknessD2');
-        const gapInput = document.getElementById('weldingGap');
-        const angleCInput = document.getElementById('intersectAngle');
-        const offsetInput = document.getElementById('centerOffset');
-        const angleInput = document.getElementById('startAngle');
-        const paddingD2Input = document.getElementById('paddingD2'); // Changed to paddingD2
-        const paddingD1Input = document.getElementById('paddingD1'); // New input
-        const dxfButtonPipe = document.getElementById('download-dxf-pipe');
-        const dxfButtonHole = document.getElementById('download-dxf-hole');
+        const cutSurfaceMat = new THREE.MeshBasicMaterial({
+            color: 0xa8c7fa,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
 
-        /**
-         * Инициализация 3D-сцены
-         */
+        const seamMaterial = new THREE.LineBasicMaterial({ color: 0xff5252, linewidth: 3 });
+
+        // DOM Elements
+        const inputs = {
+            d1: document.getElementById('diameter1'),
+            d2: document.getElementById('diameter2'),
+            thick: document.getElementById('thicknessD2'),
+            gap: document.getElementById('weldingGap'),
+            angle: document.getElementById('intersectAngle'),
+            offset: document.getElementById('centerOffset'),
+            startAngle: document.getElementById('startAngle'),
+            padD2: document.getElementById('paddingD2'),
+            padD1: document.getElementById('paddingD1'),
+            err: document.getElementById('error-message')
+        };
+
+        // --- Initialization ---
+        function init() {
+            init3D();
+            
+            // Event Listeners
+            Object.values(inputs).forEach(el => {
+                if(el.tagName === 'INPUT') el.addEventListener('input', update);
+            });
+            
+            document.getElementById('download-dxf-pipe').addEventListener('click', () => downloadDXF('pipe'));
+            document.getElementById('download-dxf-hole').addEventListener('click', () => downloadDXF('hole'));
+            window.addEventListener('resize', onResize);
+
+            // Initial Trigger
+            update();
+        }
+
         function init3D() {
             const container = document.getElementById('3d-container');
             
-            // Сцена
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xe5e7eb);
+            scene.background = new THREE.Color(0x0f0f0f); // Very dark gray
+            
+            // Fog for depth
+            scene.fog = new THREE.Fog(0x0f0f0f, 200, 1000);
 
-            // Камера
-            const aspect = container.clientWidth / container.clientHeight;
-            camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 10000);
-            camera.position.set(200, 150, 200);
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 2000);
+            camera.position.set(150, 100, 150);
 
-            // Освещение
-            const ambLight = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(ambLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            dirLight.position.set(100, 200, 150);
-            scene.add(dirLight);
-
-            // Рендерер
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
+            // Tone mapping for better contrast
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
             container.appendChild(renderer.domElement);
 
-            // Контроллеры
+            // Controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.1;
-            controls.minDistance = 10;
-            controls.maxDistance = 5000;
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambient);
+            
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            mainLight.position.set(50, 100, 50);
+            scene.add(mainLight);
 
-            // Сетка
-            const gridHelper = new THREE.GridHelper(500, 20, 0x9ca3af, 0x9ca3af);
-            gridHelper.rotation.x = Math.PI / 2;
-            scene.add(gridHelper);
+            const fillLight = new THREE.DirectionalLight(0x445566, 0.5);
+            fillLight.position.set(-50, 0, -50);
+            scene.add(fillLight);
 
-            // Анимация
+            // Grid
+            const grid = new THREE.GridHelper(500, 50, 0x333333, 0x1a1a1a);
+            scene.add(grid);
+
             animate();
-            updatePreview();
         }
 
-        /**
-         * Цикл анимации
-         */
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
 
-        /**
-         * Обработчик изменения размера окна
-         */
-        function onWindowResize() {
+        function onResize() {
             const container = document.getElementById('3d-container');
             if (!container) return;
-            
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            
-            if (w === 0 || h === 0) return; // Не обновлять, если контейнер схлопнут
-
-            camera.aspect = w / h;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(w, h);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         }
 
-        /**
-         * Инициализация приложения
-         */
-        function init() {
-            init3D();
+        // --- Core Logic ---
 
-            // Слушатели событий
-            d1Input.addEventListener('input', updatePreview);
-            d2Input.addEventListener('input', updatePreview);
-            thicknessInput.addEventListener('input', updatePreview);
-            gapInput.addEventListener('input', updatePreview);
-            angleCInput.addEventListener('input', updatePreview);
-            offsetInput.addEventListener('input', updatePreview);
-            angleInput.addEventListener('input', updatePreview);
-            paddingD2Input.addEventListener('input', updatePreview); 
-            paddingD1Input.addEventListener('input', updatePreview); 
+        function update() {
+            inputs.err.classList.add('hidden');
             
-            dxfButtonPipe.addEventListener('click', () => generateAndDownloadDXF('pipe'));
-            dxfButtonHole.addEventListener('click', () => generateAndDownloadDXF('hole'));
-            
-            window.addEventListener('resize', onWindowResize);
+            const params = getParams();
+            if (!params) return;
 
-            // Язык
-            document.getElementById('lang-ru').addEventListener('click', () => setLanguage('ru'));
-            document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
-            document.getElementById('lang-et').addEventListener('click', () => setLanguage('et'));
-            
-            const savedLang = localStorage.getItem('pipe_lang') || 'ru';
-            setLanguage(savedLang);
-        }
-
-        /**
-         * Обновление 3D-сцены
-         */
-        function updatePreview() {
-            hideError(); // Сбрасываем ошибки при любом изменении
-            const D1 = parseFloat(d1Input.value);
-            const D2 = parseFloat(d2Input.value);
-            const thickness = parseFloat(thicknessInput.value) || 0;
-            const gap = parseFloat(gapInput.value) || 0;
-            const intersectAngleDeg = parseFloat(angleCInput.value) || 90;
-            const offset = parseFloat(offsetInput.value) || 0;
-            const startAngleDeg = parseFloat(angleInput.value) || 0;
-            const paddingD2 = parseFloat(paddingD2Input.value) || 0; // Use paddingD2 here
-            const paddingD1 = parseFloat(paddingD1Input.value) || 0; // Use paddingD1 here
-            
-            const intersectAngleRad = intersectAngleDeg * Math.PI / 180;
-            const startAngleRad = startAngleDeg * Math.PI / 180;
-            
-            // --- Валидация ---
-            if (isNaN(D1) || isNaN(D2) || D1 <= 0 || D2 <= 0 || gap < 0 || paddingD2 < 0 || paddingD1 < 0 || thickness < 0 || intersectAngleDeg <= 0 || intersectAngleDeg > 90) {
-                showError("errorPositive");
-                return;
-            }
-            if (thickness >= D2 / 2) {
-                showError("errorThickness");
-                return;
-            }
-
+            const { D1, D2, angleRad, offset, gap } = params;
             const R1 = D1 / 2;
-            const R1_eff = R1 + gap;
-            const R2_outer = D2 / 2;
-            const R2_inner = R2_outer - thickness;
+            const R2 = D2 / 2;
 
-            // Проверка на возможность пересечения (для UI)
-            if (Math.abs(offset) + R2_outer <= R1_eff) {
-                // Все ок
-            } else {
-                 showError("errorInvalidIntersectionPipe");
-                 // Не выходим, просто показываем ошибку
-            }
-
-            // --- Обновление 3D-сцены ---
-
-            // Удаляем старые объекты
+            // --- Rebuild Scene Objects ---
             if (pipe1Mesh) scene.remove(pipe1Mesh);
             if (pipe2Mesh) scene.remove(pipe2Mesh);
-            if (pipe2InnerMesh) scene.remove(pipe2InnerMesh);
-            if (gapVizMesh) scene.remove(gapVizMesh);
             if (seamLineMesh) scene.remove(seamLineMesh);
 
-            // Создаем Трубу 1 (вертикальная)
-            const pipe1Geo = new THREE.CylinderGeometry(R1, R1, D1 * 2.5, 64, 1, true); // true = openEnded
-            pipe1Mesh = new THREE.Mesh(pipe1Geo, pipeMaterial1);
-            scene.add(pipe1Mesh); 
+            // 1. Main Pipe (Vertical Y-Axis for simplicity in world space)
+            const p1Geo = new THREE.CylinderGeometry(R1, R1, Math.max(D1 * 3, D2 * 4), 64, 1, true);
+            pipe1Mesh = new THREE.Mesh(p1Geo, mainPipeMat);
+            scene.add(pipe1Mesh);
 
-            // --- Труба 2 (внешняя) ---
-            const pipe2Length = D1 * 1.5;
-            const pipe2Geo = new THREE.CylinderGeometry(R2_outer, R2_outer, pipe2Length, 64, 1, true);
-            pipe2Geo.rotateZ(Math.PI / 2); // Поворачиваем, чтобы ось была вдоль X
+            // 2. Notched Pipe (Pipe 2)
+            const pipe2Length = D1 * 1.5 + 100; // Enough length
+            const segments = 128; // High res for smooth cut
+            const p2Geo = new THREE.BufferGeometry();
             
-            pipe2Mesh = new THREE.Mesh(pipe2Geo, pipeMaterial2);
+            const vertices = [];
+            const indices = [];
+            const uvs = [];
             
-            // Применяем угол врезки (вращение вокруг Z)
-            const rotationZ = (Math.PI / 2) - intersectAngleRad;
-            pipe2Mesh.rotation.z = rotationZ;
+            // Math constants
+            const sinTheta = Math.sin(angleRad);
+            const tanTheta = Math.tan(angleRad);
             
-            // Применяем смещение (по оси Z)
-            pipe2Mesh.position.z = offset;
-            
-            // Сдвигаем трубу 2, чтобы она "врезалась"
-            // (Рассчитываем сдвиг по X, чтобы она касалась центра)
-            const posX = R1 * Math.cos((Math.PI / 2) - intersectAngleRad) + (pipe2Length / 3);
-            pipe2Mesh.position.x = posX;
-            
+            // For texture calc
+            const circumference = 2 * Math.PI * R2;
+
+            for (let y = 0; y <= 1; y++) { // 0 = cut end, 1 = far end
+                for (let x = 0; x <= segments; x++) {
+                    const alpha = (x / segments) * 2 * Math.PI;
+                    const sinAlpha = Math.sin(alpha);
+                    const cosAlpha = Math.cos(alpha);
+
+                    // Intersection formula
+                    const R1_eff = R1 + gap; 
+                    
+                    // Check intersection validity with safe term
+                    let term = Math.pow(R1_eff, 2) - Math.pow(R2 * sinAlpha + offset, 2);
+                    
+                    if (term < 0) {
+                        // If term is extremely close to 0 (floating point error), clamp it
+                        if (term > -0.01) {
+                            term = 0;
+                        } else {
+                            showError("Geometry Error: Pipes do not intersect. Increase D1 or reduce Offset.");
+                            return; // Stop mesh generation to avoid NANs
+                        }
+                    }
+
+                    // Local coords of the circle cross section
+                    const localX = R2 * cosAlpha;
+                    
+                    let len = 0;
+                    
+                    if (y === 0) {
+                        // CUT END
+                        // y_cut calculation
+                        // Protect against division by zero
+                        const sT = Math.abs(sinTheta) < 1e-6 ? 1e-6 : sinTheta;
+                        const tT = Math.abs(tanTheta) < 1e-6 ? 1e-6 : tanTheta;
+
+                        const part1 = (1 / sT) * Math.sqrt(term);
+                        const part2 = (R2 * cosAlpha) / tT;
+                        
+                        // CHANGED: Inverted sign of part2 to flip the cut side
+                        const cutDepth = part1 + part2; 
+                        
+                        len = cutDepth; 
+                    } else {
+                        // FAR END
+                        len = (D1 + pipe2Length); 
+                    }
+
+                    // Vector W (Axis of Pipe 2 directed AWAY from Pipe 1)
+                    const wx = Math.sin(angleRad);
+                    const wy = Math.cos(angleRad);
+                    const wz = 0;
+
+                    // Vector V (Offset direction - typically Z axis for Y-up Pipe 1)
+                    const vx = 0;
+                    const vy = 0;
+                    const vz = 1;
+
+                    // Vector U (Cross product V x W)
+                    const ux = (vy * wz) - (vz * wy); // -cos
+                    const uy = (vz * wx) - (vx * wz); // sin
+                    const uz = (vx * wy) - (vy * wx); // 0
+
+                    // Construct Vertex P
+                    const pX = (R2 * cosAlpha * ux) + ((R2 * sinAlpha + offset) * vx) + (len * wx);
+                    const pY = (R2 * cosAlpha * uy) + ((R2 * sinAlpha + offset) * vy) + (len * wy);
+                    const pZ = (R2 * cosAlpha * uz) + ((R2 * sinAlpha + offset) * vz) + (len * wz);
+
+                    // Safety check against NaN before pushing
+                    if (isNaN(pX) || isNaN(pY) || isNaN(pZ)) {
+                        vertices.push(0, 0, 0);
+                    } else {
+                        vertices.push(pX, pY, pZ);
+                    }
+                    
+                    // UVs
+                    uvs.push(x / segments, y);
+                }
+            }
+
+            // Indices
+            for (let x = 0; x < segments; x++) {
+                const a = x;
+                const b = x + 1;
+                const c = x + segments + 1;
+                const d = x + segments + 2;
+                
+                indices.push(a, b, d);
+                indices.push(a, d, c);
+            }
+
+            p2Geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            p2Geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            p2Geo.setIndex(indices);
+            p2Geo.computeVertexNormals();
+
+            pipe2Mesh = new THREE.Mesh(p2Geo, cutPipeMat);
             scene.add(pipe2Mesh);
 
-            // --- Труба 2 (внутренняя) ---
-            if (R2_inner > 0) {
-                const pipe2InnerGeo = new THREE.CylinderGeometry(R2_inner, R2_inner, pipe2Length, 64, 1, true);
-                pipe2InnerGeo.rotateZ(Math.PI / 2);
-                pipe2InnerMesh = new THREE.Mesh(pipe2InnerGeo, pipeMaterial2Inner);
-                
-                // Применяем те же трансформации
-                pipe2InnerMesh.rotation.z = rotationZ;
-                pipe2InnerMesh.position.z = offset;
-                pipe2InnerMesh.position.x = posX;
-                
-                scene.add(pipe2InnerMesh);
+            // 3. Seam Line (Red)
+            const seamPoints = [];
+            for(let i=0; i<=segments; i++) {
+                seamPoints.push(new THREE.Vector3(
+                    vertices[i*3],
+                    vertices[i*3+1],
+                    vertices[i*3+2]
+                ));
             }
-
-            // Создаем визуализацию зазора
-            if (gap > 0) {
-                const gapVizGeo = new THREE.CylinderGeometry(R1_eff, R1_eff, D1 * 2.5, 64, 1, true);
-                gapVizMesh = new THREE.Mesh(gapVizGeo, gapMaterial);
-                scene.add(gapVizMesh); 
-            }
-
-            // Создаем линию шва (начало развертки)
-            const seamY = R2_outer * Math.cos(startAngleRad);
-            const seamZ = R2_outer * Math.sin(startAngleRad);
-            const p1 = new THREE.Vector3(-pipe2Length / 2, seamY, seamZ);
-            const p2 = new THREE.Vector3(pipe2Length / 2, seamY, seamZ);
-            
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-            seamLineMesh = new THREE.Line(lineGeo, seamMaterial);
-            
-            // Линия шва должна иметь то же положение и вращение, что и труба 2
-            seamLineMesh.rotation.z = rotationZ;
-            seamLineMesh.position.z = offset;
-            seamLineMesh.position.x = posX;
-            
+            const seamGeo = new THREE.BufferGeometry().setFromPoints(seamPoints);
+            seamLineMesh = new THREE.Line(seamGeo, seamMaterial);
             scene.add(seamLineMesh);
 
-            // Обновляем камеру и контроллеры
-            const maxDim = Math.max(D1, D2, 10);
-            controls.maxDistance = maxDim * 10;
+            // Camera Target
             controls.target.set(0, 0, 0);
-            camera.position.set(maxDim * 2, maxDim * 1.5, maxDim * 2);
-            controls.update();
         }
 
-        /**
-         * Расчет точек для 2D-шаблона ТРУБЫ D2
-         * @param {number} R1_eff - Эффективный радиус D1 (R1 + gap)
-         * @param {number} R2 - Внешний радиус D2
-         * @param {number} startAngleRad - Начальный угол развертки
-         * @param {number} intersectAngleRad - Угол врезки
-         * @param {number} offset - Смещение
-         * @returns {Array|null}
-         */
-        function calculatePipeTemplatePoints(R1_eff, R2, startAngleRad, intersectAngleRad, offset) {
-            
-            // Проверка на возможность пересечения
-            if (Math.abs(offset) > R1_eff + R2) { // Грубая проверка
-                return { points: null, error: "errorInvalidIntersectionPipe" };
+        function getParams() {
+            // Helper to safely parse inputs (Prevents NaN errors)
+            const safeFloat = (val, def) => {
+                if (val === "" || val === undefined) return def;
+                const parsed = parseFloat(val);
+                return isNaN(parsed) ? def : parsed;
+            };
+
+            const D1 = safeFloat(inputs.d1.value, 100);
+            const D2 = safeFloat(inputs.d2.value, 50);
+            const thickness = safeFloat(inputs.thick.value, 0);
+            const gap = safeFloat(inputs.gap.value, 0);
+            let angleDeg = safeFloat(inputs.angle.value, 45);
+            const offset = safeFloat(inputs.offset.value, 0);
+            const startAngle = safeFloat(inputs.startAngle.value, 0);
+            const pd2 = safeFloat(inputs.padD2.value, 0);
+            const pd1 = safeFloat(inputs.padD1.value, 0);
+
+            if (D1 <= 0 || D2 <= 0) {
+                showError("Diameters must be positive.");
+                return null;
             }
+            // Clamp Angle
+            angleDeg = Math.max(1, Math.min(90, angleDeg));
 
-            const points = [];
-            const circumference = 2 * Math.PI * R2;
-            const steps = 360; 
-            const sin_theta = Math.sin(intersectAngleRad);
-            const part2_factor = (intersectAngleRad === Math.PI / 2) ? 0 : (1 / Math.tan(intersectAngleRad));
-
-            for (let i = 0; i <= steps; i++) {
-                const angle = (i / steps) * 2 * Math.PI; // Угол в радианах (0 до 2*PI)
-                const effectiveAngle = angle + startAngleRad;
-                const x = (i / steps) * circumference;
-                
-                // y = (1/sin(theta)) * sqrt(R1_eff^2 - (R2*sin(alpha) + offset)^2) - (R2*cos(alpha) / tan(theta))
-                const inside_sqrt = Math.pow(R1_eff, 2) - Math.pow(R2 * Math.sin(effectiveAngle) + offset, 2);
-
-                if (inside_sqrt < 0) {
-                    // Это может случиться при крайних значениях offset
-                    return { points: null, error: "errorInvalidIntersectionPipe" }; 
-                }
-
-                const part1 = (1 / sin_theta) * Math.sqrt(inside_sqrt);
-                const part2 = (R2 * Math.cos(effectiveAngle)) * part2_factor;
-                const y = part1 - part2;
-                
-                points.push({ x: x, y: y });
-            }
-            return { points: points, error: null };
+            return { 
+                D1, D2, thickness, gap, 
+                angleDeg, angleRad: angleDeg * Math.PI / 180,
+                offset, startAngleRad: startAngle * Math.PI / 180,
+                padD2: pd2, padD1: pd1
+            };
         }
 
-        /**
-         * Расчет точек для 2D-шаблона ОТВЕРСТИЯ в D1 (ИСПРАВЛЕНО)
-         * @param {number} R1 - Радиус основной трубы D1
-         * @param {number} R2_inner - Внутренний радиус трубы D2
-         * @param {number} intersectAngleRad - Угол врезки
-         * @param {number} offset - Смещение
-         * @returns {Array|null}
-         */
-        function calculateHoleTemplatePoints(R1, R2_inner, intersectAngleRad, offset) {
-            
-            const points = [];
-            const steps = 360; // Количество точек
-            const sin_theta = Math.sin(intersectAngleRad);
-            const cos_theta = Math.cos(intersectAngleRad);
-            // const tan_theta_inv = (intersectAngleRad === Math.PI / 2) ? 0 : (1 / Math.tan(intersectAngleRad)); // == cos_theta / sin_theta
-
-            for (let i = 0; i <= steps; i++) {
-                const alpha = (i / steps) * 2 * Math.PI; // Угол вокруг оси трубы 2
-                
-                const R2_sin_alpha = R2_inner * Math.sin(alpha);
-                const R2_cos_alpha = R2_inner * Math.cos(alpha);
-
-                // 1. Рассчитываем 't' (расстояние вдоль оси трубы 2 до точки пересечения)
-                // t = ( C1 +/- sqrt(R1^2 - C2^2) ) / sin(theta)
-                // C1 = R2_inner * cos(alpha) * cos(theta)
-                // C2 = R2_inner * sin(alpha) + offset
-                
-                const C1 = R2_cos_alpha * cos_theta;
-                const C2 = R2_sin_alpha + offset;
-                
-                const inside_sqrt_val = R1 * R1 - C2 * C2;
-
-                if (inside_sqrt_val < 0) {
-                    // Геометрически невозможное пересечение в этой точке
-                    // Это может произойти, если |offset + R2_inner*sin(alpha)| > R1
-                    // Это означает, что труба 2 "промахивается" мимо трубы 1
-                    // console.warn(`Hole calc skip at alpha ${alpha * 180 / Math.PI}: R1=${R1}, C2=${C2}`);
-                    // Если это происходит в самом начале, это полная ошибка
-                    if (i === 0 || i === steps) {
-                       return { points: null, error: "errorInvalidIntersectionHole" };
-                    }
-                    // Пропускаем точку, если это разрыв в середине
-                    continue; 
-                }
-                
-                const sqrt_val = Math.sqrt(inside_sqrt_val);
-                
-                // Рассчитываем t, используя тот же метод, что и для шаблона D2
-                // t = (sqrt(R1^2 - C2^2) - C1) / sin(theta)
-                const t = (sqrt_val - C1) / sin_theta; 
-                
-                // 2. Рассчитываем 3D-координаты (x, y, z) точки пересечения
-                // x = t*sin(theta) - R2_inner*cos(alpha)*cos(theta)
-                // y = t*cos(theta) + R2_inner*cos(alpha)*sin(theta)
-                // z = R2_inner*sin(alpha) + offset
-                
-                const x_3d = t * sin_theta - R2_cos_alpha * cos_theta;
-                const y_3d = t * cos_theta + R2_cos_alpha * sin_theta;
-                const z_3d = R2_sin_alpha + offset;
-                
-                // 3. Разворачиваем 3D-точку (x, y, z) с поверхности цилиндра R1
-                // Ось X развертки: R1 * угол_вокруг_D1 (phi)
-                // Ось Y развертки: y_3d (высота вдоль D1)
-                
-                // Угол phi = atan2(z_3d, x_3d)
-                // atan2 возвращает от -PI до +PI. Сдвигаем в 0...2*PI
-                let phi = Math.atan2(z_3d, x_3d);
-                if (phi < 0) {
-                    phi += 2 * Math.PI;
-                }
-
-                // --- ИСПРАВЛЕНИЕ: Сдвигаем начало развертки на 180 град (назад) ---
-                // Мы хотим, чтобы x=0 был на phi=PI (сзади)
-                let phi_shifted = phi - Math.PI;
-                if (phi_shifted < 0) {
-                    phi_shifted += 2 * Math.PI;
-                }
-                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
-                
-                const x_unrolled = R1 * phi_shifted; // Используем phi_shifted
-                const y_unrolled = y_3d;
-                
-                points.push({ x: x_unrolled, y: y_unrolled, phi: phi_shifted }); // Cохраняем phi_shifted
-            }
-            
-            if (points.length === 0) {
-                // Если ни одна точка не пересеклась
-                return { points: null, error: "errorInvalidIntersectionHole" };
-            }
-
-            // 4. УДАЛЕНО: Сортировка точек по x_unrolled. Она нарушала непрерывность линии.
-            // points.sort((a, b) => a.x - b.x);
-            
-            // 5. УДАЛЕНО: Блок "Убедимся, что первая и последняя точки совпадают" был не нужен 
-            // и потенциально некорректен. Флаг '70\n1' в DXF сам замкнет полилинию.
-
-            return { points: points, error: null };
+        function showError(msg) {
+            inputs.err.innerText = msg;
+            inputs.err.classList.remove('hidden');
         }
 
+        // --- DXF Logic ---
 
-        /**
-         * Генерация строки DXF (для обоих типов шаблонов)
-         */
-        function generateDXFString(templatePoints, R_for_circumference, padding, type) { // Добавлен 'type'
-            if (!templatePoints || templatePoints.length === 0) return "";
-
-            const circumference = 2 * Math.PI * R_for_circumference;
-            let dxf = `0\nSECTION\n2\nENTITIES\n`; // Начало секции ENTITIES
-
-            // Находим минимальную и максимальную Y-координату, чтобы центрировать и применить отступ
-            const minY_template = Math.min(...templatePoints.map(p => p.y));
-            const maxY_template = Math.max(...templatePoints.map(p => p.y));
-            
-            // Сдвигаем все точки так, чтобы minY_template оказалась на 0, а потом добавляем padding
-            const shiftedPoints = templatePoints.map(p => ({
-                x: p.x,
-                y: p.y - minY_template + padding 
-            }));
-
-            // --- POLYLINE для кривой (отверстие или профиль трубы) ---
-            dxf += `0\nPOLYLINE\n`; 
-            dxf += `8\n0\n`; // Слой 0
-            dxf += `66\n1\n`; // Entities follow
-            
-            // --- ИЗМЕНЕНИЕ: Делаем полилинию отверстия 'hole' ОТКРЫТОЙ (0), а 'pipe' - ЗАМКНУТОЙ (1) ---
-            if (type === 'pipe') {
-                 dxf += `70\n1\n`; // Флаг: 1 = Замкнутая (для D2)
-            } else {
-                 dxf += `70\n0\n`; // Флаг: 0 = Открытая (для D1, чтобы не было штриховки)
-            }
-            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
-
-            // Добавляем точки кривой
-            for (const p of shiftedPoints) {
-                dxf += `0\nVERTEX\n8\n0\n`;
-                dxf += `10\n${p.x.toFixed(4)}\n`; // X-координата
-                dxf += `20\n${p.y.toFixed(4)}\n`; // Y-координата
-                dxf += `30\n0.0\n`; // Z-координата
-            }
-
-            if (type === 'pipe') {
-                // Для шаблона D2 (pipe) добавляем плоское основание
-                const baseY = 0.0; // Базовая линия должна быть на Y=0
-                
-                // Находим X последней точки (это circumference) и первой (это 0)
-                const lastX = (shiftedPoints.length > 0) ? shiftedPoints[shiftedPoints.length - 1].x : circumference;
-                const firstX = (shiftedPoints.length > 0) ? shiftedPoints[0].x : 0.0;
-
-                // Переходим в правый нижний угол
-                dxf += `0\nVERTEX\n8\n0\n10\n${lastX.toFixed(4)}\n20\n${baseY.toFixed(4)}\n30\n0.0\n`;
-                // Переходим в левый нижний угол
-                dxf += `0\nVERTEX\n8\n0\n10\n${firstX.toFixed(4)}\n20\n${baseY.toFixed(4)}\n30\n0.0\n`;
-            }
-            // Для 'hole' (теперь открытой) мы НЕ добавляем замыкающие точки.
-            
-            dxf += `0\nSEQEND\n`; // --- Конец ПЕРВОЙ полилинии (кривой) ---
-
-            // --- ИСПРАВЛЕНИЕ: Добавляем прямоугольник развертки D1, если тип 'hole' ---
-            if (type === 'hole') {
-                // Находим верхнюю точку сдвинутого отверстия
-                const maxY_shifted = Math.max(...shiftedPoints.map(p => p.y)); // Верх отверстия
-                
-                const rect_Y_min = 0.0;
-                // Добавляем отступ 'padding' также СВЕРХУ отверстия
-                const rect_Y_max = maxY_shifted + padding; 
-                const rect_X_min = 0.0;
-                const rect_X_max = circumference;
-                
-                dxf += `0\nPOLYLINE\n`; // --- Начало ВТОРОЙ полилинии (прямоугольник) ---
-                dxf += `8\n0\n`; // Слой 0
-                dxf += `66\n1\n`; // Entities follow
-                dxf += `70\n1\n`; // Флаг: 1 = Замкнутая (прямоугольник должен быть замкнутым)
-                
-                // Добавляем 4 вершины прямоугольника
-                // 1. (0, 0)
-                dxf += `0\nVERTEX\n8\n0\n10\n${rect_X_min.toFixed(4)}\n20\n${rect_Y_min.toFixed(4)}\n30\n0.0\n`;
-                // 2. (Окружность, 0)
-                dxf += `0\nVERTEX\n8\n0\n10\n${rect_X_max.toFixed(4)}\n20\n${rect_Y_min.toFixed(4)}\n30\n0.0\n`;
-                // 3. (Окружность, Макс Y)
-                dxf += `0\nVERTEX\n8\n0\n10\n${rect_X_max.toFixed(4)}\n20\n${rect_Y_max.toFixed(4)}\n30\n0.0\n`;
-                // 4. (0, Макс Y)
-                dxf += `0\nVERTEX\n8\n0\n10\n${rect_X_min.toFixed(4)}\n20\n${rect_Y_max.toFixed(4)}\n30\n0.0\n`;
-                
-                dxf += `0\nSEQEND\n`; // --- Конец ВТОРОЙ полилинии ---
-            }
-
-            // --- Конец файла ---
-            dxf += `0\nENDSEC\n0\nEOF\n`;
-            return dxf;
-        }
-
-        /**
-         * Генерация и скачивание DXF
-         * @param {string} type - 'pipe' или 'hole'
-         */
-        function generateAndDownloadDXF(type) {
-            hideError();
-            
-            // --- 1. Сбор и валидация данных ---
-            const D1 = parseFloat(d1Input.value);
-            const D2 = parseFloat(d2Input.value);
-            const thickness = parseFloat(thicknessInput.value) || 0;
-            const gap = parseFloat(gapInput.value) || 0;
-            const intersectAngleDeg = parseFloat(angleCInput.value) || 90;
-            const offset = parseFloat(offsetInput.value) || 0;
-            const startAngleDeg = parseFloat(angleInput.value) || 0;
-            const paddingD2 = parseFloat(paddingD2Input.value) || 0; 
-            const paddingD1 = parseFloat(paddingD1Input.value) || 0; 
-            
-            const intersectAngleRad = intersectAngleDeg * Math.PI / 180;
-            const startAngleRad = startAngleDeg * Math.PI / 180;
-
-            if (isNaN(D1) || isNaN(D2) || D1 <= 0 || D2 <= 0 || gap < 0 || paddingD2 < 0 || paddingD1 < 0 || thickness < 0 || intersectAngleDeg <= 0 || intersectAngleDeg > 90) {
-                showError("errorPositive");
-                return;
-            }
-             if (thickness >= D2 / 2) {
-                showError("errorThickness");
-                return;
-            }
+        function calculatePoints(type, params) {
+            const { D1, D2, angleRad, offset, gap, thickness, startAngleRad } = params;
             
             const R1 = D1 / 2;
-            const R1_eff = R1 + gap;
             const R2_outer = D2 / 2;
             const R2_inner = R2_outer - thickness;
-
-            let calculationResult;
-            let R_for_circumference = 0;
-            let filename = "pipe_template.dxf";
-            let currentPadding = 0;
-
-            // --- 2. Выбор расчета ---
+            
+            const points = [];
+            const steps = 360;
+            const sinTheta = Math.sin(angleRad);
+            const tanTheta = Math.tan(angleRad);
+            
             if (type === 'pipe') {
-                calculationResult = calculatePipeTemplatePoints(R1_eff, R2_outer, startAngleRad, intersectAngleRad, offset);
-                R_for_circumference = R2_outer;
-                filename = `pipe_D2-${D2}_for_D1-${D1}_G-${gap}_A-${intersectAngleDeg}_O-${offset}.dxf`;
-                currentPadding = paddingD2;
-            
+                const R1_eff = R1 + gap;
+                const R2 = R2_outer;
+                const circumference = 2 * Math.PI * R2;
+
+                for (let i = 0; i <= steps; i++) {
+                    const angle = (i / steps) * 2 * Math.PI;
+                    const effAngle = angle + startAngleRad;
+                    const x = (i / steps) * circumference;
+                    
+                    let term = Math.pow(R1_eff, 2) - Math.pow(R2 * Math.sin(effAngle) + offset, 2);
+                    // Force term to 0 if slightly negative (happens at cusps when D1=D2)
+                    if (term < 0) {
+                         if (term > -0.01) term = 0; 
+                         else continue; 
+                    }
+
+                    const sT = Math.abs(sinTheta) < 1e-6 ? 1e-6 : sinTheta;
+                    const tT = Math.abs(tanTheta) < 1e-6 ? 1e-6 : tanTheta;
+
+                    // Same inverted sign as 3D for consistency
+                    const y = (1 / sT) * Math.sqrt(term) + (R2 * Math.cos(effAngle) / tT);
+                    points.push({x, y});
+                }
             } else if (type === 'hole') {
-                calculationResult = calculateHoleTemplatePoints(R1, R2_inner, intersectAngleRad, offset);
-                R_for_circumference = R1;
-                filename = `hole_D1-${D1}_for_D2-${D2}-T${thickness}_A-${intersectAngleDeg}_O-${offset}.dxf`;
-                currentPadding = paddingD1;
-            } else {
-                return; // Неизвестный тип
+                const cosTheta = Math.cos(angleRad);
+                const sT = Math.abs(sinTheta) < 1e-6 ? 1e-6 : sinTheta;
+                
+                for (let i = 0; i <= steps; i++) {
+                    const alpha = (i / steps) * 2 * Math.PI;
+                    const R2 = R2_inner;
+                    
+                    const r2Sin = R2 * Math.sin(alpha);
+                    const r2Cos = R2 * Math.cos(alpha);
+                    
+                    const C1 = r2Cos * cosTheta;
+                    const C2 = r2Sin + offset;
+                    
+                    const term = R1*R1 - C2*C2;
+                    if (term < 0) continue;
+
+                    const sqrtVal = Math.sqrt(term);
+                    
+                    // Distance 't' to surface
+                    // FIX: Changed minus to plus to match geometry (L*sin = sqrt + u*cos)
+                    // This ensures points lie exactly on the cylinder surface (x3d = sqrtVal)
+                    const t = (sqrtVal + C1) / sT;
+
+                    // 3D coordinates on Surface R1
+                    const x3d = t * sinTheta - r2Cos * cosTheta;
+                    const z3d = r2Sin + offset; 
+                    const y3d = t * cosTheta + r2Cos * sinTheta;
+                    
+                    // Unwrap R1
+                    let phi = Math.atan2(z3d, x3d);
+                    if (phi < 0) phi += 2 * Math.PI;
+                    
+                    let phiShift = phi - Math.PI;
+                    if (phiShift < 0) phiShift += 2*Math.PI;
+
+                    const xUnroll = R1 * phiShift;
+                    points.push({ x: xUnroll, y: y3d });
+                }
             }
 
-            // --- 3. Проверка результата расчета ---
-            if (!calculationResult.points) {
-                showError(calculationResult.error || "Unknown calculation error");
-                return;
-            }
-            
-            const points = calculationResult.points;
-
-            // --- 4. Генерируем DXF ---
-            // 'padding' и сдвиг теперь обрабатываются ВНУТРИ generateDXFString
-            const dxfData = generateDXFString(points, R_for_circumference, currentPadding, type); // Передаем 'type'
-            if (dxfData === "") return;
-
-            // --- 5. Создаем Blob и ссылку для скачивания ---
-            const blob = new Blob([dxfData], { type: 'application/dxf' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            
-            // Очистка
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            return points;
         }
 
-        // --- Запуск ---
-        document.addEventListener('DOMContentLoaded', init);
+        function downloadDXF(type) {
+            const params = getParams();
+            if (!params) return;
 
+            const points = calculatePoints(type, params);
+            if (!points.length) {
+                showError("Could not generate points. Check geometry.");
+                return;
+            }
+
+            const pad = type === 'pipe' ? params.padD2 : params.padD1;
+            
+            // Normalize Y to start at 0 + padding
+            const minY = Math.min(...points.map(p => p.y));
+            const shiftedPoints = points.map(p => ({
+                x: p.x,
+                y: p.y - minY + pad
+            }));
+
+            // Header
+            let dxf = "0\nSECTION\n2\nENTITIES\n";
+            
+            // Curve
+            dxf += "0\nPOLYLINE\n8\n0\n66\n1\n";
+            dxf += (type === 'pipe' ? "70\n1\n" : "70\n0\n"); // 1=Closed, 0=Open
+
+            shiftedPoints.forEach(p => {
+                dxf += `0\nVERTEX\n8\n0\n10\n${p.x.toFixed(4)}\n20\n${p.y.toFixed(4)}\n30\n0.0\n`;
+            });
+            
+            if (type === 'pipe') {
+                // Close the loop at the bottom for the paper template
+                const lastX = shiftedPoints[shiftedPoints.length-1].x;
+                dxf += `0\nVERTEX\n8\n0\n10\n${lastX.toFixed(4)}\n20\n0.0\n30\n0.0\n`;
+                dxf += `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n30\n0.0\n`;
+            }
+
+            dxf += "0\nSEQEND\n";
+
+            // If Hole, add bounding box for reference
+            if (type === 'hole') {
+                const maxY = Math.max(...shiftedPoints.map(p => p.y)) + pad;
+                const maxX = 2 * Math.PI * (params.D1/2);
+                
+                dxf += "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n";
+                dxf += `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n30\n0.0\n`;
+                dxf += `0\nVERTEX\n8\n0\n10\n${maxX.toFixed(4)}\n20\n0.0\n30\n0.0\n`;
+                dxf += `0\nVERTEX\n8\n0\n10\n${maxX.toFixed(4)}\n20\n${maxY.toFixed(4)}\n30\n0.0\n`;
+                dxf += `0\nVERTEX\n8\n0\n10\n0.0\n20\n${maxY.toFixed(4)}\n30\n0.0\n`;
+                dxf += "0\nSEQEND\n";
+            }
+
+            dxf += "0\nENDSEC\n0\nEOF\n";
+
+            // Download
+            const blob = new Blob([dxf], { type: 'application/dxf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_template.dxf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
-
-
-
-
