@@ -1,12 +1,38 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en" class="dark">
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор развертки обечайки</title>
+    <title>Shell Rolling Master v0.02</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        md: {
+                            base: '#141218',
+                            surface: '#1d1b20',
+                            surface2: '#2b2930',
+                            primary: '#d0bcff',
+                            onPrimary: '#381e72',
+                            secondary: '#ccc2dc',
+                            outline: '#938f99',
+                            error: '#f2b8b5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -15,512 +41,903 @@
             }
         }
     </script>
+    
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .label-3d {
-            color: #1f2937; /* text-gray-800 */
-            font-size: 14px;
-            pointer-events: none;
-            user-select: none;
-            text-align: center;
-            line-height: 1.2;
-        }
-        #visualization-3d canvas {
-            display: block;
+        body { background-color: #141218; color: #e6e1e5; font-family: 'Roboto', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1d1b20; }
+        ::-webkit-scrollbar-thumb { background: #49454f; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .input-group { position: relative; margin-bottom: 1.5rem; }
+        .input-field {
             width: 100%;
-            height: 100%;
+            background: #1d1b20;
+            border: 1px solid #938f99;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #e6e1e5;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #d0bcff;
+            box-shadow: 0 0 0 2px rgba(208, 188, 255, 0.2);
+        }
+        .input-label {
+            position: absolute;
+            left: 14px;
+            top: -10px;
+            background: #141218;
+            padding: 0 4px;
+            font-size: 0.75rem;
+            color: #d0bcff;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: #d0bcff;
+            color: #381e72;
+            transition: filter 0.2s;
+        }
+        .btn-primary:hover { filter: brightness(0.9); }
+        
+        .btn-secondary {
+            background-color: #4a4458;
+            color: #e8def8;
+        }
+        .btn-secondary:hover { background-color: #554e65; }
+
+        .tab-active { border-bottom: 2px solid #d0bcff; color: #d0bcff; }
+        .tab-inactive { color: #938f99; }
+        .tab-inactive:hover { color: #e6e1e5; }
+        
+        /* SVG Dimension Text */
+        .dim-text {
+            font-family: 'Roboto', sans-serif;
+            fill: #d0bcff;
+            text-anchor: middle;
+            background-color: #141218; /* fallback */
+            paint-order: stroke;
+            stroke: #141218;
+            stroke-width: 3px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .dim-line {
+            stroke: #938f99;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="h-screen overflow-hidden flex flex-col md:flex-row">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Калькулятор развертки обечайки</h1>
-            <p class="mt-2 text-gray-600">Введите параметры для расчета развертки и создания DXF файла.</p>
-        </header>
+    <!-- SIDEBAR: CONTROLS -->
+    <aside class="w-full md:w-[400px] bg-md-surface2 flex flex-col h-full overflow-y-auto border-r border-[#49454f] shadow-2xl z-10">
+        <div class="p-6">
+            <h1 class="text-xl font-bold flex items-center gap-2 text-md-primary mb-6">
+                <span class="material-icons-round">architecture</span>
+                Shell Rolling Master <span class="text-xs bg-md-primary text-md-onPrimary px-2 py-0.5 rounded-full ml-1">v0.02</span>
+            </h1>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Left Column: Inputs and Outputs -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="space-y-6">
-                    <!-- Input Section -->
-                    <div>
-                        <h2 class="text-xl font-semibold mb-4 border-b pb-2">Входные параметры</h2>
-                        <div class="space-y-4">
-                            <!-- Diameter Specification -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Расчет по диаметру</label>
-                                <div class="mt-1 flex rounded-md shadow-sm">
-                                    <button id="spec-od-btn" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-blue-600 text-white text-sm font-medium z-10">Внешнему (OD)</button>
-                                    <button id="spec-id-btn" class="relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50">Внутреннему (ID)</button>
-                                </div>
-                            </div>
+            <!-- Mode Selector -->
+            <div class="bg-md-surface rounded-xl p-1 flex mb-6 border border-[#49454f]">
+                <button id="mode-cylinder" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-md-primary text-md-onPrimary shadow-md">Cylinder</button>
+                <button id="mode-cone" class="flex-1 py-2 rounded-lg text-sm font-medium text-[#ccc2dc] hover:bg-[#36343b] transition-all">Cone</button>
+            </div>
 
-                            <!-- Diameter Value -->
-                            <div>
-                                <label id="diameter-label" for="diameter" class="block text-sm font-medium text-gray-700">Внешний диаметр (OD)</label>
-                                <input type="number" name="diameter" id="diameter" value="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            </div>
-
-                            <!-- Material Thickness -->
-                            <div>
-                                <label for="thickness" class="block text-sm font-medium text-gray-700">Толщина материала</label>
-                                <input type="number" name="thickness" id="thickness" value="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            </div>
-
-                            <!-- Shell Width -->
-                            <div>
-                                <label for="width" class="block text-sm font-medium text-gray-700">Ширина обечайки (Высота)</label>
-                                <input type="number" name="width" id="width" value="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            </div>
-
-                            <!-- K-Factor -->
-                            <div>
-                                <label for="k-factor" class="block text-sm font-medium text-gray-700">K-Фактор</label>
-                                <input type="number" name="k-factor" id="k-factor" value="0.44" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            </div>
-                            
-                            <!-- Welding Gap -->
-                            <div>
-                                <label for="gap" class="block text-sm font-medium text-gray-700">Зазор под сварку (Gap)</label>
-                                <input type="number" name="gap" id="gap" value="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            </div>
-                        </div>
+            <!-- Parameters Form -->
+            <div class="space-y-2">
+                
+                <!-- Diameter Spec -->
+                <div class="flex items-center justify-between mb-4 px-1">
+                    <span class="text-sm text-md-secondary">Diameter Type:</span>
+                    <div class="flex gap-2 text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="specType" value="OD" checked class="accent-md-primary">
+                            <span>OD (Ext)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="specType" value="ID" class="accent-md-primary">
+                            <span>ID (Int)</span>
+                        </label>
                     </div>
+                </div>
 
-                    <!-- Output Section -->
-                    <div>
-                        <h2 class="text-xl font-semibold mb-4 border-b pb-2">Расчетные значения</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label id="calculated-diameter-label" class="block text-sm font-medium text-gray-500">Расчетный внутренний диаметр (ID)</label>
-                                <p id="calculated-diameter-value" class="mt-1 text-lg font-semibold text-blue-700 p-2 bg-gray-100 rounded-md"></p>
-                            </div>
-                             <div>
-                                <label class="block text-sm font-medium text-gray-500">Длина развертки (с учетом зазора)</label>
-                                <p id="flat-pattern-length" class="mt-1 text-lg font-semibold text-blue-700 p-2 bg-gray-100 rounded-md"></p>
-                            </div>
-                        </div>
+                <div class="input-group">
+                    <label class="input-label">Diameter 1 (Top / Main)</label>
+                    <input type="number" id="d1" value="2000" class="input-field">
+                </div>
+
+                <div id="cone-input-group" class="input-group hidden">
+                    <label class="input-label">Diameter 2 (Bottom)</label>
+                    <input type="number" id="d2" value="1500" class="input-field">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Height / Sheet Width</label>
+                    <input type="number" id="height" value="2500" class="input-field">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label class="input-label">Thickness (S)</label>
+                        <input type="number" id="thickness" value="15" class="input-field">
                     </div>
-                    
-                    <!-- Action Button -->
-                    <div class="pt-4">
-                         <button id="download-dxf" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                            Скачать DXF
-                        </button>
-                        <p id="error-message" class="text-red-600 text-sm mt-2 text-center"></p>
+                    <div class="input-group">
+                        <label class="input-label">K-Factor</label>
+                        <input type="number" id="k-factor" value="0.44" step="0.01" class="input-field">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label class="input-label">Gap</label>
+                        <input type="number" id="gap" value="2" step="0.1" class="input-field">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Bend Lines</label>
+                        <input type="number" id="bendLines" value="0" min="0" step="1" class="input-field">
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Visualizations -->
-            <div class="space-y-8">
-                <!-- 3D Visualization -->
-                <div class="bg-white p-4 rounded-lg shadow-md min-h-[300px]">
-                    <h3 class="text-lg font-semibold mb-2 text-center">Визуализация обечайки</h3>
-                    <div id="visualization-3d" class="w-full h-80 rounded-md bg-white relative border"></div>
-                </div>
-
-                <!-- 2D Visualization -->
-                <div class="bg-white p-4 rounded-lg shadow-md min-h-[300px]">
-                    <h3 class="text-lg font-semibold mb-2 text-center">Развертка</h3>
-                    <div id="visualization-2d" class="w-full h-80 flex items-center justify-center p-4">
-                        <div id="flat-pattern-svg-container" class="relative w-full h-full">
-                           <!-- SVG will be injected here -->
+            <!-- Results Card -->
+            <div class="mt-4 bg-[#1f1d24] rounded-xl p-4 border border-[#49454f]">
+                <h3 class="text-xs font-bold text-md-secondary uppercase tracking-wider mb-3">Results</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center border-b border-[#36343b] pb-2">
+                        <span class="text-sm text-gray-400">Type:</span>
+                        <span id="res-type" class="font-mono text-md-primary">Cylinder</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-[#36343b] pb-2">
+                        <span class="text-sm text-gray-400">Length / Angle:</span>
+                        <span id="res-main" class="font-mono font-bold text-white text-lg">---</span>
+                    </div>
+                    <div id="res-cone-details" class="hidden space-y-2">
+                         <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-400">Outer Radius (R):</span>
+                            <span id="res-r-out" class="font-mono text-white">---</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-400">Inner Radius (r):</span>
+                            <span id="res-r-in" class="font-mono text-white">---</span>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-6 space-y-3">
+                <button id="btn-pdf" class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-primary shadow-lg">
+                    <span class="material-icons-round text-lg">picture_as_pdf</span>
+                    Download PDF Report
+                </button>
+                <button id="btn-dxf" class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-secondary border border-[#79747e]">
+                    <span class="material-icons-round text-lg">data_object</span>
+                    Download DXF
+                </button>
+            </div>
+            
+            <div id="error-msg" class="mt-4 text-md-error text-sm text-center hidden"></div>
+        </div>
+        
+        <div class="mt-auto p-4 text-center text-xs text-gray-600 border-t border-[#36343b]">
+             Shell Rolling Master v0.02
+        </div>
+    </aside>
+
+    <!-- MAIN: VISUALIZATION -->
+    <main class="flex-1 flex flex-col h-full relative bg-md-base">
+        <!-- Tabs -->
+        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#2b2930] rounded-full p-1 flex shadow-xl z-20 border border-[#49454f]">
+            <button id="tab-3d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-active">3D Model</button>
+            <button id="tab-2d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-inactive">2D Pattern</button>
+        </div>
+
+        <!-- 3D Container -->
+        <div id="view-3d" class="w-full h-full relative">
+            <div id="canvas-container" class="w-full h-full"></div>
+            <!-- Overlay controls for 3D could go here -->
+            <div class="absolute bottom-6 right-6 text-xs text-gray-500 pointer-events-none">
+                LMB: Rotate • RMB: Pan • Wheel: Zoom
             </div>
         </div>
-    </div>
+
+        <!-- 2D Container -->
+        <div id="view-2d" class="w-full h-full hidden flex items-center justify-center p-8 bg-[#18181b]">
+            <div id="svg-wrapper" class="w-full h-full max-w-4xl max-h-[80vh] border border-[#333] rounded-lg bg-[#121212] relative overflow-hidden flex items-center justify-center shadow-2xl">
+                <!-- SVG injected here -->
+            </div>
+        </div>
+    </main>
 
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-        // --- DOM ELEMENTS ---
-        const specOdBtn = document.getElementById('spec-od-btn');
-        const specIdBtn = document.getElementById('spec-id-btn');
-        const diameterLabel = document.getElementById('diameter-label');
-        const diameterInput = document.getElementById('diameter');
-        const thicknessInput = document.getElementById('thickness');
-        const widthInput = document.getElementById('width');
-        const kFactorInput = document.getElementById('k-factor');
-        const gapInput = document.getElementById('gap');
-        const calculatedDiameterLabel = document.getElementById('calculated-diameter-label');
-        const calculatedDiameterValue = document.getElementById('calculated-diameter-value');
-        const flatPatternLengthValue = document.getElementById('flat-pattern-length');
-        const downloadBtn = document.getElementById('download-dxf');
-        const errorMessage = document.getElementById('error-message');
-        const viz3dContainer = document.getElementById('visualization-3d');
-        const viz2dContainer = document.getElementById('flat-pattern-svg-container');
-
-        // --- STATE ---
-        let state = {
-            specType: 'OD', // 'OD' or 'ID'
-            diameter: 100,
-            thickness: 3,
-            width: 150,
+        // --- GLOBAL STATE ---
+        const state = {
+            mode: 'cylinder', // 'cylinder' | 'cone'
+            specType: 'OD',   // 'OD' | 'ID'
+            d1: 2000,
+            d2: 1500,
+            h: 2500,
+            thickness: 15,
             kFactor: 0.44,
-            gap: 0,
-            calculated: {
-                od: 100,
-                id: 94,
-                finalFlatLength: 0
-            },
+            gap: 2.0,
+            bendLines: 0,
+            calc: {}, // Stores calculated results
             isValid: true
         };
 
-        // --- 3D VISUALIZATION SETUP (THREE.JS) ---
-        let scene, camera, renderer, labelRenderer, controls, cylinderOutline, odIdLabel, widthLabel;
+        // --- DOM ELEMENTS ---
+        const els = {
+            inputs: {
+                d1: document.getElementById('d1'),
+                d2: document.getElementById('d2'),
+                h: document.getElementById('height'),
+                t: document.getElementById('thickness'),
+                k: document.getElementById('k-factor'),
+                gap: document.getElementById('gap'),
+                bend: document.getElementById('bendLines'),
+                radios: document.getElementsByName('specType')
+            },
+            modes: {
+                cyl: document.getElementById('mode-cylinder'),
+                cone: document.getElementById('mode-cone')
+            },
+            ui: {
+                coneInput: document.getElementById('cone-input-group'),
+                error: document.getElementById('error-msg'),
+                resType: document.getElementById('res-type'),
+                resMain: document.getElementById('res-main'),
+                resCone: document.getElementById('res-cone-details'),
+                resROut: document.getElementById('res-r-out'),
+                resRIn: document.getElementById('res-r-in')
+            },
+            tabs: {
+                t3d: document.getElementById('tab-3d'),
+                t2d: document.getElementById('tab-2d'),
+                v3d: document.getElementById('view-3d'),
+                v2d: document.getElementById('view-2d')
+            },
+            actions: {
+                pdf: document.getElementById('btn-pdf'),
+                dxf: document.getElementById('btn-dxf')
+            }
+        };
 
-        function init3D() {
-            // Scene
+        // --- THREE.JS SETUP ---
+        let scene, camera, renderer, controls, mesh, edges;
+        
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xffffff); // white background
+            scene.background = new THREE.Color(0x141218);
+            
+            // Grid
+            const gridHelper = new THREE.GridHelper(5000, 50, 0x333333, 0x222222);
+            scene.add(gridHelper);
 
-            // Camera (Orthographic)
-            const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
-            const frustumSize = 300;
-            camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 1000);
-            camera.position.set(0, 0, 100);
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(2000, 3000, 3000); 
+            scene.add(dirLight);
+            
+            const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            backLight.position.set(-2000, 1000, -2000);
+            scene.add(backLight);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 30000);
+            camera.position.set(4000, 3000, 4000);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            viz3dContainer.appendChild(renderer.domElement);
-            
-            // Label Renderer
-            labelRenderer = new CSS2DRenderer();
-            labelRenderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
-            labelRenderer.domElement.style.position = 'absolute';
-            labelRenderer.domElement.style.top = '0px';
-            viz3dContainer.appendChild(labelRenderer.domElement);
+            container.appendChild(renderer.domElement);
 
             // Controls
-            controls = new OrbitControls(camera, labelRenderer.domElement);
-            controls.enableRotate = false; // Disable rotation for 2D look
-            controls.enablePan = true;
-            controls.enableZoom = true;
-            controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: null };
-            controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxDistance = 20000;
 
-            // Initial Cylinder Outline
-            const geometry = new THREE.CylinderGeometry(1, 1, 1, 64, 1, false);
-            const edges = new THREE.EdgesGeometry(geometry);
-            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x374151 }); // gray-700
-            cylinderOutline = new THREE.LineSegments(edges, lineMaterial);
-            scene.add(cylinderOutline);
+            // Placeholder Mesh
+            mesh = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial());
+            scene.add(mesh);
 
-            // 3D Labels
-            const odIdDiv = document.createElement('div');
-            odIdDiv.className = 'label-3d';
-            odIdLabel = new CSS2DObject(odIdDiv);
-            scene.add(odIdLabel);
+            edges = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xd0bcff }));
+            scene.add(edges);
 
-            const widthDiv = document.createElement('div');
-            widthDiv.className = 'label-3d';
-            widthLabel = new CSS2DObject(widthDiv);
-            scene.add(widthLabel);
-
-            // Animation Loop
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
-                labelRenderer.render(scene, camera);
-            }
             animate();
-
-            // Handle Resize
-            window.addEventListener('resize', onWindowResize, false);
-            function onWindowResize() {
-                if (!viz3dContainer.clientWidth) return;
-                const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
-                camera.left = -camera.right * aspect;
-                camera.right = camera.right * aspect;
-                camera.updateProjectionMatrix();
-                renderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
-                labelRenderer.setSize(viz3dContainer.clientWidth, viz3dContainer.clientHeight);
-            }
+            window.addEventListener('resize', onResize);
         }
 
-        // --- EVENT LISTENERS ---
-        function setupEventListeners() {
-            specOdBtn.addEventListener('click', () => setSpecType('OD'));
-            specIdBtn.addEventListener('click', () => setSpecType('ID'));
-            [diameterInput, thicknessInput, widthInput, kFactorInput, gapInput].forEach(input => {
-                input.addEventListener('input', updateCalculations);
-            });
-        }
-
-        // --- UI UPDATE FUNCTIONS ---
-        function setSpecType(type) {
-            state.specType = type;
-            if (type === 'OD') {
-                specOdBtn.classList.add('bg-blue-600', 'text-white', 'z-10');
-                specOdBtn.classList.remove('bg-white', 'text-gray-700');
-                specIdBtn.classList.add('bg-white', 'text-gray-700');
-                specIdBtn.classList.remove('bg-blue-600', 'text-white', 'z-10');
-                diameterLabel.textContent = 'Внешний диаметр (OD)';
-                calculatedDiameterLabel.textContent = 'Расчетный внутренний диаметр (ID)';
-            } else {
-                specIdBtn.classList.add('bg-blue-600', 'text-white', 'z-10');
-                specIdBtn.classList.remove('bg-white', 'text-gray-700');
-                specOdBtn.classList.add('bg-white', 'text-gray-700');
-                specOdBtn.classList.remove('bg-blue-600', 'text-white', 'z-10');
-                diameterLabel.textContent = 'Внутренний диаметр (ID)';
-                calculatedDiameterLabel.textContent = 'Расчетный внешний диаметр (OD)';
-            }
-            updateCalculations();
-        }
-
-        // --- CORE CALCULATION LOGIC ---
-        function updateCalculations() {
-            // 1. Read inputs
-            const diameter = parseFloat(diameterInput.value);
-            const thickness = parseFloat(thicknessInput.value);
-            const width = parseFloat(widthInput.value);
-            const kFactor = parseFloat(kFactorInput.value);
-            const gap = parseFloat(gapInput.value);
-
-            // 2. Validate inputs
-            errorMessage.textContent = '';
-            state.isValid = true;
-            if (isNaN(diameter) || isNaN(thickness) || isNaN(width) || isNaN(kFactor) || isNaN(gap) || diameter <= 0 || thickness <= 0 || width <= 0 || kFactor <= 0 || gap < 0) {
-                state.isValid = false;
-                errorMessage.textContent = 'Все значения должны быть положительными числами (зазор может быть 0).';
-            }
-
-            let od, id;
-            if (state.specType === 'OD') {
-                od = diameter;
-                id = od - (2 * thickness);
-                if (id <= 0) {
-                    state.isValid = false;
-                    errorMessage.textContent = 'Внешний диаметр должен быть больше двойной толщины.';
-                }
-            } else { // 'ID'
-                id = diameter;
-                od = id + (2 * thickness);
-            }
-            
-            const neutralAxisDiameter = id + (kFactor * thickness);
-            const flatLength = neutralAxisDiameter * Math.PI;
-            const finalFlatLength = flatLength - gap;
-
-            if (finalFlatLength <= 0) {
-                state.isValid = false;
-                errorMessage.textContent = 'Длина развертки не может быть отрицательной. Проверьте зазор.';
-            }
-            
-            if (!state.isValid) {
-                calculatedDiameterValue.textContent = '---';
-                flatPatternLengthValue.textContent = '---';
-                downloadBtn.disabled = true;
-                return; // FIX: Stop execution if inputs are invalid
-            }
-
-            // 4. Update state
-            state.diameter = diameter;
-            state.thickness = thickness;
-            state.width = width;
-            state.kFactor = kFactor;
-            state.gap = gap;
-            state.calculated.od = od;
-            state.calculated.id = id;
-            state.calculated.finalFlatLength = finalFlatLength;
-
-            // 5. Update UI display
-            const otherDiameter = state.specType === 'OD' ? id : od;
-            calculatedDiameterValue.textContent = `${otherDiameter.toFixed(3)}`;
-            flatPatternLengthValue.textContent = `${finalFlatLength.toFixed(3)}`;
-            downloadBtn.disabled = false;
-            
-            // 6. Update Visualizations
-            update3DVisual();
-            update2DVisual();
-        }
-
-        // --- VISUALIZATION UPDATE FUNCTIONS ---
-        function update3DVisual() {
-            if (!cylinderOutline) return;
-            // FIX: Get width from main state, not calculated state
-            const { od, id } = state.calculated;
-            const { width } = state; 
-            
-            const radius = od / 2;
-            
-            // Update cylinder geometry
-            cylinderOutline.geometry.dispose();
-            const newGeom = new THREE.CylinderGeometry(radius, radius, width, 64, 1, false);
-            cylinderOutline.geometry = new THREE.EdgesGeometry(newGeom);
-            cylinderOutline.position.set(0, 0, 0);
-
-            // Update labels
-            odIdLabel.element.innerHTML = `OD: ${od.toFixed(2)}<br>ID: ${id.toFixed(2)}`;
-            odIdLabel.position.set(radius + 10, 0, 0);
-            
-            widthLabel.element.textContent = `Width: ${width.toFixed(2)}`;
-            widthLabel.position.set(0, -width / 2 - 20, 0);
-
-            // Adjust orthographic camera to fit object
-            const aspect = viz3dContainer.clientWidth / viz3dContainer.clientHeight;
-            const maxDim = Math.max(od, width);
-            const padding = 1.6;
-            
-            camera.zoom = 1; // Reset zoom
-            camera.left = (maxDim * aspect / -2) * padding;
-            camera.right = (maxDim * aspect / 2) * padding;
-            camera.top = (maxDim / 2) * padding;
-            camera.bottom = (maxDim / -2) * padding;
+        function onResize() {
+            const container = document.getElementById('canvas-container');
+            if(!container) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            controls.target.set(0,0,0);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         }
 
-        function update2DVisual() {
-            const { finalFlatLength } = state.calculated;
-            const { width } = state;
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- GEOMETRY GENERATOR ---
+        function createThickShellGeometry(r1_in, r1_out, r2_in, r2_out, h, startAngle, endAngle) {
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const indices = [];
+            const segments = 64; 
+            const totalAngle = endAngle - startAngle;
             
-            const containerW = viz2dContainer.clientWidth;
-            const containerH = viz2dContainer.clientHeight;
-            const padding = 40;
-
-            const availableW = containerW - 2 * padding;
-            const availableH = containerH - 2 * padding;
-
-            let rectW, rectH;
-            const aspectRatio = finalFlatLength / width;
-
-            if (availableW / availableH > aspectRatio) {
-                rectH = availableH;
-                rectW = rectH * aspectRatio;
-            } else {
-                rectW = availableW;
-                rectH = rectW / aspectRatio;
+            for (let i = 0; i <= segments; i++) {
+                const theta = startAngle + (i / segments) * totalAngle;
+                const cos = Math.cos(theta);
+                const sin = Math.sin(theta);
+                vertices.push(r1_out * cos, h/2, -r1_out * sin);
+                vertices.push(r1_in * cos, h/2, -r1_in * sin);
+                vertices.push(r2_out * cos, -h/2, -r2_out * sin);
+                vertices.push(r2_in * cos, -h/2, -r2_in * sin);
             }
+
+            for (let i = 0; i < segments; i++) {
+                const base = i * 4;
+                const next = (i + 1) * 4;
+                indices.push(base + 0, next + 0, base + 2); indices.push(next + 0, next + 2, base + 2);
+                indices.push(base + 1, base + 3, next + 1); indices.push(base + 3, next + 3, next + 1);
+                indices.push(base + 0, base + 1, next + 0); indices.push(base + 1, next + 1, next + 0);
+                indices.push(base + 2, next + 2, base + 3); indices.push(next + 2, next + 3, base + 3);
+            }
+            indices.push(0, 2, 1); indices.push(1, 2, 3);
+            const last = segments * 4;
+            indices.push(last + 0, last + 1, last + 2); indices.push(last + 1, last + 3, last + 2);
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            return geometry;
+        }
+
+        // --- HELPER: Bounding Box for Cone Sector ---
+        function getConeBBox(rOut, rIn, angle) {
+            // rad: 0 deg input -> -90 deg SVG (Top)
+            const rad = (deg) => (deg - 90) * Math.PI / 180;
+            const startAngle = -angle / 2;
+            const endAngle = angle / 2;
             
-            const x = (containerW - rectW) / 2;
-            const y = (containerH - rectH) / 2;
+            // 4 Corners
+            const points = [
+                { x: rOut*Math.cos(rad(startAngle)), y: rOut*Math.sin(rad(startAngle)) },
+                { x: rOut*Math.cos(rad(endAngle)), y: rOut*Math.sin(rad(endAngle)) },
+                { x: rIn*Math.cos(rad(endAngle)), y: rIn*Math.sin(rad(endAngle)) },
+                { x: rIn*Math.cos(rad(startAngle)), y: rIn*Math.sin(rad(startAngle)) }
+            ];
 
-            const svg = `
-                <svg width="100%" height="100%" viewBox="0 0 ${containerW} ${containerH}">
-                    <rect x="${x}" y="${y}" width="${rectW}" height="${rectH}" fill="#93c5fd" stroke="#2563eb" stroke-width="2" />
-                    
-                    <line x1="${x}" y1="${y + rectH + 15}" x2="${x + rectW}" y2="${y + rectH + 15}" stroke="#374151" stroke-width="1" />
-                    <line x1="${x}" y1="${y + rectH + 10}" x2="${x}" y2="${y + rectH + 20}" stroke="#374151" stroke-width="1" />
-                    <line x1="${x + rectW}" y1="${y + rectH + 10}" x2="${x + rectW}" y2="${y + rectH + 20}" stroke="#374151" stroke-width="1" />
-                    <text x="${x + rectW / 2}" y="${y + rectH + 30}" font-family="Inter" font-size="12" fill="#374151" text-anchor="middle">
-                        Длина: ${finalFlatLength.toFixed(2)}
-                    </text>
+            // Check Top Extremum (Arc passing through 0 deg / -90 rad)
+            // This happens if the range [start, end] contains 0.
+            // Since start = -A/2 and end = A/2, it always contains 0.
+            points.push({ x: 0, y: -rOut });
 
-                    <line x1="${x - 15}" y1="${y}" x2="${x - 15}" y2="${y + rectH}" stroke="#374151" stroke-width="1" />
-                    <line x1="${x - 10}" y1="${y}" x2="${x - 20}" y2="${y}" stroke="#374151" stroke-width="1" />
-                    <line x1="${x - 10}" y1="${y + rectH}" x2="${x - 20}" y2="${y + rectH}" stroke="#374151" stroke-width="1" />
-                    <text x="${x - 25}" y="${y + rectH / 2}" font-family="Inter" font-size="12" fill="#374151" text-anchor="middle" transform="rotate(-90, ${x - 25}, ${y + rectH / 2})">
-                        Ширина: ${width.toFixed(2)}
-                    </text>
-                </svg>
-            `;
-            viz2dContainer.innerHTML = svg;
+            // Check Side Extremums (Arc passing through 90 deg / 0 rad or -90 deg / -180 rad)
+            // SVG Right (0 rad) corresponds to Input 90 deg.
+            // SVG Left (PI rad) corresponds to Input 270 deg (or -90 deg? No, deg-90=180 => deg=270).
+            // Actually, simply:
+            // Right edge (X max) is at 0 rad (SVG). Input deg = 90.
+            // Left edge (X min) is at PI rad (SVG). Input deg = 270 (-90 is top).
+            
+            // If half angle > 90, then we cross the X axis
+            if (angle/2 >= 90) {
+                 points.push({ x: rOut, y: 0 }); // Right edge of outer
+                 points.push({ x: -rOut, y: 0 }); // Left edge of outer
+            }
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            points.forEach(p => {
+                if(p.x < minX) minX = p.x;
+                if(p.x > maxX) maxX = p.x;
+                if(p.y < minY) minY = p.y;
+                if(p.y > maxY) maxY = p.y;
+            });
+            
+            return { minX, maxX, minY, maxY, width: maxX-minX, height: maxY-minY };
         }
 
 
-        // --- DXF GENERATION & DOWNLOAD ---
-        function generateDxfContent() {
-            if (!state.isValid) return null;
+        // --- CALCULATION LOGIC ---
+        function calculate() {
+            state.d1 = parseFloat(els.inputs.d1.value);
+            state.d2 = parseFloat(els.inputs.d2.value);
+            state.h = parseFloat(els.inputs.h.value);
+            state.thickness = parseFloat(els.inputs.t.value);
+            state.kFactor = parseFloat(els.inputs.k.value);
+            state.gap = parseFloat(els.inputs.gap.value);
+            state.bendLines = parseInt(els.inputs.bend.value) || 0;
+            
+            els.inputs.radios.forEach(r => { if(r.checked) state.specType = r.value; });
 
-            const length = state.calculated.finalFlatLength;
-            const width = state.width;
+            state.isValid = true;
+            els.ui.error.classList.add('hidden');
 
-            // DXF template for a closed polyline (rectangle) at origin
-            const dxf = `0
-SECTION
-2
-ENTITIES
-0
-POLYLINE
-8
-0
-66
-1
-70
-1
-0
-VERTEX
-8
-0
-10
-0.0
-20
-0.0
-0
-VERTEX
-8
-0
-10
-${length.toFixed(4)}
-20
-0.0
-0
-VERTEX
-8
-0
-10
-${length.toFixed(4)}
-20
-${width.toFixed(4)}
-0
-VERTEX
-8
-0
-10
-0.0
-20
-${width.toFixed(4)}
-0
-SEQEND
-0
-ENDSEC
-0
-EOF
-`;
-            return dxf;
-        }
-
-        downloadBtn.addEventListener('click', () => {
-            const dxfContent = generateDxfContent();
-            if (!dxfContent) {
-                errorMessage.textContent = 'Невозможно создать DXF из-за неверных данных.';
+            if ([state.d1, state.h, state.thickness, state.kFactor].some(v => isNaN(v) || v <= 0)) {
+                showError("Invalid input data.");
                 return;
             }
 
-            const blob = new Blob([dxfContent], { type: 'application/dxf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'flat_pattern.dxf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
+            const offset = 2 * state.kFactor * state.thickness; 
+            let d1_neutral, d2_neutral;
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            init3D();
-            setupEventListeners();
-            updateCalculations(); // Initial calculation on load
-        });
+            if (state.specType === 'ID') {
+                d1_neutral = state.d1 + offset;
+                d2_neutral = state.mode === 'cone' ? state.d2 + offset : d1_neutral;
+            } else {
+                const sub = 2 * state.thickness * (1 - state.kFactor);
+                d1_neutral = state.d1 - sub;
+                d2_neutral = state.mode === 'cone' ? state.d2 - sub : d1_neutral;
+            }
 
+            state.calc.d1_n = d1_neutral;
+            state.calc.d2_n = d2_neutral;
+
+            if (state.mode === 'cylinder') {
+                const circumference = Math.PI * d1_neutral;
+                state.calc.flatLength = circumference - state.gap;
+                state.calc.flatWidth = state.h;
+                if (state.calc.flatLength <= 0) showError("Gap is larger than circumference!");
+                state.calc.shape = 'rect';
+            } else {
+                const R1 = d1_neutral / 2;
+                const R2 = d2_neutral / 2;
+                const H = state.h;
+
+                if (Math.abs(R1 - R2) < 0.001) {
+                    showError("Diameters are equal. Switch to Cylinder mode.");
+                    return;
+                }
+
+                const dR = Math.abs(R2 - R1);
+                const slantHeight = Math.sqrt(Math.pow(dR, 2) + Math.pow(H, 2));
+                const R_large = Math.max(R1, R2);
+                const R_small = Math.min(R1, R2);
+                const PatternRadiusOuter = (slantHeight * R_large) / (R_large - R_small);
+                const PatternRadiusInner = PatternRadiusOuter - slantHeight;
+                
+                let angleDeg = (360 * R_large) / PatternRadiusOuter;
+                const currentArc = (angleDeg / 360) * 2 * Math.PI * PatternRadiusOuter;
+                const newArc = currentArc - state.gap;
+                const finalAngle = (newArc / (2 * Math.PI * PatternRadiusOuter)) * 360;
+
+                state.calc.rOut = PatternRadiusOuter;
+                state.calc.rIn = PatternRadiusInner;
+                state.calc.angle = finalAngle;
+                state.calc.shape = 'sector';
+            }
+
+            updateUI();
+            update3D();
+            update2D();
+        }
+
+        function showError(msg) {
+            state.isValid = false;
+            els.ui.error.textContent = msg;
+            els.ui.error.classList.remove('hidden');
+        }
+
+        function updateUI() {
+            if (!state.isValid) return;
+            els.ui.resType.textContent = state.mode === 'cylinder' ? 'Cylinder' : 'Cone';
+            if (state.mode === 'cylinder') {
+                els.ui.resMain.textContent = `L = ${state.calc.flatLength.toFixed(2)} mm`;
+                els.ui.resCone.classList.add('hidden');
+            } else {
+                els.ui.resMain.textContent = `∠ = ${state.calc.angle.toFixed(2)}°`;
+                els.ui.resCone.classList.remove('hidden');
+                els.ui.resROut.textContent = state.calc.rOut.toFixed(2);
+                els.ui.resRIn.textContent = state.calc.rIn.toFixed(2);
+            }
+        }
+
+        function update3D() {
+            if (!state.isValid) return;
+            if (mesh.geometry) mesh.geometry.dispose();
+            if (edges.geometry) edges.geometry.dispose();
+
+            let r1_in, r1_out, r2_in, r2_out;
+            const t = state.thickness;
+
+            if (state.specType === 'ID') {
+                r1_in = state.d1 / 2; r1_out = r1_in + t;
+                r2_in = state.mode === 'cone' ? state.d2/2 : r1_in; 
+                r2_out = r2_in + t;
+            } else { 
+                r1_out = state.d1 / 2; r1_in = r1_out - t;
+                r2_out = state.mode === 'cone' ? state.d2/2 : r1_out;
+                r2_in = r2_out - t;
+            }
+            if (r1_in < 0.1) r1_in = 0.1; if (r2_in < 0.1) r2_in = 0.1;
+
+            const avgDiaNeutral = (state.calc.d1_n + state.calc.d2_n) / 2;
+            const circumference = Math.PI * avgDiaNeutral;
+            let gapAngle = 0;
+            if (circumference > 0) gapAngle = (state.gap / circumference) * 2 * Math.PI;
+            if (gapAngle > 2 * Math.PI - 0.1) gapAngle = 2 * Math.PI - 0.1;
+
+            const thetaLength = 2 * Math.PI - gapAngle;
+            const thetaStart = Math.PI/2 + gapAngle/2;
+
+            const geometry = createThickShellGeometry(r1_in, r1_out, r2_in, r2_out, state.h, thetaStart, thetaStart + thetaLength);
+            mesh.geometry = geometry;
+            edges.geometry = new THREE.EdgesGeometry(geometry, 15);
+            mesh.material = new THREE.MeshStandardMaterial({ color: 0x3b3841, metalness: 0.6, roughness: 0.4, side: THREE.DoubleSide });
+        }
+
+        function update2D() {
+            const container = document.getElementById('svg-wrapper');
+            container.innerHTML = '';
+            if (!state.isValid) return;
+
+            const ns = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(ns, "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            const g = document.createElementNS(ns, "g");
+            svg.appendChild(g);
+
+            // Calculate Scale
+            let bbox = { w: 100, h: 100 };
+            if (state.mode === 'cylinder') {
+                bbox.w = state.calc.flatLength;
+                bbox.h = state.calc.flatWidth;
+            } else {
+                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle);
+                bbox.w = cb.width;
+                bbox.h = cb.height;
+            }
+
+            const maxDim = Math.max(bbox.w, bbox.h);
+            const fontSize = Math.max(12, maxDim * 0.02); 
+            const strokeWidth = Math.max(1, maxDim * 0.002);
+            const arrowSize = fontSize * 0.8;
+
+            // Helper Arrow
+            const createArrow = (x1, y1, x2, y2, text, isVertical=false) => {
+                const grp = document.createElementNS(ns, "g");
+                const color = "#938f99";
+                const line = document.createElementNS(ns, "line");
+                line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+                line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+                line.setAttribute("stroke", color);
+                line.setAttribute("stroke-width", strokeWidth);
+                line.setAttribute("class", "dim-line");
+                
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const drawHead = (tx, ty, ang) => {
+                    const h1x = tx - arrowSize * Math.cos(ang - Math.PI/6);
+                    const h1y = ty - arrowSize * Math.sin(ang - Math.PI/6);
+                    const h2x = tx - arrowSize * Math.cos(ang + Math.PI/6);
+                    const h2y = ty - arrowSize * Math.sin(ang + Math.PI/6);
+                    const p = document.createElementNS(ns, "polyline");
+                    p.setAttribute("points", `${h1x},${h1y} ${tx},${ty} ${h2x},${h2y}`);
+                    p.setAttribute("fill", "none"); p.setAttribute("stroke", color); p.setAttribute("stroke-width", strokeWidth);
+                    return p;
+                };
+
+                grp.appendChild(line);
+                grp.appendChild(drawHead(x1, y1, angle + Math.PI)); 
+                grp.appendChild(drawHead(x2, y2, angle)); 
+
+                const txt = document.createElementNS(ns, "text");
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                txt.textContent = text;
+                txt.setAttribute("font-size", fontSize);
+                txt.setAttribute("class", "dim-text");
+                
+                const dist = fontSize * 0.8;
+                if(isVertical) {
+                    txt.setAttribute("transform", `rotate(-90, ${midX}, ${midY}) translate(0, -${dist})`);
+                    txt.setAttribute("x", midX); txt.setAttribute("y", midY);
+                } else {
+                    txt.setAttribute("x", midX); txt.setAttribute("y", midY - dist);
+                }
+                grp.appendChild(txt);
+                return grp;
+            };
+
+            if (state.mode === 'cylinder') {
+                const w = state.calc.flatLength;
+                const h = state.calc.flatWidth;
+                const rect = document.createElementNS(ns, "rect");
+                rect.setAttribute("x", -w/2); rect.setAttribute("y", -h/2);
+                rect.setAttribute("width", w); rect.setAttribute("height", h);
+                rect.setAttribute("fill", "#2b2930"); rect.setAttribute("stroke", "#d0bcff"); rect.setAttribute("stroke-width", strokeWidth * 2);
+                g.appendChild(rect);
+
+                const dimOffset = fontSize * 2.5;
+                g.appendChild(createArrow(-w/2, h/2 + dimOffset, w/2, h/2 + dimOffset, `W=${w.toFixed(1)}`));
+                g.appendChild(createArrow(-w/2 - dimOffset, -h/2, -w/2 - dimOffset, h/2, `H=${h.toFixed(1)}`, true));
+                bbox.w += dimOffset*4; bbox.h += dimOffset*4;
+
+            } else {
+                const rOut = state.calc.rOut;
+                const rIn = state.calc.rIn;
+                const angle = state.calc.angle; 
+                const rad = (deg) => (deg - 90) * Math.PI / 180;
+                const startAngle = -angle / 2;
+                const endAngle = angle / 2;
+
+                const x1 = Math.cos(rad(startAngle)) * rOut;
+                const y1 = Math.sin(rad(startAngle)) * rOut;
+                const x2 = Math.cos(rad(endAngle)) * rOut;
+                const y2 = Math.sin(rad(endAngle)) * rOut;
+                const x3 = Math.cos(rad(endAngle)) * rIn;
+                const y3 = Math.sin(rad(endAngle)) * rIn;
+                const x4 = Math.cos(rad(startAngle)) * rIn;
+                const y4 = Math.sin(rad(startAngle)) * rIn;
+                const largeArc = angle > 180 ? 1 : 0;
+                const d = [`M ${x1} ${y1}`, `A ${rOut} ${rOut} 0 ${largeArc} 1 ${x2} ${y2}`, `L ${x3} ${y3}`, `A ${rIn} ${rIn} 0 ${largeArc} 0 ${x4} ${y4}`, `Z`].join(" ");
+                
+                const path = document.createElementNS(ns, "path");
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "#2b2930"); path.setAttribute("stroke", "#d0bcff"); path.setAttribute("stroke-width", strokeWidth * 2);
+                g.appendChild(path);
+
+                // Cone Dimensions (BBox)
+                const cb = getConeBBox(rOut, rIn, angle);
+                const dimOffset = fontSize * 3;
+                
+                // Width Arrow (Bottom)
+                g.appendChild(createArrow(cb.minX, cb.maxY + dimOffset, cb.maxX, cb.maxY + dimOffset, `W=${cb.width.toFixed(1)}`));
+                // Height Arrow (Left)
+                g.appendChild(createArrow(cb.minX - dimOffset, cb.minY, cb.minX - dimOffset, cb.maxY, `H=${cb.height.toFixed(1)}`, true));
+
+                // Center view
+                const centerX = (cb.minX + cb.maxX) / 2;
+                const centerY = (cb.minY + cb.maxY) / 2;
+                g.setAttribute("transform", `translate(${-centerX}, ${-centerY})`);
+                
+                bbox.w = cb.width + dimOffset*5;
+                bbox.h = cb.height + dimOffset*5;
+            }
+
+            const padding = fontSize * 4;
+            svg.setAttribute("viewBox", `${-bbox.w/2} ${-bbox.h/2} ${bbox.w} ${bbox.h}`);
+            container.appendChild(svg);
+        }
+
+        // --- PDF GENERATION ---
+        async function generatePDF() {
+            if (!state.isValid) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            
+            try {
+                const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
+                const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+                doc.addFileToVFS('Roboto-Regular.ttf', arrayBufferToBase64(fontBytes));
+                doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+                doc.setFont('Roboto');
+            } catch (e) { doc.setFont('helvetica'); }
+
+            const pageWidth = 297, pageHeight = 210, margin = 10;
+            doc.setFillColor(255, 255, 255); doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            doc.setDrawColor(0); doc.setLineWidth(0.5); doc.rect(margin, margin, pageWidth - 2*margin, pageHeight - 2*margin);
+            
+            // Title Block
+            const tbWidth = 100, tbHeight = 40;
+            const tbX = pageWidth - margin - tbWidth, tbY = pageHeight - margin - tbHeight;
+            doc.rect(tbX, tbY, tbWidth, tbHeight);
+            doc.setFontSize(10); doc.text("Part Type:", tbX + 2, tbY + 6);
+            doc.setFontSize(12); doc.text(state.mode === 'cylinder' ? "Cylinder Shell" : "Truncated Cone", tbX + 2, tbY + 14);
+            doc.setFontSize(8); doc.text(`Date: ${new Date().toLocaleDateString()}`, tbX + 2, tbY + 35);
+            doc.text("Shell Rolling Master v0.02", tbX + 55, tbY + 35);
+
+            // Params
+            let cursorY = margin + 20;
+            const startX = margin + 10;
+            doc.setFontSize(14); doc.text("Rolling Parameters", startX, margin + 10);
+            doc.setFontSize(10);
+            
+            const params = [
+                ["Material (Thickness)", `${state.thickness} mm`],
+                ["K-Factor", `${state.kFactor}`],
+                ["Gap", `${state.gap} mm`],
+                ["Height", `${state.h} mm`]
+            ];
+            if (state.mode === 'cylinder') {
+                params.push(["Diameter (D1)", `${state.d1} mm`]);
+                params.push(["Flat Width", `${state.calc.flatLength.toFixed(2)} mm`]);
+                params.push(["Flat Height", `${state.calc.flatWidth.toFixed(2)} mm`]);
+            } else {
+                params.push(["Top Dia (D1)", `${state.d1} mm`]);
+                params.push(["Bot Dia (D2)", `${state.d2} mm`]);
+                params.push(["Sector Angle", `${state.calc.angle.toFixed(2)} deg`]);
+                params.push(["Outer Radius", `${state.calc.rOut.toFixed(2)} mm`]);
+                params.push(["Inner Radius", `${state.calc.rIn.toFixed(2)} mm`]);
+                
+                // Add BBox info to text
+                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle);
+                params.push(["Total Width", `${cb.width.toFixed(1)} mm`]);
+                params.push(["Total Height", `${cb.height.toFixed(1)} mm`]);
+            }
+            if (state.bendLines > 0) params.push(["Bend Lines", `${state.bendLines} qty`]);
+
+            params.forEach(row => {
+                doc.text(`${row[0]}:`, startX, cursorY);
+                doc.text(row[1], startX + 50, cursorY);
+                cursorY += 7;
+            });
+
+            // Drawing Area
+            const drawAreaX = startX + 90, drawAreaY = margin + 10;
+            const drawAreaW = 170, drawAreaH = 140;
+            const cx = drawAreaX + drawAreaW / 2, cy = drawAreaY + drawAreaH / 2;
+            doc.setLineWidth(0.3);
+
+            const drawArrowPDF = (x1, y1, x2, y2, txt) => {
+                 doc.line(x1, y1, x2, y2);
+                 const ang = Math.atan2(y2-y1, x2-x1);
+                 const len = 2;
+                 doc.line(x1, y1, x1+len*Math.cos(ang+0.5), y1+len*Math.sin(ang+0.5));
+                 doc.line(x1, y1, x1+len*Math.cos(ang-0.5), y1+len*Math.sin(ang-0.5));
+                 doc.line(x2, y2, x2+len*Math.cos(ang+2.6), y2+len*Math.sin(ang+2.6)); // reversed head
+                 doc.line(x2, y2, x2+len*Math.cos(ang-2.6), y2+len*Math.sin(ang-2.6));
+                 doc.text(txt, (x1+x2)/2, (y1+y2)/2 - 1, { align: 'center' });
+            };
+
+            if (state.mode === 'cylinder') {
+                const w = state.calc.flatLength, h = state.calc.flatWidth;
+                const scale = Math.min(drawAreaW / w, drawAreaH / h) * 0.8;
+                const dw = w * scale, dh = h * scale;
+                const dx = cx - dw/2, dy = cy - dh/2;
+                
+                doc.rect(dx, dy, dw, dh);
+                drawArrowPDF(dx, dy+dh+5, dx+dw, dy+dh+5, `W=${w.toFixed(1)}`);
+                
+                // Vertical
+                doc.text(`H=${h.toFixed(1)}`, dx-5, cy, { align: 'center', angle: 90 });
+                doc.line(dx-3, dy, dx-3, dy+dh);
+                doc.line(dx-4, dy, dx-2, dy); doc.line(dx-4, dy+dh, dx-2, dy+dh); // ticks
+            } else {
+                const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
+                const cb = getConeBBox(rOut, rIn, angle);
+                const scale = Math.min(drawAreaW / cb.width, drawAreaH / cb.height) * 0.8;
+                
+                const sROut = rOut * scale;
+                const sRIn = rIn * scale;
+                
+                // Map center of bbox to center of draw area
+                const shapeCenterX = (cb.minX + cb.maxX) / 2 * scale;
+                const shapeCenterY = (cb.minY + cb.maxY) / 2 * scale;
+                const ox = cx - shapeCenterX;
+                const oy = cy - shapeCenterY;
+
+                const rad = (deg) => (deg - 90) * Math.PI / 180;
+                const getP = (r, aDeg) => ({ x: ox + r * Math.cos(rad(aDeg)), y: oy + r * Math.sin(rad(aDeg)) });
+
+                const startA = -angle/2, endA = angle/2, steps=40, dAng=angle/steps;
+                for(let i=0; i<=steps; i++) {
+                    const p = getP(sROut, startA + i*dAng);
+                    i===0 ? doc.moveTo(p.x, p.y) : doc.lineTo(p.x, p.y);
+                }
+                const pInEnd = getP(sRIn, endA);
+                doc.lineTo(pInEnd.x, pInEnd.y);
+                for(let i=steps; i>=0; i--) {
+                    const p = getP(sRIn, startA + i*dAng);
+                    doc.lineTo(p.x, p.y);
+                }
+                const pOutStart = getP(sROut, startA);
+                doc.lineTo(pOutStart.x, pOutStart.y);
+                doc.stroke();
+
+                // Dimensions
+                const scaledMinX = ox + cb.minX * scale;
+                const scaledMaxX = ox + cb.maxX * scale;
+                const scaledMinY = oy + cb.minY * scale;
+                const scaledMaxY = oy + cb.maxY * scale;
+                
+                // Width
+                drawArrowPDF(scaledMinX, scaledMaxY+5, scaledMaxX, scaledMaxY+5, `W=${cb.width.toFixed(1)}`);
+                
+                // Height
+                const leftX = scaledMinX - 5;
+                doc.text(`H=${cb.height.toFixed(1)}`, leftX-2, (scaledMinY+scaledMaxY)/2, { align: 'center', angle: 90 });
+                doc.line(leftX, scaledMinY, leftX, scaledMaxY);
+                doc.line(leftX-1, scaledMinY, leftX+1, scaledMinY); // ticks
+                doc.line(leftX-1, scaledMaxY, leftX+1, scaledMaxY);
+            }
+
+            doc.save('shell_rolling_report.pdf');
+        }
+
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+            return window.btoa(binary);
+        }
+
+        // Keep DXF and listeners same as before...
+        function generateDXF() {
+             if (!state.isValid) return;
+             let content = "0\nSECTION\n2\nENTITIES\n";
+             if (state.mode === 'cylinder') {
+                 const w = state.calc.flatLength, h = state.calc.flatWidth;
+                 content += dxfPoly([[0,0], [w,0], [w,h], [0,h], [0,0]]);
+             } else {
+                 const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
+                 const points = [], steps = 72, rad = (deg) => deg * Math.PI / 180;
+                 for(let i=0; i<=steps; i++) points.push([Math.cos(rad(i*angle/steps))*rOut, Math.sin(rad(i*angle/steps))*rOut]);
+                 for(let i=steps; i>=0; i--) points.push([Math.cos(rad(i*angle/steps))*rIn, Math.sin(rad(i*angle/steps))*rIn]);
+                 points.push(points[0]);
+                 content += dxfPoly(points);
+             }
+             content += "0\nENDSEC\n0\nEOF\n";
+             const a = document.createElement('a');
+             a.href = URL.createObjectURL(new Blob([content], { type: 'application/dxf' }));
+             a.download = 'pattern.dxf'; a.click();
+        }
+        function dxfPoly(points) {
+            let s = "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n"; 
+            points.forEach(p => s += `0\nVERTEX\n8\n0\n10\n${p[0].toFixed(4)}\n20\n${p[1].toFixed(4)}\n30\n0.0\n`);
+            s += "0\nSEQEND\n"; return s;
+        }
+
+        function setMode(m) {
+            state.mode = m;
+            els.ui.coneInput.classList.toggle('hidden', m === 'cylinder');
+            // Toggle styles for buttons
+            const active = ['bg-md-primary', 'text-md-onPrimary', 'shadow-md'];
+            const inactive = ['text-[#ccc2dc]', 'hover:bg-[#36343b]'];
+            
+            if (m === 'cylinder') {
+                els.modes.cyl.classList.add(...active); els.modes.cyl.classList.remove(...inactive);
+                els.modes.cone.classList.add(...inactive); els.modes.cone.classList.remove(...active);
+            } else {
+                els.modes.cone.classList.add(...active); els.modes.cone.classList.remove(...inactive);
+                els.modes.cyl.classList.add(...inactive); els.modes.cyl.classList.remove(...active);
+            }
+            calculate();
+        }
+        function switchTab(t) {
+            els.tabs.t3d.classList.toggle('tab-active', t==='3d'); els.tabs.t3d.classList.toggle('tab-inactive', t!=='3d');
+            els.tabs.t2d.classList.toggle('tab-active', t==='2d'); els.tabs.t2d.classList.toggle('tab-inactive', t!=='2d');
+            els.tabs.v3d.classList.toggle('hidden', t!=='3d');
+            els.tabs.v2d.classList.toggle('hidden', t!=='2d');
+            if(t==='2d') update2D();
+        }
+
+        Object.values(els.inputs).forEach(i => i.length ? i.forEach(r=>r.addEventListener('change', calculate)) : i.addEventListener('input', calculate));
+        els.modes.cyl.addEventListener('click', () => setMode('cylinder'));
+        els.modes.cone.addEventListener('click', () => setMode('cone'));
+        els.tabs.t3d.addEventListener('click', () => switchTab('3d'));
+        els.tabs.t2d.addEventListener('click', () => switchTab('2d'));
+        els.actions.pdf.addEventListener('click', generatePDF);
+        els.actions.dxf.addEventListener('click', generateDXF);
+
+        initThree(); calculate();
     </script>
 </body>
 </html>
