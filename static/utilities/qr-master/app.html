@@ -1,0 +1,1034 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>QR Master</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {sans: ['Inter', 'sans-serif']},
+            colors: {
+              primary: '#111827',
+              accent: '#6366F1',
+              bg: '#F3F4F6',
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'scan-laser': 'scanLaser 2s ease-in-out infinite alternate',
+            },
+            keyframes: {
+              scanLaser: {
+                '0%': {top: '0%', opacity: 0.5},
+                '100%': {top: '100%', opacity: 1},
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+
+      .view-hidden {
+        display: none !important;
+      }
+
+      .view-visible {
+        display: flex !important;
+      }
+
+      #reader {
+        width: 100%;
+        height: 100%;
+        background: #000;
+      }
+
+      #reader video {
+        object-fit: cover;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* helper must stay rendered (not display: none) for html5-qrcode file scan */
+      #file-scan-helper {
+        position: absolute;
+        top: -10000px;
+        left: -10000px;
+        width: 320px;
+        height: 320px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .min-input {
+        width: 100%;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+      }
+
+      .min-input:focus {
+        border-color: #6366f1;
+        background: #ffffff;
+      }
+
+      .chip {
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #ffffff;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+        transition: 0.2s;
+        white-space: nowrap;
+      }
+
+      .chip.active {
+        background: #111827;
+        color: #ffffff;
+        border-color: #111827;
+      }
+
+      #paste-area:empty:before {
+        content: attr(data-placeholder);
+        color: #9ca3af;
+      }
+
+      dialog {
+        border: none;
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(2px);
+      }
+    </style>
+  </head>
+  <body class="bg-bg text-primary h-screen w-full overflow-hidden flex flex-col font-sans">
+    <div id="file-scan-helper" aria-hidden="true"></div>
+
+    <!-- HOME -->
+    <div id="view-home" class="view-visible flex-1 flex flex-col relative p-6 h-full z-10 gap-6">
+      <div class="flex justify-between items-center h-12 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center">
+            <i class="ph-bold ph-aperture text-xl"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xl tracking-tight">QR Master</div>
+            <p class="text-xs text-gray-500">
+              Scan, generate, and keep history locally. No uploads.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="document.getElementById('settingsDialog').showModal()"
+          class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100 active:scale-95 transition-transform"
+          aria-label="Settings"
+        >
+          <i class="ph-bold ph-gear text-xl"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 flex flex-col items-center justify-center min-h-0 gap-10">
+        <div class="flex flex-col items-center gap-8 w-full">
+          <div class="relative group" role="presentation" onclick="switchView('scanner')">
+            <div
+              class="absolute -inset-4 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full blur-xl opacity-20 group-hover:opacity-40 animate-pulse-slow pointer-events-none"
+            ></div>
+            <button
+              class="relative w-44 h-44 bg-white rounded-full shadow-2xl flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform duration-200 border-4 border-white"
+              type="button"
+              aria-label="Start scan"
+            >
+              <div class="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-inner">
+                <i class="ph-fill ph-camera text-4xl"></i>
+              </div>
+              <span class="font-bold text-base text-gray-800">Scan</span>
+            </button>
+          </div>
+
+          <div class="flex gap-3 w-full max-w-md justify-center">
+            <input type="file" id="home-file-in" class="hidden" accept="image/*" onchange="handleFileSelect(this)" />
+            <button
+              type="button"
+              onclick="document.getElementById('home-file-in').click()"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white rounded-xl shadow-sm border border-gray-200 text-sm font-semibold text-gray-600 active:scale-95 transition-transform hover:bg-gray-50 hover:border-gray-300"
+            >
+              <i class="ph-bold ph-image text-lg text-accent"></i>
+              <span>Upload</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="openPasteDialog()"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white rounded-xl shadow-sm border border-gray-200 text-sm font-semibold text-gray-600 active:scale-95 transition-transform hover:bg-gray-50 hover:border-gray-300"
+            >
+              <i class="ph-bold ph-clipboard-text text-lg text-accent"></i>
+              <span>Paste</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+          <button
+            type="button"
+            onclick="switchView('generator')"
+            class="bg-white p-5 rounded-2xl shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-transform border border-gray-100 hover:border-accent/40"
+          >
+            <i class="ph-duotone ph-pencil-simple text-3xl text-accent"></i>
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Create</span>
+          </button>
+          <button
+            type="button"
+            onclick="switchView('history')"
+            class="bg-white p-5 rounded-2xl shadow-sm flex flex-col items-center gap-2 active:scale-95 transition-transform border border-gray-100 hover:border-accent/40"
+          >
+            <i class="ph-duotone ph-clock-counter-clockwise text-3xl text-accent"></i>
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">History</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCANNER -->
+    <div id="view-scanner" class="view-hidden h-full w-full bg-black absolute inset-0 z-50">
+      <div class="absolute top-0 left-0 w-full p-6 pt-8 z-30 flex justify-between items-center pointer-events-none">
+        <button
+          type="button"
+          onclick="switchView('home')"
+          class="pointer-events-auto w-12 h-12 rounded-full bg-black/40 text-white backdrop-blur-md flex items-center justify-center active:scale-90 transition-transform"
+          aria-label="Close scanner"
+        >
+          <i class="ph-bold ph-x text-2xl"></i>
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('file-in').click()"
+          class="pointer-events-auto w-12 h-12 rounded-full bg-black/40 text-white backdrop-blur-md flex items-center justify-center active:scale-90 transition-transform"
+          aria-label="Upload image"
+        >
+          <i class="ph-bold ph-image text-2xl"></i>
+        </button>
+        <input type="file" id="file-in" class="hidden" accept="image/*" onchange="handleFileSelect(this)" />
+      </div>
+
+      <div class="absolute inset-0 w-full h-full bg-black">
+        <div id="reader"></div>
+      </div>
+
+      <div
+        id="scan-ui"
+        class="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center hidden"
+      >
+        <div
+          class="relative w-[70%] aspect-square max-w-sm rounded-3xl border-2 border-white/50 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] overflow-hidden"
+        >
+          <div class="absolute top-0 left-0 w-full h-1 bg-accent shadow-[0_0_20px_#6366F1] animate-scan-laser"></div>
+        </div>
+        <p class="text-white/80 mt-8 font-medium text-sm backdrop-blur-sm px-4 py-1 rounded-full bg-black/30">
+          Point camera at code
+        </p>
+      </div>
+
+      <div
+        id="scan-loading"
+        class="absolute inset-0 z-40 bg-black flex flex-col items-center justify-center text-white px-6 text-center"
+      >
+        <i id="loading-spinner" class="ph-bold ph-spinner animate-spin text-4xl text-accent mb-4"></i>
+        <span id="loading-text" class="text-lg font-medium mb-4">Starting camera...</span>
+        <button
+          id="btn-retry-cam"
+          type="button"
+          onclick="startScanner()"
+          class="hidden px-6 py-2 bg-white text-primary rounded-full font-medium active:scale-95 transition-transform"
+        >
+          Retry
+        </button>
+        <button
+          id="btn-cancel-cam"
+          type="button"
+          onclick="switchView('home')"
+          class="hidden mt-4 text-gray-400 text-sm"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- GENERATOR -->
+    <div id="view-generator" class="view-hidden h-full flex-col bg-bg absolute inset-0 z-40">
+      <div class="bg-white p-4 shadow-sm flex items-center gap-3 shrink-0 pt-8">
+        <button
+          type="button"
+          onclick="switchView('home')"
+          class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary active:bg-gray-200"
+          aria-label="Back"
+        >
+          <i class="ph-bold ph-arrow-left text-xl"></i>
+        </button>
+        <h2 class="font-bold text-xl">Creator</h2>
+      </div>
+
+      <div class="p-5 flex-1 overflow-y-auto space-y-6">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar">
+          <button type="button" onclick="setMode('text')" id="mode-text" class="chip active">Link / Text</button>
+          <button type="button" onclick="setMode('contact')" id="mode-contact" class="chip">Contact</button>
+          <button type="button" onclick="setMode('wifi')" id="mode-wifi" class="chip">Wi-Fi</button>
+        </div>
+
+        <div id="gen-forms" class="space-y-4">
+          <div id="form-text">
+            <input
+              type="text"
+              id="in-text"
+              class="min-input"
+              placeholder="Enter text or https://..."
+              oninput="generate()"
+              autocomplete="off"
+            />
+          </div>
+          <div id="form-contact" class="space-y-3 hidden">
+            <button
+              id="btn-pick-contact"
+              type="button"
+              onclick="pickContact()"
+              class="w-full py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-accent hidden"
+            >
+              Pick from Contacts
+            </button>
+            <input
+              type="text"
+              id="in-name"
+              class="min-input"
+              placeholder="Name"
+              oninput="generate()"
+              autocomplete="name"
+            />
+            <input
+              type="tel"
+              id="in-phone"
+              class="min-input"
+              placeholder="Phone"
+              oninput="generate()"
+              autocomplete="tel"
+            />
+          </div>
+          <div id="form-wifi" class="space-y-3 hidden">
+            <input
+              type="text"
+              id="in-ssid"
+              class="min-input"
+              placeholder="Network Name (SSID)"
+              oninput="generate()"
+              autocomplete="off"
+            />
+            <input
+              type="text"
+              id="in-pass"
+              class="min-input"
+              placeholder="Password"
+              oninput="generate()"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[280px]">
+          <div id="qrcode"></div>
+          <div id="qr-hint" class="text-sm text-gray-400 mt-4">Start typing to generate</div>
+          <button
+            id="btn-save-gen"
+            type="button"
+            onclick="saveGeneratedToHistory()"
+            class="hidden mt-6 bg-primary text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg active:scale-95 transition-transform"
+          >
+            Save to History
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="view-history" class="view-hidden h-full flex-col bg-bg absolute inset-0 z-40">
+      <div class="bg-white p-4 shadow-sm flex items-center justify-between shrink-0 pt-8">
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            onclick="switchView('home')"
+            class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary active:bg-gray-200"
+            aria-label="Back"
+          >
+            <i class="ph-bold ph-arrow-left text-xl"></i>
+          </button>
+          <h2 class="font-bold text-xl">History</h2>
+        </div>
+
+        <div class="flex gap-2 items-center">
+          <input type="file" id="import-file" accept=".json" class="hidden" onchange="importHistory(this)" />
+          <button
+            type="button"
+            onclick="triggerImport()"
+            class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-primary active:bg-gray-200"
+            title="Import history"
+          >
+            <i class="ph-bold ph-download-simple text-xl"></i>
+          </button>
+          <button
+            type="button"
+            onclick="exportHistory()"
+            class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-primary active:bg-gray-200"
+            title="Export history"
+          >
+            <i class="ph-bold ph-export text-xl"></i>
+          </button>
+          <div class="w-px h-6 bg-gray-200 mx-1 self-center"></div>
+          <button
+            type="button"
+            onclick="clearHistory()"
+            class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 active:bg-red-100"
+            title="Clear history"
+          >
+            <i class="ph-bold ph-trash text-xl"></i>
+          </button>
+        </div>
+      </div>
+      <div id="history-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    </div>
+
+    <!-- PASTE DIALOG -->
+    <dialog
+      id="pasteDialog"
+      class="bg-white p-6 rounded-3xl w-[90%] max-w-sm m-auto shadow-2xl backdrop:bg-black/40 backdrop:blur"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Paste from Clipboard</h3>
+        <button
+          type="button"
+          onclick="this.closest('dialog').close()"
+          class="text-gray-400 hover:text-gray-600"
+          aria-label="Close dialog"
+        >
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+      </div>
+
+      <p class="text-sm text-gray-500 mb-4">
+        Tap the box below and select Paste from your keyboard (text or images).
+      </p>
+
+      <div
+        id="paste-area"
+        contenteditable="true"
+        data-placeholder="Tap here and paste..."
+        class="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-4 text-sm focus:border-accent focus:bg-white outline-none overflow-auto"
+      ></div>
+
+      <div class="mt-4 flex justify-end">
+        <button
+          type="button"
+          onclick="document.getElementById('pasteDialog').close()"
+          class="text-sm text-gray-500 font-medium px-4 py-2"
+        >
+          Cancel
+        </button>
+      </div>
+    </dialog>
+
+    <!-- RESULT DIALOG -->
+    <dialog
+      id="resultDialog"
+      class="bg-transparent p-0 w-full max-w-md m-auto mb-0 rounded-t-3xl backdrop:bg-black/40 backdrop:blur z-50"
+    >
+      <div class="bg-white p-6 pb-8 rounded-t-3xl shadow-[0_-10px_60px_rgba(0,0,0,0.2)] animate-[slideUp_0.3s]">
+        <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6"></div>
+
+        <div class="flex justify-center mb-6">
+          <div id="result-qr" class="bg-white p-2 rounded-xl border border-gray-100 shadow-sm hidden"></div>
+        </div>
+
+        <div class="flex gap-4 mb-6">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-accent flex items-center justify-center shrink-0">
+            <i id="res-icon" class="ph-fill ph-link text-2xl"></i>
+          </div>
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1" id="res-type">TYPE</div>
+            <div class="text-sm font-bold text-gray-900 break-all leading-snug line-clamp-3" id="res-content">
+              ...
+            </div>
+          </div>
+        </div>
+
+        <button
+          id="btn-smart-action"
+          type="button"
+          class="w-full py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-95 transition-transform flex items-center justify-center gap-2 mb-3"
+        >
+          <i class="ph-bold ph-check"></i>
+          <span id="btn-smart-text">Action</span>
+        </button>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onclick="copyText('res-content')"
+            class="py-3 bg-gray-50 text-gray-700 rounded-xl font-medium text-sm active:bg-gray-200"
+          >
+            Copy
+          </button>
+          <button
+            type="button"
+            onclick="document.getElementById('resultDialog').close()"
+            class="py-3 bg-gray-50 text-gray-700 rounded-xl font-medium text-sm active:bg-gray-200"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- SETTINGS -->
+    <dialog
+      id="settingsDialog"
+      class="bg-white p-6 rounded-3xl w-[85%] max-w-sm m-auto shadow-2xl backdrop:bg-black/40 backdrop:blur"
+    >
+      <h3 class="text-lg font-bold mb-4">Settings</h3>
+      <label class="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-6 cursor-pointer">
+        <span class="font-medium text-sm">Scan Barcodes (EAN/Code-128)</span>
+        <input type="checkbox" id="chk-barcode" class="w-5 h-5 accent-primary text-primary focus:ring-primary rounded" />
+      </label>
+      <button
+        type="button"
+        onclick="this.closest('dialog').close()"
+        class="w-full py-3 bg-primary text-white rounded-xl font-medium"
+      >
+        Done
+      </button>
+    </dialog>
+
+    <script>
+      const DB_KEY = 'qr_ultimate_v3';
+      const views = ['home', 'scanner', 'generator', 'history'];
+      let html5QrCode = null;
+      let isProcessing = false;
+      let startTimeout;
+
+      function openPasteDialog() {
+        const dialog = document.getElementById('pasteDialog');
+        const area = document.getElementById('paste-area');
+        area.textContent = '';
+        dialog.showModal();
+        setTimeout(() => area.focus(), 100);
+      }
+
+      document.getElementById('paste-area').addEventListener('paste', (event) => {
+        event.preventDefault();
+        const items = (event.clipboardData || event.originalEvent?.clipboardData)?.items || [];
+        let handled = false;
+
+        Array.from(items).forEach((item) => {
+          if (handled) {
+            return;
+          }
+
+          if (item.kind === 'file') {
+            const blob = item.getAsFile();
+            scanFromFile(blob);
+            handled = true;
+            document.getElementById('pasteDialog').close();
+          } else if (item.kind === 'string') {
+            item.getAsString((text) => {
+              if (text && text.trim()) {
+                addToHistory(text, 'scan');
+                showResult(text);
+                document.getElementById('pasteDialog').close();
+              }
+            });
+            handled = true;
+          }
+        });
+
+        if (!handled) {
+          alert('Could not read clipboard. Try again.');
+        }
+      });
+
+      function switchView(viewName) {
+        views.forEach((view) => {
+          const el = document.getElementById(`view-${view}`);
+          el.classList.toggle('view-visible', view === viewName);
+          el.classList.toggle('view-hidden', view !== viewName);
+        });
+
+        if (viewName === 'scanner') {
+          startScanner();
+        } else {
+          stopScanner();
+        }
+
+        if (viewName === 'history') {
+          renderHistory();
+        }
+      }
+
+      function startScanner() {
+        const loader = document.getElementById('scan-loading');
+        const spinner = document.getElementById('loading-spinner');
+        const loadText = document.getElementById('loading-text');
+        const btnRetry = document.getElementById('btn-retry-cam');
+        const btnCancel = document.getElementById('btn-cancel-cam');
+        const guide = document.getElementById('scan-ui');
+
+        loader.classList.remove('hidden');
+        guide.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        btnRetry.classList.add('hidden');
+        btnCancel.classList.add('hidden');
+        loadText.textContent = 'Starting camera...';
+        isProcessing = false;
+
+        const formats = [Html5QrcodeSupportedFormats.QR_CODE];
+        if (document.getElementById('chk-barcode').checked) {
+          formats.push(
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.UPC_A
+          );
+        }
+
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode('reader');
+        }
+
+        clearTimeout(startTimeout);
+        startTimeout = setTimeout(() => {
+          spinner.classList.add('hidden');
+          loadText.textContent = 'Failed to start camera.';
+          btnRetry.classList.remove('hidden');
+          btnCancel.classList.remove('hidden');
+        }, 6000);
+
+        const config = {fps: 10, qrbox: {width: 250, height: 250}, formatsToSupport: formats};
+
+        html5QrCode
+          .start({facingMode: 'environment'}, config, onScanSuccess)
+          .then(() => {
+            clearTimeout(startTimeout);
+            loader.classList.add('hidden');
+            guide.classList.remove('hidden');
+          })
+          .catch(() => {
+            clearTimeout(startTimeout);
+            spinner.classList.add('hidden');
+            loadText.textContent = 'Camera access error (requires HTTPS).';
+            btnRetry.classList.remove('hidden');
+            btnCancel.classList.remove('hidden');
+          });
+      }
+
+      function onScanSuccess(decodedText) {
+        if (isProcessing) return;
+        isProcessing = true;
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+
+        document.getElementById('scan-ui').classList.add('hidden');
+
+        html5QrCode
+          .stop()
+          .then(() => {
+            addToHistory(decodedText, 'scan');
+            switchView('home');
+            setTimeout(() => showResult(decodedText), 200);
+          })
+          .catch(() => {
+            switchView('home');
+            showResult(decodedText);
+          });
+      }
+
+      function stopScanner() {
+        clearTimeout(startTimeout);
+        if (html5QrCode) {
+          html5QrCode.stop().catch(() => {});
+        }
+      }
+
+      function handleFileSelect(input) {
+        if (!input.files || !input.files.length) return;
+        scanFromFile(input.files[0]);
+        input.value = '';
+      }
+
+      function scanFromFile(file) {
+        if (!file) return;
+
+        const tempScanner = new Html5Qrcode('file-scan-helper');
+
+        tempScanner
+          .scanFile(file, true)
+          .then((decodedText) => {
+            addToHistory(decodedText, 'scan');
+            showResult(decodedText);
+          })
+          .catch(() => {
+            alert('No QR code found in image (try better lighting)');
+          })
+          .finally(() => {
+            try {
+              tempScanner.clear();
+            } catch (e) {
+              /* ignore */
+            }
+          });
+      }
+
+      function showResult(text) {
+        const dialog = document.getElementById('resultDialog');
+        const meta = parseMeta(text);
+        const contentNode = document.getElementById('res-content');
+        const typeNode = document.getElementById('res-type');
+        const iconNode = document.getElementById('res-icon');
+        const qrContainer = document.getElementById('result-qr');
+        const btn = document.getElementById('btn-smart-action');
+        const btnText = document.getElementById('btn-smart-text');
+
+        contentNode.textContent = text;
+        typeNode.textContent = meta.type;
+        iconNode.className = `ph-fill ${meta.icon} text-2xl`;
+
+        qrContainer.innerHTML = '';
+        if (meta.type !== 'Barcode') {
+          new QRCode(qrContainer, {
+            text,
+            width: 120,
+            height: 120,
+            colorDark: '#111827',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+          qrContainer.classList.remove('hidden');
+        } else {
+          qrContainer.classList.add('hidden');
+        }
+
+        btn.onclick = null;
+
+        if (meta.type === 'Contact') {
+          btnText.textContent = 'Save contact';
+          btn.onclick = () => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([text], {type: 'text/vcard'}));
+            a.download = 'contact.vcf';
+            a.click();
+          };
+        } else if (meta.type === 'Website') {
+          btnText.textContent = 'Open link';
+          btn.onclick = () => window.open(text, '_blank', 'noopener');
+        } else if (meta.type === 'Wi-Fi') {
+          const passMatch = text.match(/P:([^;]*)/);
+          const password = passMatch ? passMatch[1] : '';
+          btnText.textContent = password ? 'Copy Wi‑Fi password' : 'Copy network';
+          btn.onclick = () => {
+            navigator.clipboard.writeText(password || text);
+            alert('Copied to clipboard');
+          };
+        } else if (meta.type === 'Barcode') {
+          btnText.textContent = 'Search barcode';
+          btn.onclick = () => window.open(`https://google.com/search?q=${encodeURIComponent(text)}`, '_blank', 'noopener');
+        } else {
+          btnText.textContent = 'Search Google';
+          btn.onclick = () => window.open(`https://google.com/search?q=${encodeURIComponent(text)}`, '_blank', 'noopener');
+        }
+
+        dialog.showModal();
+      }
+
+      function parseMeta(value) {
+        const text = value.trim();
+        if (text.toUpperCase().startsWith('BEGIN:VCARD')) {
+          return {type: 'Contact', icon: 'ph-address-book'};
+        }
+        if (/^https?:\/\//i.test(text)) {
+          return {type: 'Website', icon: 'ph-globe'};
+        }
+        if (text.toUpperCase().startsWith('WIFI:')) {
+          return {type: 'Wi-Fi', icon: 'ph-wifi-high'};
+        }
+        if (/^\d{8,}$/.test(text)) {
+          return {type: 'Barcode', icon: 'ph-barcode'};
+        }
+        return {type: 'Text', icon: 'ph-text-aa'};
+      }
+
+      function copyText(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          navigator.clipboard.writeText(el.textContent || '');
+          alert('Copied');
+        }
+      }
+
+      function getHistory() {
+        try {
+          const data = localStorage.getItem(DB_KEY);
+          return data ? JSON.parse(data) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function addToHistory(text, type) {
+        let history = getHistory().filter((item) => item.text !== text);
+        history.unshift({id: Date.now(), text, type, date: new Date().toLocaleString()});
+        if (history.length > 50) history.pop();
+        localStorage.setItem(DB_KEY, JSON.stringify(history));
+      }
+
+      function renderHistory() {
+        const list = document.getElementById('history-list');
+        const history = getHistory();
+        list.innerHTML = '';
+        if (!history.length) {
+          const empty = document.createElement('div');
+          empty.className = 'text-center text-gray-400 mt-10 text-sm';
+          empty.textContent = 'History is empty';
+          list.appendChild(empty);
+          return;
+        }
+
+        history.forEach((item) => {
+          const meta = parseMeta(item.text);
+          const row = document.createElement('div');
+          row.className =
+            'bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-transform';
+          row.onclick = () => showResult(item.text);
+
+          const iconWrap = document.createElement('div');
+          iconWrap.className =
+            'w-10 h-10 rounded-full bg-gray-50 text-primary flex items-center justify-center shrink-0';
+          const icon = document.createElement('i');
+          icon.className = `ph-fill ${meta.icon} text-lg`;
+          iconWrap.appendChild(icon);
+
+          const textWrap = document.createElement('div');
+          textWrap.className = 'flex-1 min-w-0';
+
+          const metaRow = document.createElement('div');
+          metaRow.className = 'flex justify-between';
+
+          const typeLabel = document.createElement('span');
+          typeLabel.className = 'text-[10px] font-bold text-gray-400 uppercase';
+          typeLabel.textContent = meta.type;
+
+          const dateLabel = document.createElement('span');
+          dateLabel.className = 'text-[10px] text-gray-300';
+          dateLabel.textContent = item.date;
+
+          metaRow.appendChild(typeLabel);
+          metaRow.appendChild(dateLabel);
+
+          const value = document.createElement('div');
+          value.className = 'text-sm font-bold text-gray-800 truncate';
+          value.textContent = item.text;
+
+          textWrap.appendChild(metaRow);
+          textWrap.appendChild(value);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className =
+            'w-10 h-10 flex items-center justify-center text-gray-300 hover:text-red-500 del-btn';
+          const delIcon = document.createElement('i');
+          delIcon.className = 'ph-bold ph-trash text-lg';
+          delBtn.appendChild(delIcon);
+          delBtn.onclick = (event) => {
+            event.stopPropagation();
+            deleteHistory(item.id);
+          };
+
+          row.appendChild(iconWrap);
+          row.appendChild(textWrap);
+          row.appendChild(delBtn);
+          list.appendChild(row);
+        });
+      }
+
+      function deleteHistory(id) {
+        const history = getHistory().filter((item) => item.id !== id);
+        localStorage.setItem(DB_KEY, JSON.stringify(history));
+        renderHistory();
+      }
+
+      function clearHistory() {
+        if (confirm('Clear all history?')) {
+          localStorage.removeItem(DB_KEY);
+          renderHistory();
+        }
+      }
+
+      function exportHistory() {
+        const history = getHistory();
+        if (!history.length) {
+          alert('History is empty');
+          return;
+        }
+        const blob = new Blob([JSON.stringify(history)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `qr_history_${Date.now()}.json`;
+        a.click();
+      }
+
+      function triggerImport() {
+        document.getElementById('import-file').click();
+      }
+
+      function importHistory(input) {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target?.result || '[]');
+            let history = getHistory();
+            data.forEach((item) => {
+              if (!history.some((row) => row.text === item.text)) {
+                history.push(item);
+              }
+            });
+            history.sort((a, b) => b.id - a.id);
+            localStorage.setItem(DB_KEY, JSON.stringify(history));
+            renderHistory();
+            alert('Imported');
+          } catch (err) {
+            alert('File error');
+          }
+        };
+        reader.readAsText(file);
+        input.value = '';
+      }
+
+      let genMode = 'text';
+      let genTimer;
+
+      function setMode(mode) {
+        genMode = mode;
+        ['text', 'contact', 'wifi'].forEach((key) => {
+          document.getElementById(`mode-${key}`).classList.toggle('active', key === mode);
+          document.getElementById(`form-${key}`).classList.toggle('hidden', key !== mode);
+        });
+        generate();
+      }
+
+      function generate() {
+        clearTimeout(genTimer);
+        genTimer = setTimeout(() => {
+          const container = document.getElementById('qrcode');
+          container.innerHTML = '';
+          let data = '';
+
+          if (genMode === 'text') {
+            data = document.getElementById('in-text').value.trim();
+          } else if (genMode === 'contact') {
+            const name = document.getElementById('in-name').value.trim();
+            const phone = document.getElementById('in-phone').value.trim();
+            if (name || phone) {
+              data = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEND:VCARD`;
+            }
+          } else if (genMode === 'wifi') {
+            const ssid = document.getElementById('in-ssid').value.trim();
+            const pass = document.getElementById('in-pass').value.trim();
+            if (ssid) {
+              data = `WIFI:S:${ssid};T:WPA;P:${pass};;`;
+            }
+          }
+
+          if (data) {
+            new QRCode(container, {
+              text: data,
+              width: 200,
+              height: 200,
+              colorDark: '#111827',
+              colorLight: '#ffffff',
+            });
+            document.getElementById('qr-hint').classList.add('hidden');
+            document.getElementById('btn-save-gen').classList.remove('hidden');
+          } else {
+            document.getElementById('qr-hint').classList.remove('hidden');
+            document.getElementById('btn-save-gen').classList.add('hidden');
+          }
+        }, 200);
+      }
+
+      function saveGeneratedToHistory() {
+        let data = '';
+        if (genMode === 'text') {
+          data = document.getElementById('in-text').value.trim();
+        } else if (genMode === 'contact') {
+          data = `BEGIN:VCARD\nVERSION:3.0\nFN:${document.getElementById('in-name').value.trim()}\nTEL:${document.getElementById('in-phone').value.trim()}\nEND:VCARD`;
+        } else if (genMode === 'wifi') {
+          data = `WIFI:S:${document.getElementById('in-ssid').value.trim()};T:WPA;P:${document.getElementById('in-pass').value.trim()};;`;
+        }
+        if (data) {
+          addToHistory(data, 'gen');
+          alert('Saved!');
+        }
+      }
+
+      if ('contacts' in navigator && 'ContactsManager' in window) {
+        document.getElementById('btn-pick-contact').classList.remove('hidden');
+      }
+
+      async function pickContact() {
+        try {
+          const contacts = await navigator.contacts.select(['name', 'tel'], {multiple: false});
+          if (contacts.length) {
+            const contact = contacts[0];
+            const name = Array.isArray(contact.name) ? contact.name[0] : contact.name || '';
+            const tel = Array.isArray(contact.tel) ? contact.tel[0] : contact.tel || '';
+            document.getElementById('in-name').value = name || '';
+            document.getElementById('in-phone').value = tel || '';
+            generate();
+          }
+        } catch (e) {
+          /* ignored */
+        }
+      }
+
+      setMode('text');
+      generate();
+      renderHistory();
+    </script>
+  </body>
+</html>

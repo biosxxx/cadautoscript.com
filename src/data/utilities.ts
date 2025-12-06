@@ -104,6 +104,16 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Draw or upload signature', 'Drag placement once', 'ZIP export'],
     href: '/utilities/pdf-batch-signer/',
   },
+  {
+    id: 'qr-master',
+    name: 'QR Master',
+    description:
+      'Scan QR codes and barcodes instantly, generate custom codes for links or WiFi, and manage your scan history locally.',
+    tech: 'Camera + QR',
+    standards: 'Offline',
+    features: ['Scan QR & barcodes', 'Generate Wi-Fi/link codes', 'History with import/export', 'Smart paste & image scan'],
+    href: '/utilities/qr-master/',
+  },
 ];
 
 

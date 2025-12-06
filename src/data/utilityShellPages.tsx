@@ -9,7 +9,8 @@ export type UtilityPageSlug =
   | 'pdf-batch-signer'
   | 'qr-nameplate'
   | 'dxf-editor'
-  | 'pdf-master';
+  | 'pdf-master'
+  | 'qr-master';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -152,5 +153,23 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'View pages inside their original file',
     ],
     scriptType: 'defer',
+  },
+  'qr-master': {
+    slug: 'qr-master',
+    title: 'QR Master',
+    subtitle: 'Scan QR, barcodes, or generate Wi-Fi/link codes locally.',
+    description:
+      'Scan QR codes and barcodes instantly, generate custom codes for links or WiFi, and manage your scan history locally.',
+    about:
+      'QR Master pairs live camera scanning with paste/upload workflows, so you can read QR codes and barcodes, generate Wi-Fi or contact codes, and keep everything in a local history with import/export.',
+    tags: ['QR', 'Barcode', 'Offline'],
+    note: 'Camera, paste, and file scans run locally. History stays in your browser and can be exported as JSON.',
+    features: [
+      'Live QR + barcode scan with camera',
+      'Paste or image upload scanning',
+      'Generate Wi-Fi, link, or contact codes',
+      'Local history with import/export',
+    ],
+    scriptType: 'module',
   },
 };
