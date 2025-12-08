@@ -56,7 +56,7 @@ export default function LoginModal(): JSX.Element | null {
   const handleSignIn = async (provider: Provider) => {
     setError(null);
     try {
-      const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
+      const redirectTo = typeof window !== 'undefined' ? window.location.href : undefined;
       const {error: signInError} = await supabase.auth.signInWithOAuth({
         provider,
         options: {redirectTo},
