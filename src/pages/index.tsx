@@ -3,6 +3,8 @@ import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {utilities} from '@site/src/data/utilities';
+import {useAuthModal} from '@site/src/contexts/AuthModalContext';
+import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
 import styles from './index.module.css';
 
 const heroStats = [
@@ -11,24 +13,56 @@ const heroStats = [
   {label: 'Formats', value: 'DXF / SVG / CSV'},
 ];
 
-function UtilityCard({utility}: {utility: (typeof utilities)[number]}) {
+type UtilityCardProps = {
+  utility: (typeof utilities)[number];
+  index: number;
+  isAuthenticated: boolean;
+  authChecked: boolean;
+};
+
+function UtilityCard({utility, index, isAuthenticated, authChecked}: UtilityCardProps) {
+  const {openLoginModal} = useAuthModal();
+  const isLocked = authChecked && !isAuthenticated && index >= 3;
+
+  const handleLaunch = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isLocked) {
+      return;
+    }
+    event.preventDefault();
+    openLoginModal();
+  };
+
   return (
-    <article className={styles.utilityCard}>
+    <article className={`${styles.utilityCard} ${isLocked ? styles.utilityCardLocked : ''}`}>
       <div className={styles.utilityHead}>
         <span className={styles.badge}>{utility.tech}</span>
         <span className={styles.subtle}>{utility.standards}</span>
       </div>
       <h3>{utility.name}</h3>
       <p>{utility.description}</p>
+      {isLocked ? (
+        <p className={styles.lockHint}>
+          <span aria-hidden="true" className={styles.lockIcon}>
+            lock
+          </span>
+          Sign in to unlock this utility
+        </p>
+      ) : null}
       <ul className={styles.featureList}>
         {utility.features.map((feature) => (
           <li key={feature}>{feature}</li>
         ))}
       </ul>
       <div className={styles.utilityFooter}>
-        <a className="button button--primary" href={utility.href} data-nobrokenlinkcheck>
-          Open utility
+        <a
+          className={`button button--primary ${isLocked ? styles.lockedAction : ''}`}
+          href={utility.href}
+          data-nobrokenlinkcheck
+          onClick={handleLaunch}
+        >
+          {isLocked ? 'Sign in to open' : 'Open utility'}
         </a>
+        {isLocked ? <span className={styles.lockBadge}>Requires account</span> : null}
       </div>
     </article>
   );
@@ -36,10 +70,12 @@ function UtilityCard({utility}: {utility: (typeof utilities)[number]}) {
 
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
+  const {isAuthenticated, authChecked} = useAuthStatus();
+
   return (
     <Layout
       title={siteConfig.title}
-      description="CAD AutoScript — SolidWorks macros, calculators, and QA tools">
+      description="CAD AutoScript - SolidWorks macros, calculators, and QA tools">
       <main className={styles.main}>
         <section className={styles.hero}>
           <div>
@@ -78,8 +114,14 @@ export default function Home(): ReactNode {
             </p>
           </header>
           <div className={styles.utilityGrid}>
-            {utilities.map((utility) => (
-              <UtilityCard key={utility.id} utility={utility} />
+            {utilities.map((utility, index) => (
+              <UtilityCard
+                key={utility.id}
+                utility={utility}
+                index={index}
+                isAuthenticated={isAuthenticated}
+                authChecked={authChecked}
+              />
             ))}
           </div>
         </section>

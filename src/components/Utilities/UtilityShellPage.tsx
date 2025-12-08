@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
 import Comments from '@site/src/components/Comments';
+import {utilities} from '@site/src/data/utilities';
+import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
+import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
 type HeroLink = {label: string; href: string; variant?: 'primary' | 'ghost'; external?: boolean};
@@ -32,6 +35,16 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
   const shellCssHref = useBaseUrl('/utilities/util-shell.css');
   const shellLightHref = useBaseUrl('/utilities/util-shell.light.css');
   const shellScriptSrc = useBaseUrl('/utilities/util-shell.js');
+  const {isAuthenticated, authChecked} = useAuthStatus();
+  const {openLoginModal} = useAuthModal();
+
+  const utilityIndex = useMemo(
+    () => utilities.findIndex((utility) => utility.href === `/utilities/${slug}/` || utility.id === slug),
+    [slug],
+  );
+  const isFreeUtility = utilityIndex >= 0 && utilityIndex < 3;
+  const isLocked = !isAuthenticated && !isFreeUtility;
+  const isCheckingAccess = !authChecked && !isFreeUtility;
 
   const heroLinks = defaultHeroLinks;
   const reactionsSlug = config.reactionSlug ?? `tool-${slug}`;
@@ -73,22 +86,50 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
         </header>
         <section className="utility-main">
           <div className="utility-stage">
-            <iframe
-              className="tool-frame"
-              src={iframeSrc}
-              title={title}
-              loading="lazy"
-              data-nobrokenlinkcheck
-            ></iframe>
+            {isCheckingAccess ? (
+              <div className="utility-locked">
+                <p className="utility-locked__eyebrow">Checking access…</p>
+                <h2>Hold on</h2>
+                <p className="utility-locked__copy">
+                  Verifying your session for <strong>{title}</strong>.
+                </p>
+              </div>
+            ) : isLocked ? (
+              <div className="utility-locked">
+                <p className="utility-locked__eyebrow">Sign in required</p>
+                <h2>Unlock this utility</h2>
+                <p className="utility-locked__copy">
+                  Guests can open the first three tools. Sign in to launch <strong>{title}</strong> and the rest of the catalog.
+                </p>
+                <div className="utility-locked__actions">
+                  <button type="button" className="button primary" onClick={openLoginModal}>
+                    Sign in
+                  </button>
+                  <Link className="button ghost" to="/utilities/pipe-cutter/">
+                    View free utilities
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <iframe
+                className="tool-frame"
+                src={iframeSrc}
+                title={title}
+                loading="lazy"
+                data-nobrokenlinkcheck
+              ></iframe>
+            )}
           </div>
-          <div className="utility-toolbar" role="toolbar">
-            <button className="utility-toggle" type="button" aria-expanded="true">
-              Hide info
-            </button>
-            <button className="utility-fullscreen" type="button" aria-pressed="false">
-              Full screen
-            </button>
-          </div>
+          {!isLocked ? (
+            <div className="utility-toolbar" role="toolbar">
+              <button className="utility-toggle" type="button" aria-expanded="true">
+                Hide info
+              </button>
+              <button className="utility-fullscreen" type="button" aria-pressed="false">
+                Full screen
+              </button>
+            </div>
+          ) : null}
           <div className="utility-reactions">
             <ReactionsBar slug={reactionsSlug} />
           </div>

@@ -105,6 +105,44 @@
   pointer-events: none;
 }
 
+.utility-locked {
+  position: relative;
+  padding: 72px clamp(24px, 4vw, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: clamp(420px, 55vh, 640px);
+}
+
+.utility-locked__eyebrow {
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: #ffbe73;
+}
+
+.utility-locked h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+}
+
+.utility-locked__copy {
+  margin: 0;
+  color: #c7d0f1;
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+.utility-locked__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .utility-card h2,
 .utility-info h2 {
   margin: 0;

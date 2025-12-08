@@ -84,6 +84,8 @@
   flex-direction: column;
   gap: 0.75rem;
   background: rgba(5, 7, 19, 0.6);
+  position: relative;
+  overflow: hidden;
 }
 
 .utilityHead {
@@ -116,8 +118,54 @@
   font-size: 0.9rem;
 }
 
+.lockHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #ffcba4;
+  margin: 0;
+}
+
+.lockIcon {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 203, 164, 0.1);
+  color: #ff9e45;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .utilityFooter {
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lockBadge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 203, 164, 0.15);
+  color: #ffbe73;
+  border: 1px solid rgba(255, 203, 164, 0.25);
+}
+
+.lockedAction {
+  background: linear-gradient(90deg, rgba(255, 203, 164, 0.3), rgba(255, 203, 164, 0.15));
+  color: #fff7ed;
+  border: 1px solid rgba(255, 203, 164, 0.35);
+}
+
+.utilityCardLocked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 203, 164, 0.08), rgba(255, 255, 255, 0));
+  pointer-events: none;
 }
 
 .docsSection {

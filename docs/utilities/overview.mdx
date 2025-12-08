@@ -3,34 +3,11 @@ sidebar_position: 2
 title: Utility catalog
 ---
 
-import {utilities} from '@site/src/data/utilities';
+import UtilityAccessTable from '@site/src/components/Utilities/UtilityAccessTable';
 
 Each calculator below launches the same standalone page machinists already use. Docs stay nearby, but the apps themselves run in Chromium with WebGL/WASM acceleration.
 
-<table className="utilityTable">
-  <thead>
-    <tr>
-      <th>Utility</th>
-      <th>Description</th>
-      <th>Standards</th>
-      <th>Launch</th>
-    </tr>
-  </thead>
-  <tbody>
-    {utilities.map((utility) => (
-      <tr key={utility.id}>
-        <td>{utility.name}</td>
-        <td>{utility.description}</td>
-        <td>{utility.standards}</td>
-        <td>
-          <a href={utility.href} data-nobrokenlinkcheck>
-            Open
-          </a>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+<UtilityAccessTable />
 
 ## Versioning & telemetry
 
