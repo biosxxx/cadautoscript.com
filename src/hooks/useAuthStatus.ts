@@ -23,7 +23,8 @@ export function useAuthStatus(): AuthState {
       if (typeof window === 'undefined') return;
 
       // Handle implicit flow fragments (e.g., #access_token=... after logout/login)
-      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const cleanedHash = window.location.hash.replace(/^#+/, '');
+      const hashParams = new URLSearchParams(cleanedHash);
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       if (accessToken && refreshToken) {
