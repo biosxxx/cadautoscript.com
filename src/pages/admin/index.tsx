@@ -75,17 +75,16 @@ export default function AdminPage(): JSX.Element {
     setLoadingUsers(true);
     setError(null);
 
-    // Primary path: RPC with email join
     const {data: rpcProfiles, error: profilesError} = await supabase
       .rpc('get_admin_users_list')
       .order('created_at', {ascending: false});
 
     let merged = rpcProfiles ?? [];
 
-    // Fallback: fetch profiles table directly and merge missing ids (no email in this fallback)
+    // Fallback: fetch profiles directly to catch records that may not join with auth.users
     const {data: rawProfiles, error: profilesFallbackError} = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url, role, created_at, last_seen_at')
+      .select('id, username, full_name, avatar_url, role, created_at, last_seen_at, email')
       .order('created_at', {ascending: false});
 
     if (profilesFallbackError) {
@@ -229,10 +228,7 @@ export default function AdminPage(): JSX.Element {
   const handleRoleChange = async (userId: string, newRole: RoleValue) => {
     setRoleUpdating(userId);
     setToast(null);
-    const {error: roleError} = await supabase
-      .from('profiles')
-      .update({role: newRole})
-      .eq('id', userId);
+    const {error: roleError} = await supabase.from('profiles').update({role: newRole}).eq('id', userId);
     if (roleError) {
       console.error('[Admin] Unable to update role', roleError.message);
       setError('Unable to update role.');
@@ -246,40 +242,6 @@ export default function AdminPage(): JSX.Element {
     setRoleUpdating(null);
     setToast('Role updated');
   };
-
-  const loadProfiles = useCallback(async () => {
-    setLoadingUsers(true);
-    setError(null);
-
-    // Primary path: RPC with email join
-    const {data: rpcProfiles, error: profilesError} = await supabase
-      .rpc('get_admin_users_list')
-      .order('created_at', {ascending: false});
-
-    let merged = rpcProfiles ?? [];
-
-    // Fallback: fetch profiles table directly and merge missing ids (no email in this fallback)
-    const {data: rawProfiles, error: profilesFallbackError} = await supabase
-      .from('profiles')
-      .select('id, username, full_name, avatar_url, role, created_at, last_seen_at')
-      .order('created_at', {ascending: false});
-
-    if (profilesFallbackError) {
-      console.error('[Admin] Unable to load profiles fallback', profilesFallbackError.message);
-    } else if (rawProfiles) {
-      const existingIds = new Set(merged.map((p: ProfileRow) => p.id));
-      const missing = rawProfiles.filter((p) => !existingIds.has(p.id));
-      merged = [...merged, ...missing];
-    }
-
-    if (profilesError && !merged.length) {
-      console.error('[Admin] Unable to fetch profiles', profilesError.message);
-      setError('Unable to load users.');
-    }
-
-    setData((prev) => ({...prev, profiles: merged as ProfileRow[]}));
-    setLoadingUsers(false);
-  }, []);
 
   const handleDeleteUser = async (userId: string) => {
     if (!userId) return;
