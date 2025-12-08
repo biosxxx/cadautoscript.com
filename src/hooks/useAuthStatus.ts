@@ -17,9 +17,52 @@ export function useAuthStatus(): AuthState {
 
   useEffect(() => {
     let isMounted = true;
+    let handledRedirect = false;
+
+    const maybeExchangeCode = async () => {
+      if (typeof window === 'undefined') return;
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
+      const errorDescription = url.searchParams.get('error_description');
+
+      if (errorDescription && !shouldSilence(errorDescription)) {
+        console.error('[Supabase Auth] Redirect error', errorDescription);
+      }
+
+      if (!code) return;
+
+      try {
+        handledRedirect = true;
+        const {data, error} = await supabase.auth.exchangeCodeForSession({code});
+        if (error && !shouldSilence(error.message)) {
+          console.error('[Supabase Auth] Unable to exchange code for session', error.message);
+        }
+        if (isMounted) {
+          setUser(data?.session?.user ?? null);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unable to complete auth redirect.';
+        if (!shouldSilence(message)) {
+          console.error('[Supabase Auth] Redirect handling failed', message);
+        }
+      } finally {
+        // Clean URL to avoid re-processing the code param on navigation
+        url.searchParams.delete('code');
+        url.searchParams.delete('state');
+        url.searchParams.delete('scope');
+        url.searchParams.delete('auth_type');
+        url.searchParams.delete('provider');
+        url.searchParams.delete('error_description');
+        const cleaned = url.toString();
+        window.history.replaceState({}, '', cleaned);
+      }
+    };
 
     const resolveSession = async () => {
       try {
+        if (!handledRedirect) {
+          await maybeExchangeCode();
+        }
         const {data, error} = await supabase.auth.getSession();
         if (!isMounted) return;
         if (error && !shouldSilence(error.message)) {
