@@ -21,6 +21,34 @@ export function useAuthStatus(): AuthState {
 
     const maybeExchangeCode = async () => {
       if (typeof window === 'undefined') return;
+
+      // Handle implicit flow fragments (e.g., #access_token=... after logout/login)
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      if (accessToken && refreshToken) {
+        try {
+          handledRedirect = true;
+          const {data, error} = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error && !shouldSilence(error.message)) {
+            console.error('[Supabase Auth] Unable to set session from hash', error.message);
+          }
+          if (isMounted) {
+            setUser(data?.session?.user ?? null);
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Unable to set session from hash.';
+          if (!shouldSilence(message)) {
+            console.error('[Supabase Auth] Hash handling failed', message);
+          }
+        } finally {
+          window.location.hash = '';
+        }
+      }
+
       const url = new URL(window.location.href);
       const code = url.searchParams.get('code');
       const errorDescription = url.searchParams.get('error_description');

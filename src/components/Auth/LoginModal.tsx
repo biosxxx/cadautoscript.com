@@ -59,7 +59,7 @@ export default function LoginModal(): JSX.Element | null {
       const redirectTo = typeof window !== 'undefined' ? window.location.href : undefined;
       const {error: signInError} = await supabase.auth.signInWithOAuth({
         provider,
-        options: {redirectTo},
+        options: {redirectTo, flowType: 'pkce'},
       });
       if (signInError) {
         throw signInError;
