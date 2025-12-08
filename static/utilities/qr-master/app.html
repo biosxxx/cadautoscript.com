@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -16,7 +15,8 @@
     />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- REPLACED qrcodejs with the more robust node-qrcode library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -134,6 +134,15 @@
   </head>
   <body class="bg-bg text-primary h-screen w-full overflow-hidden flex flex-col font-sans">
     <div id="file-scan-helper" aria-hidden="true"></div>
+    
+    <!-- TOAST NOTIFICATION -->
+    <div 
+      id="toast" 
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl transform transition-all duration-300 opacity-0 translate-y-10 z-[100] pointer-events-none flex items-center gap-2 font-medium text-sm w-max max-w-[90%]"
+    >
+      <i class="ph-fill ph-check-circle text-lg text-green-400"></i>
+      <span id="toast-msg">Notification</span>
+    </div>
 
     <!-- HOME -->
     <div id="view-home" class="view-visible flex-1 flex flex-col relative p-6 h-full z-10 gap-6">
@@ -463,6 +472,33 @@
         </button>
       </div>
     </dialog>
+    
+    <!-- CONFIRM DIALOG -->
+    <dialog
+      id="confirmDialog"
+      class="bg-white p-6 rounded-3xl w-[90%] max-w-sm m-auto shadow-2xl backdrop:bg-black/40 backdrop:blur"
+    >
+      <h3 class="text-lg font-bold mb-2">Clear History</h3>
+      <p class="text-sm text-gray-500 mb-6">
+        Are you sure you want to delete all scan history? This action cannot be undone.
+      </p>
+      <div class="flex justify-end gap-3">
+        <button
+          type="button"
+          onclick="this.closest('dialog').close()"
+          class="px-4 py-2 text-sm font-medium text-gray-600 active:bg-gray-100 rounded-xl"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onclick="performClearHistory()"
+          class="px-4 py-2 text-sm font-bold text-red-500 bg-red-50 active:bg-red-100 rounded-xl"
+        >
+          Delete
+        </button>
+      </div>
+    </dialog>
 
     <!-- RESULT DIALOG -->
     <dialog
@@ -540,7 +576,26 @@
       const views = ['home', 'scanner', 'generator', 'history'];
       let html5QrCode = null;
       let isProcessing = false;
+      let isScannerRunning = false; // Flag to track actual scanner state
       let startTimeout;
+      let toastTimeout;
+
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toast-msg');
+        msg.textContent = message;
+        
+        // Reset classes to show
+        toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+        
+        // Clear existing timeout
+        clearTimeout(toastTimeout);
+        
+        // Hide after 2s
+        toastTimeout = setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+        }, 2000);
+      }
 
       function openPasteDialog() {
         const dialog = document.getElementById('pasteDialog');
@@ -578,7 +633,7 @@
         });
 
         if (!handled) {
-          alert('Could not read clipboard. Try again.');
+          showToast('Could not read clipboard');
         }
       });
 
@@ -631,10 +686,12 @@
 
         clearTimeout(startTimeout);
         startTimeout = setTimeout(() => {
-          spinner.classList.add('hidden');
-          loadText.textContent = 'Failed to start camera.';
-          btnRetry.classList.remove('hidden');
-          btnCancel.classList.remove('hidden');
+          if (!isScannerRunning) {
+              spinner.classList.add('hidden');
+              loadText.textContent = 'Failed to start camera.';
+              btnRetry.classList.remove('hidden');
+              btnCancel.classList.remove('hidden');
+          }
         }, 6000);
 
         const config = {fps: 10, qrbox: {width: 250, height: 250}, formatsToSupport: formats};
@@ -643,11 +700,13 @@
           .start({facingMode: 'environment'}, config, onScanSuccess)
           .then(() => {
             clearTimeout(startTimeout);
+            isScannerRunning = true;
             loader.classList.add('hidden');
             guide.classList.remove('hidden');
           })
           .catch(() => {
             clearTimeout(startTimeout);
+            isScannerRunning = false;
             spinner.classList.add('hidden');
             loadText.textContent = 'Camera access error (requires HTTPS).';
             btnRetry.classList.remove('hidden');
@@ -664,23 +723,40 @@
 
         document.getElementById('scan-ui').classList.add('hidden');
 
-        html5QrCode
-          .stop()
-          .then(() => {
-            addToHistory(decodedText, 'scan');
-            switchView('home');
-            setTimeout(() => showResult(decodedText), 200);
-          })
-          .catch(() => {
+        // Save immediately
+        addToHistory(decodedText, 'scan');
+
+        // Only try to stop if running
+        if (isScannerRunning && html5QrCode) {
+            html5QrCode
+            .stop()
+            .then(() => {
+                isScannerRunning = false;
+                switchView('home');
+                setTimeout(() => showResult(decodedText), 200);
+            })
+            .catch(() => {
+                isScannerRunning = false;
+                switchView('home');
+                showResult(decodedText);
+            });
+        } else {
+            // Already stopped or not running, just navigate
             switchView('home');
             showResult(decodedText);
-          });
+        }
       }
 
       function stopScanner() {
         clearTimeout(startTimeout);
-        if (html5QrCode) {
-          html5QrCode.stop().catch(() => {});
+        if (html5QrCode && isScannerRunning) {
+          // Attempt to stop and update flag
+          html5QrCode.stop().then(() => {
+              isScannerRunning = false;
+          }).catch((err) => {
+              // Ignore 'scanner not running' errors, just mark false
+              isScannerRunning = false;
+          });
         }
       }
 
@@ -702,7 +778,7 @@
             showResult(decodedText);
           })
           .catch(() => {
-            alert('No QR code found in image (try better lighting)');
+            showToast('No QR code found');
           })
           .finally(() => {
             try {
@@ -711,6 +787,37 @@
               /* ignore */
             }
           });
+      }
+
+      // Safe QR generator helper using robust node-qrcode library
+      function safeGenerateQr(container, text, width = 120, height = 120) {
+        container.innerHTML = '';
+        const canvas = document.createElement('canvas');
+        container.appendChild(canvas);
+
+        const options = {
+            width: width,
+            margin: 1,
+            color: {
+                dark: "#111827",
+                light: "#ffffff"
+            },
+            errorCorrectionLevel: 'M'
+        };
+
+        // Attempt generation with Medium correction
+        QRCode.toCanvas(canvas, text, options, function (error) {
+            if (error) {
+                // If failed, try Low correction (allows more data)
+                options.errorCorrectionLevel = 'L';
+                QRCode.toCanvas(canvas, text, options, function(err2){
+                     if(err2) {
+                         console.error('QR Gen Error:', err2);
+                         container.innerHTML = '<div class="text-gray-400 text-xs text-center p-2">Data too long<br>to display</div>';
+                     }
+                });
+            }
+        });
       }
 
       function showResult(text) {
@@ -727,16 +834,8 @@
         typeNode.textContent = meta.type;
         iconNode.className = `ph-fill ${meta.icon} text-2xl`;
 
-        qrContainer.innerHTML = '';
         if (meta.type !== 'Barcode') {
-          new QRCode(qrContainer, {
-            text,
-            width: 120,
-            height: 120,
-            colorDark: '#111827',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M,
-          });
+          safeGenerateQr(qrContainer, text, 120, 120);
           qrContainer.classList.remove('hidden');
         } else {
           qrContainer.classList.add('hidden');
@@ -761,7 +860,7 @@
           btnText.textContent = password ? 'Copy Wi‑Fi password' : 'Copy network';
           btn.onclick = () => {
             navigator.clipboard.writeText(password || text);
-            alert('Copied to clipboard');
+            showToast('Copied to clipboard');
           };
         } else if (meta.type === 'Barcode') {
           btnText.textContent = 'Search barcode';
@@ -795,7 +894,7 @@
         const el = document.getElementById(id);
         if (el) {
           navigator.clipboard.writeText(el.textContent || '');
-          alert('Copied');
+          showToast('Copied');
         }
       }
 
@@ -891,19 +990,24 @@
       }
 
       function clearHistory() {
-        if (confirm('Clear all history?')) {
-          localStorage.removeItem(DB_KEY);
-          renderHistory();
-        }
+        document.getElementById('confirmDialog').showModal();
+      }
+      
+      function performClearHistory() {
+        localStorage.removeItem(DB_KEY);
+        renderHistory();
+        document.getElementById('confirmDialog').close();
+        showToast('History cleared');
       }
 
       function exportHistory() {
         const history = getHistory();
         if (!history.length) {
-          alert('History is empty');
+          showToast('History is empty');
           return;
         }
-        const blob = new Blob([JSON.stringify(history)], {type: 'application/json'});
+        // MODIFIED: Ensure formatted JSON structure (pretty print)
+        const blob = new Blob([JSON.stringify(history, null, 2)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = `qr_history_${Date.now()}.json`;
@@ -921,18 +1025,23 @@
         reader.onload = (e) => {
           try {
             const data = JSON.parse(e.target?.result || '[]');
+            // VALIDATION: Ensure strict array structure
+            if (!Array.isArray(data)) throw new Error('Invalid JSON format');
+            
             let history = getHistory();
+            let count = 0;
             data.forEach((item) => {
-              if (!history.some((row) => row.text === item.text)) {
+              if (item && item.text && !history.some((row) => row.text === item.text)) {
                 history.push(item);
+                count++;
               }
             });
             history.sort((a, b) => b.id - a.id);
             localStorage.setItem(DB_KEY, JSON.stringify(history));
             renderHistory();
-            alert('Imported');
+            showToast(count > 0 ? `Imported ${count} items` : 'No new items found');
           } catch (err) {
-            alert('File error');
+            showToast('Invalid JSON file');
           }
         };
         reader.readAsText(file);
@@ -955,7 +1064,6 @@
         clearTimeout(genTimer);
         genTimer = setTimeout(() => {
           const container = document.getElementById('qrcode');
-          container.innerHTML = '';
           let data = '';
 
           if (genMode === 'text') {
@@ -975,16 +1083,11 @@
           }
 
           if (data) {
-            new QRCode(container, {
-              text: data,
-              width: 200,
-              height: 200,
-              colorDark: '#111827',
-              colorLight: '#ffffff',
-            });
+            safeGenerateQr(container, data, 200, 200);
             document.getElementById('qr-hint').classList.add('hidden');
             document.getElementById('btn-save-gen').classList.remove('hidden');
           } else {
+            container.innerHTML = '';
             document.getElementById('qr-hint').classList.remove('hidden');
             document.getElementById('btn-save-gen').classList.add('hidden');
           }
@@ -1002,7 +1105,7 @@
         }
         if (data) {
           addToHistory(data, 'gen');
-          alert('Saved!');
+          showToast('Saved to history');
         }
       }
 

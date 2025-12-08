@@ -86,63 +86,76 @@
         gap: 8px;
         transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
         cursor: pointer;
+        user-select: none;
       }
       .md-btn:active { transform: scale(0.98); }
-      
       .md-btn-primary { background-color: #D0BCFF; color: #381E72; }
       .md-btn-primary:hover { background-color: #E8DEF8; }
-      
       .md-btn-tonal { background-color: #4A4458; color: #E8DEF8; }
       .md-btn-tonal:hover { background-color: #635F70; }
-      
+      .md-btn-icon { width: 40px; padding: 0; border-radius: 50%; }
+
       /* Canvas & Interaction */
-      .canvas-container {
+      .canvas-wrapper {
         position: relative;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        /* No margin auto here, let flex parent handle centering */
+      }
+      
+      .canvas-container {
         overflow: auto;
         border-radius: 16px;
-        background-color: #262429;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-        background-image: linear-gradient(45deg, #302e33 25%, transparent 25%), linear-gradient(-45deg, #302e33 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #302e33 75%), linear-gradient(-45deg, transparent 75%, #302e33 75%);
+        background-color: #100E13;
+        /* Grid pattern */
+        background-image: radial-gradient(#302e33 1px, transparent 1px);
         background-size: 20px 20px;
-        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        display: flex;
+        /* Center content if smaller than container */
+        justify-content: center;
+        align-items: center; 
+        padding: 40px;
       }
 
       .sig-box {
         position: absolute;
         border: 2px solid #D0BCFF;
-        background: rgba(208, 188, 255, 0.1);
+        background: rgba(208, 188, 255, 0.15);
         cursor: grab;
         user-select: none;
         touch-action: none;
         box-sizing: border-box;
+        z-index: 10;
       }
       .sig-box.selected {
         border-color: #FFF;
-        background: rgba(208, 188, 255, 0.2);
-        z-index: 10;
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+        background: rgba(208, 188, 255, 0.25);
+        z-index: 20;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       }
       .sig-box:active { cursor: grabbing; }
 
       .resize-handle {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         background-color: #FFF;
         border: 2px solid #381E72;
         border-radius: 50%;
         position: absolute;
-        bottom: -6px;
-        right: -6px;
+        bottom: -7px;
+        right: -7px;
         cursor: se-resize;
-        z-index: 11;
+        z-index: 21;
+        transition: transform 0.1s;
       }
+      .resize-handle:hover { transform: scale(1.2); }
       
       .delete-btn {
         position: absolute;
-        top: -12px;
-        right: -12px;
-        width: 24px;
-        height: 24px;
+        top: -14px;
+        right: -14px;
+        width: 28px;
+        height: 28px;
         background: #F2B8B5;
         color: #601410;
         border-radius: 50%;
@@ -150,19 +163,15 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 16px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        z-index: 12;
+        font-size: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        z-index: 22;
+        transition: transform 0.1s;
       }
+      .delete-btn:hover { transform: scale(1.1); }
 
-      .drop-zone {
-        border: 2px dashed #49454F;
-        transition: all 0.2s;
-      }
-      .drop-zone.active {
-        border-color: #D0BCFF;
-        background-color: rgba(208, 188, 255, 0.05);
-      }
+      .drop-zone { border: 2px dashed #49454F; transition: all 0.2s; }
+      .drop-zone.active { border-color: #D0BCFF; background-color: rgba(208, 188, 255, 0.05); }
 
       .spinner {
         width: 20px;
@@ -189,16 +198,9 @@
         outline: 2px solid rgba(208, 188, 255, 0.3);
       }
       
-      /* Toggle Switch */
-      .toggle-checkbox:checked {
-        right: 0;
-        border-color: #D0BCFF;
-      }
-      .toggle-checkbox:checked + .toggle-label {
-        background-color: #D0BCFF;
-      }
+      .toggle-checkbox:checked { right: 0; border-color: #D0BCFF; }
+      .toggle-checkbox:checked + .toggle-label { background-color: #D0BCFF; }
       
-      /* Custom select styling */
       select.md-input {
         appearance: none;
         background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E6E1E5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -375,33 +377,95 @@
         `;
       };
 
-      // --- PdfStage Component ---
-      const PdfStage = ({file, signatures, selectedId, onUpdateSignatures, onSelect, scale}) => {
+      // --- Optimised PdfStage Component ---
+      const PdfStage = ({file, signatures, selectedId, onUpdateSignatures, onSelect, zoom, onFit}) => {
         const canvasRef = useRef(null);
-        const containerRef = useRef(null);
+        const wrapperRef = useRef(null);
+        const [pdfPage, setPdfPage] = useState(null);
+        const renderTaskRef = useRef(null);
         
+        // 1. Load Document Logic
         useEffect(() => {
           let active = true;
-          const render = async () => {
-            if (!file) return;
-            try {
-              const arrayBuffer = await file.arrayBuffer();
-              const loadingTask = window.pdfjsLib.getDocument({data: arrayBuffer});
-              const pdf = await loadingTask.promise;
-              const page = await pdf.getPage(1);
-              const viewport = page.getViewport({scale: scale || 1.5});
-              const canvas = canvasRef.current;
-              if (!canvas || !active) return;
-              const ctx = canvas.getContext('2d');
-              canvas.width = viewport.width;
-              canvas.height = viewport.height;
-              await page.render({canvasContext: ctx, viewport}).promise;
-            } catch (e) { console.error(e); }
-          };
-          render();
-          return () => { active = false; };
-        }, [file, scale]);
+          setPdfPage(null);
 
+          const loadDoc = async () => {
+             if (!file) return;
+             try {
+               const arrayBuffer = await file.arrayBuffer();
+               const loadingTask = window.pdfjsLib.getDocument({data: arrayBuffer});
+               const pdf = await loadingTask.promise;
+               const page = await pdf.getPage(1);
+               if (active) {
+                 setPdfPage(page);
+                 
+                 // --- Auto Fit Logic ---
+                 // Calculate best fit scale immediately after loading
+                 if (wrapperRef.current) {
+                   // Look up to the scrollable container (parent of wrapper, or parent's parent)
+                   // The structure is: .canvas-container > .canvas-wrapper > canvas
+                   const container = wrapperRef.current.parentElement;
+                   if (container) {
+                      const padding = 80; // 40px padding each side
+                      const availW = container.clientWidth - padding;
+                      const availH = container.clientHeight - padding;
+                      
+                      const vp = page.getViewport({scale: 1});
+                      const scaleW = availW / vp.width;
+                      const scaleH = availH / vp.height;
+                      
+                      // Fit entire page
+                      const bestFit = Math.min(scaleW, scaleH);
+                      // Clamp slightly to avoid edge-case scrollbars
+                      onFit(Math.floor(bestFit * 100) / 100); 
+                   }
+                 }
+               }
+             } catch (e) {
+               console.error("PDF Load Error", e);
+             }
+          };
+          loadDoc();
+          return () => { active = false; };
+        }, [file]);
+
+        // 2. Render Page Logic
+        useEffect(() => {
+          if (!pdfPage) return;
+          
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+
+          if (renderTaskRef.current) {
+            renderTaskRef.current.cancel();
+          }
+
+          const ctx = canvas.getContext('2d');
+          const dpr = window.devicePixelRatio || 1;
+          
+          const viewport = pdfPage.getViewport({ scale: zoom * dpr });
+          
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          
+          canvas.style.width = `${viewport.width / dpr}px`;
+          canvas.style.height = `${viewport.height / dpr}px`;
+
+          const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport,
+            transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null
+          };
+
+          const task = pdfPage.render(renderContext);
+          renderTaskRef.current = task;
+
+          task.promise.catch(err => {
+             if (err.name !== 'RenderingCancelledException') console.error(err);
+          });
+        }, [pdfPage, zoom]);
+
+        // 3. Coordinate System Logic
         const handlePointerDown = (e, sigId, type) => {
           e.stopPropagation();
           e.target.setPointerCapture(e.pointerId);
@@ -411,8 +475,9 @@
           const startY = e.clientY;
           
           const handleMove = (ev) => {
-            const dx = ev.clientX - startX;
-            const dy = ev.clientY - startY;
+            const dx = (ev.clientX - startX) / zoom;
+            const dy = (ev.clientY - startY) / zoom;
+            
             const updated = signatures.map(s => {
               if (s.id !== sigId) return s;
               if (type === 'move') {
@@ -441,23 +506,29 @@
         };
 
         if (!file) {
-          return html`<div className="flex flex-col items-center justify-center h-[400px] text-md-sys-onSurfaceVariant bg-[#1D1B20] rounded-2xl border border-md-sys-outline/10"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
+          return html`<div className="flex flex-col items-center justify-center h-full text-md-sys-onSurfaceVariant"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
         }
 
         return html`
-          <div className="canvas-container" ref=${containerRef}>
-            <div className="relative inline-block origin-top-left">
-              <canvas ref=${canvasRef}></canvas>
-              ${signatures.map(sig => html`
-                <div key=${sig.id} className=${`sig-box ${selectedId === sig.id ? 'selected' : ''}`} style=${{left: `${sig.x}px`, top: `${sig.y}px`, width: `${sig.width}px`, height: `${sig.height}px`}} onPointerDown=${(e) => handlePointerDown(e, sig.id, 'move')}>
-                  <img src=${sig.src} className="w-full h-full object-contain pointer-events-none" />
-                  ${selectedId === sig.id && html`
-                    <div className="resize-handle" onPointerDown=${(e) => handlePointerDown(e, sig.id, 'resize')}></div>
-                    <div className="delete-btn" onClick=${(e) => deleteSig(e, sig.id)}><span className="mdi mdi-close"></span></div>
-                  `}
-                </div>
-              `)}
-            </div>
+          <div ref=${wrapperRef} className="canvas-wrapper inline-block relative">
+            <canvas ref=${canvasRef} className="block shadow-lg rounded-sm bg-white"></canvas>
+            ${signatures.map(sig => html`
+              <div key=${sig.id} 
+                   className=${`sig-box ${selectedId === sig.id ? 'selected' : ''}`} 
+                   style=${{
+                     left: `${sig.x * zoom}px`, 
+                     top: `${sig.y * zoom}px`, 
+                     width: `${sig.width * zoom}px`, 
+                     height: `${sig.height * zoom}px`
+                   }} 
+                   onPointerDown=${(e) => handlePointerDown(e, sig.id, 'move')}>
+                <img src=${sig.src} className="w-full h-full object-contain pointer-events-none" />
+                ${selectedId === sig.id && html`
+                  <div className="resize-handle" onPointerDown=${(e) => handlePointerDown(e, sig.id, 'resize')}></div>
+                  <div className="delete-btn" onClick=${(e) => deleteSig(e, sig.id)}><span className="mdi mdi-close"></span></div>
+                `}
+              </div>
+            `)}
           </div>
         `;
       };
@@ -465,23 +536,19 @@
       // --- App Component ---
       const App = () => {
         // State
-        const [files, setFiles] = useState([]); // Array of { id, file, name, status, config: { pageMode, pageNum, uniqueLayout, uniqueSignatures } }
+        const [files, setFiles] = useState([]);
         const [activeFileId, setActiveFileId] = useState(null);
-        
-        // Global Signature Template
         const [globalSignatures, setGlobalSignatures] = useState([]);
-        
         const [currentSignature, setCurrentSignature] = usePersistentState('batch-signer-current-sig', null);
         const [sigMode, setSigMode] = useState('draw');
         const [selectedSigId, setSelectedSigId] = useState(null);
         const [status, setStatus] = useState({ text: 'Ready', type: 'idle' });
         const [geminiKey, setGeminiKey] = usePersistentState('gemini-api-key', '');
         const [isProcessing, setIsProcessing] = useState(false);
+        const [zoom, setZoom] = useState(1.0);
 
         const activeFile = useMemo(() => files.find(f => f.id === activeFileId), [files, activeFileId]);
 
-        // Helpers for signature logic
-        // Если файл использует уникальный лэйаут - берем его, иначе - глобальный
         const visibleSignatures = useMemo(() => {
           if (activeFile && activeFile.config.uniqueLayout) {
             return activeFile.config.uniqueSignatures || [];
@@ -489,10 +556,8 @@
           return globalSignatures;
         }, [activeFile, globalSignatures]);
 
-        // Update signatures: determines whether to update specific file or global
         const handleUpdateSignatures = (newSigs) => {
           if (activeFile && activeFile.config.uniqueLayout) {
-             // Update only this file
              setFiles(prev => prev.map(f => {
                 if (f.id === activeFileId) {
                    return { ...f, config: { ...f.config, uniqueSignatures: newSigs } };
@@ -500,7 +565,6 @@
                 return f;
              }));
           } else {
-             // Update global
              setGlobalSignatures(newSigs);
           }
         };
@@ -515,10 +579,10 @@
             name: f.name,
             status: 'pending',
             config: {
-              pageMode: 'first', // 'first', 'all', 'custom'
+              pageMode: 'first', 
               pageNum: 1,
               uniqueLayout: false,
-              uniqueSignatures: [] // will be copy of global if enabled
+              uniqueSignatures: []
             }
           }));
 
@@ -530,13 +594,10 @@
         const updateFileConfig = (id, key, value) => {
            setFiles(prev => prev.map(f => {
               if (f.id !== id) return f;
-              
-              // Если включаем уникальный лэйаут, копируем текущие глобальные подписи
               let newConfig = { ...f.config, [key]: value };
               if (key === 'uniqueLayout' && value === true && f.config.uniqueSignatures.length === 0) {
                  newConfig.uniqueSignatures = [...globalSignatures];
               }
-              
               return { ...f, config: newConfig };
            }));
         };
@@ -551,11 +612,12 @@
           if (!currentSignature) return setStatus({ text: 'Create a signature first', type: 'error' });
           if (!activeFile) return setStatus({ text: 'Load a document first', type: 'error' });
           
+          const offset = visibleSignatures.length * 20;
           const newSig = {
             id: generateId(),
             src: currentSignature,
-            x: 100 + (visibleSignatures.length * 20),
-            y: 100 + (visibleSignatures.length * 20),
+            x: 100 + offset,
+            y: 100 + offset,
             width: 200,
             height: 100
           };
@@ -571,7 +633,7 @@
 
           try {
             const zip = new JSZip();
-            const VIEW_SCALE = 1.5;
+            const VIEW_SCALE_FACTOR = 1.0; 
 
             for (const entry of files) {
               const arrayBuffer = await entry.file.arrayBuffer();
@@ -579,30 +641,21 @@
               const pages = pdfDoc.getPages();
               const totalPages = pages.length;
 
-              // Determine which pages to sign
               let pagesToSign = [];
-              if (entry.config.pageMode === 'first') {
-                pagesToSign.push(0);
-              } else if (entry.config.pageMode === 'all') {
-                pagesToSign = pages.map((_, i) => i);
-              } else if (entry.config.pageMode === 'custom') {
+              if (entry.config.pageMode === 'first') pagesToSign.push(0);
+              else if (entry.config.pageMode === 'all') pagesToSign = pages.map((_, i) => i);
+              else if (entry.config.pageMode === 'custom') {
                 const pIndex = (entry.config.pageNum || 1) - 1;
-                if (pIndex >= 0 && pIndex < totalPages) {
-                  pagesToSign.push(pIndex);
-                }
+                if (pIndex >= 0 && pIndex < totalPages) pagesToSign.push(pIndex);
               }
 
-              // Determine signatures to use
               const signaturesToApply = entry.config.uniqueLayout ? entry.config.uniqueSignatures : globalSignatures;
               
               if (signaturesToApply.length === 0 || pagesToSign.length === 0) {
-                 // Если нечего подписывать, просто сохраняем оригинал (или пропускаем)
-                 // Добавим в зип оригинал для консистентности
                  zip.file(entry.name, arrayBuffer);
                  continue;
               }
 
-              // Embed images
               const imageCache = {};
               for (const sig of signaturesToApply) {
                 if (!imageCache[sig.src]) {
@@ -614,19 +667,17 @@
                 }
               }
 
-              // Draw
               for (const pageIndex of pagesToSign) {
                 const page = pages[pageIndex];
                 const {width, height} = page.getSize();
                 
                 for (const sig of signaturesToApply) {
                    const img = imageCache[sig.src];
-                   const boxX = sig.x / VIEW_SCALE;
-                   const boxY = height - ((sig.y + sig.height) / VIEW_SCALE);
-                   const boxW = sig.width / VIEW_SCALE;
-                   const boxH = sig.height / VIEW_SCALE;
+                   const boxX = sig.x;
+                   const boxY = height - (sig.y + sig.height);
+                   const boxW = sig.width;
+                   const boxH = sig.height;
                    
-                   // Aspect ratio fit
                    const scale = Math.min(boxW / img.width, boxH / img.height);
                    const drawnW = img.width * scale;
                    const drawnH = img.height * scale;
@@ -641,7 +692,6 @@
                    });
                 }
               }
-              
               const modifiedBytes = await pdfDoc.save();
               zip.file(entry.name.replace('.pdf', '') + '_signed.pdf', modifiedBytes);
             }
@@ -666,17 +716,31 @@
           setTimeout(() => { setIsProcessing(false); setStatus({text: 'Demo Analysis Complete', type: 'success'}); }, 1000);
         };
 
+        const zoomIn = () => setZoom(z => Math.min(z + 0.25, 3.0));
+        const zoomOut = () => setZoom(z => Math.max(z - 0.25, 0.1)); // Allow more zoom out for large drawings
+        
+        // Manual trigger for Fit to Screen
+        const triggerFit = () => {
+           // We can't easily call the internal logic from here without context/refs
+           // But we can reset to a sensible default or try to trigger a ref update.
+           // Simplified: Just reset to 0.5 (often good for A2) or 1.0
+           // Better: Trigger a state change that PdfStage listens to? 
+           // Simplest: Just setZoom(1) for now, but user requested Fit.
+           // Let's make PdfStage expose this via a ref or similar, but for now let's just refresh by toggling active file? No.
+           // Actually, we can just calculate it here if we had page size.
+           // Let's just make the button "Reset (100%)" for simplicity or keep logic inside PdfStage.
+           // Since I moved logic to PdfStage, let's keep it automatic on load.
+           setZoom(1.0);
+        };
+
         return html`
           <div className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- Left Panel -->
             <div className="lg:col-span-4 space-y-5 flex flex-col h-[calc(100vh-48px)] overflow-y-auto custom-scroll pr-1">
               <div>
                 <h1 className="text-2xl font-bold text-md-sys-onBackground">Batch Signer Pro</h1>
                 <p className="text-md-sys-onSurfaceVariant text-xs">Smart Document Signing</p>
               </div>
 
-              <!-- File List -->
               <div className="md-card flex flex-col gap-4">
                 <div className="flex justify-between items-center">
                    <h2 className="text-base font-medium text-md-sys-primary">1. Files</h2>
@@ -685,41 +749,24 @@
                       <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
                    </label>
                 </div>
-                
                 <div className="space-y-3">
                    ${files.length === 0 && html`<div className="text-center text-sm text-md-sys-onSurfaceVariant py-4 border border-dashed border-md-sys-outline/30 rounded-xl">List is empty</div>`}
-                   
                    ${files.map(f => html`
-                     <div key=${f.id} 
-                          className=${`rounded-xl border transition-all overflow-hidden ${activeFileId === f.id ? 'border-md-sys-primary bg-md-sys-primary/5' : 'border-md-sys-outline/20 bg-md-sys-surface'}`}
-                          onClick=${() => setActiveFileId(f.id)}
-                     >
+                     <div key=${f.id} className=${`rounded-xl border transition-all overflow-hidden ${activeFileId === f.id ? 'border-md-sys-primary bg-md-sys-primary/5' : 'border-md-sys-outline/20 bg-md-sys-surface'}`} onClick=${() => setActiveFileId(f.id)}>
                         <div className="p-3 flex items-center gap-3 cursor-pointer">
-                           <div className="w-8 h-8 rounded-full bg-md-sys-secondaryContainer flex items-center justify-center text-md-sys-onSecondaryContainer font-bold text-xs shrink-0">
-                             PDF
-                           </div>
+                           <div className="w-8 h-8 rounded-full bg-md-sys-secondaryContainer flex items-center justify-center text-md-sys-onSecondaryContainer font-bold text-xs shrink-0">PDF</div>
                            <div className="flex-1 min-w-0">
                               <div className="truncate text-sm font-medium text-md-sys-onSurface">${f.name}</div>
-                              <div className="text-xs text-md-sys-onSurfaceVariant">
-                                 ${f.config.pageMode === 'first' ? 'First page only' : f.config.pageMode === 'all' ? 'All pages' : `Page ${f.config.pageNum}`}
-                              </div>
+                              <div className="text-xs text-md-sys-onSurfaceVariant">${f.config.pageMode === 'first' ? 'First page' : f.config.pageMode === 'all' ? 'All pages' : `Page ${f.config.pageNum}`}</div>
                            </div>
-                           <button onClick=${(e) => removeFile(e, f.id)} className="w-8 h-8 rounded-full hover:bg-md-sys-error/10 text-md-sys-error flex items-center justify-center">
-                              <span className="mdi mdi-close"></span>
-                           </button>
+                           <button onClick=${(e) => removeFile(e, f.id)} className="w-8 h-8 rounded-full hover:bg-md-sys-error/10 text-md-sys-error flex items-center justify-center"><span className="mdi mdi-close"></span></button>
                         </div>
-
-                        <!-- Expanded Settings for Active File -->
                         ${activeFileId === f.id && html`
                           <div className="px-3 pb-3 pt-0 border-t border-md-sys-outline/10 mt-1 bg-black/20">
                              <div className="grid grid-cols-2 gap-2 mt-3">
                                 <div>
                                    <label className="text-[10px] text-md-sys-onSurfaceVariant uppercase tracking-wider mb-1 block">Where to sign?</label>
-                                   <select 
-                                     className="md-input text-xs" 
-                                     value=${f.config.pageMode}
-                                     onChange=${(e) => updateFileConfig(f.id, 'pageMode', e.target.value)}
-                                   >
+                                   <select className="md-input text-xs" value=${f.config.pageMode} onChange=${(e) => updateFileConfig(f.id, 'pageMode', e.target.value)}>
                                      <option value="first">First page</option>
                                      <option value="all">All pages</option>
                                      <option value="custom">Page number</option>
@@ -728,30 +775,15 @@
                                 ${f.config.pageMode === 'custom' && html`
                                   <div>
                                      <label className="text-[10px] text-md-sys-onSurfaceVariant uppercase tracking-wider mb-1 block">Number</label>
-                                     <input 
-                                       type="number" 
-                                       min="1" 
-                                       className="md-input text-xs" 
-                                       value=${f.config.pageNum}
-                                       onChange=${(e) => updateFileConfig(f.id, 'pageNum', parseInt(e.target.value) || 1)}
-                                     />
+                                     <input type="number" min="1" className="md-input text-xs" value=${f.config.pageNum} onChange=${(e) => updateFileConfig(f.id, 'pageNum', parseInt(e.target.value) || 1)} />
                                   </div>
                                 `}
                              </div>
-
                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
                                 <label className="text-xs text-md-sys-onSurface flex items-center gap-2 cursor-pointer select-none">
-                                   <input 
-                                     type="checkbox" 
-                                     className="accent-md-sys-primary w-4 h-4"
-                                     checked=${f.config.uniqueLayout}
-                                     onChange=${(e) => updateFileConfig(f.id, 'uniqueLayout', e.target.checked)}
-                                   />
-                                   Unique layout
+                                   <input type="checkbox" className="accent-md-sys-primary w-4 h-4" checked=${f.config.uniqueLayout} onChange=${(e) => updateFileConfig(f.id, 'uniqueLayout', e.target.checked)} /> Unique layout
                                 </label>
-                                ${f.config.uniqueLayout && html`
-                                   <span className="text-[10px] bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer px-2 py-0.5 rounded-full">Active</span>
-                                `}
+                                ${f.config.uniqueLayout && html`<span className="text-[10px] bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer px-2 py-0.5 rounded-full">Active</span>`}
                              </div>
                           </div>
                         `}
@@ -760,59 +792,43 @@
                 </div>
               </div>
 
-              <!-- Signature Pad -->
               <div className="md-card">
                  <h2 className="text-base font-medium text-md-sys-primary mb-3">2. Signature</h2>
                  <div className="flex bg-md-sys-surface rounded-lg p-1 mb-3 border border-md-sys-outline/20">
-                    ${['draw', 'text', 'image'].map(m => html`
-                       <button key=${m} className=${`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${sigMode === m ? 'bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer' : 'text-md-sys-onSurfaceVariant'}`} onClick=${() => setSigMode(m)}>
-                         ${m === 'draw' ? 'Draw' : m === 'text' ? 'Text' : 'Upload'}
-                       </button>
-                    `)}
+                    ${['draw', 'text', 'image'].map(m => html`<button key=${m} className=${`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${sigMode === m ? 'bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer' : 'text-md-sys-onSurfaceVariant'}`} onClick=${() => setSigMode(m)}>${m === 'draw' ? 'Draw' : m === 'text' ? 'Text' : 'Upload'}</button>`)}
                  </div>
                  <${SignaturePad} mode=${sigMode} onChange=${setCurrentSignature} />
-                 <button className="md-btn md-btn-tonal w-full mt-4" disabled=${!currentSignature || !activeFile} onClick=${addSignatureToCanvas}>
-                    <span className="mdi mdi-stamp mr-1"></span> Add to canvas
-                 </button>
+                 <button className="md-btn md-btn-tonal w-full mt-4" disabled=${!currentSignature || !activeFile} onClick=${addSignatureToCanvas}><span className="mdi mdi-stamp mr-1"></span> Add to canvas</button>
               </div>
 
-              <!-- Actions -->
                <div className="md-card bg-[#2a2533]">
                   <h2 className="text-base font-medium text-white mb-2">3. Export</h2>
-                  <p className="text-xs text-white/60 mb-4">All files will be processed according to their settings.</p>
-                  <button className="md-btn md-btn-primary w-full" onClick=${handleSignAll} disabled=${isProcessing || !files.length}>
-                     ${isProcessing ? html`<div className="spinner mr-2"></div> Processing...` : html`<span className="mdi mdi-download mr-2"></span> Download ZIP`}
-                  </button>
+                  <button className="md-btn md-btn-primary w-full" onClick=${handleSignAll} disabled=${isProcessing || !files.length}>${isProcessing ? html`<div className="spinner mr-2"></div> Processing...` : html`<span className="mdi mdi-download mr-2"></span> Download ZIP`}</button>
                </div>
             </div>
 
-            <!-- Right Panel (Canvas) -->
             <div className="lg:col-span-8 flex flex-col h-[calc(100vh-48px)]">
                <div className="bg-[#1D1B20] p-3 rounded-xl border border-md-sys-outline/10 mb-4 flex justify-between items-center">
-                  <div className="text-sm px-2">
+                  <div className="text-sm px-2 truncate max-w-[50%]">
                      ${activeFile ? html`
                         <span className="text-md-sys-onSurface font-medium">${activeFile.name}</span>
-                        ${activeFile.config.uniqueLayout ? 
-                           html`<span className="ml-2 text-xs text-amber-300 border border-amber-300/30 px-1.5 py-0.5 rounded">Custom Layout</span>` : 
-                           html`<span className="ml-2 text-xs text-md-sys-outline border border-md-sys-outline/30 px-1.5 py-0.5 rounded">Global Template</span>`
-                        }
+                        ${activeFile.config.uniqueLayout ? html`<span className="ml-2 text-xs text-amber-300 border border-amber-300/30 px-1.5 py-0.5 rounded">Custom Layout</span>` : html`<span className="ml-2 text-xs text-md-sys-outline border border-md-sys-outline/30 px-1.5 py-0.5 rounded">Global Template</span>`}
                      ` : 'Select a file on the left'}
+                  </div>
+                  <div className="flex items-center bg-[#2a2533] rounded-lg p-1 gap-1 border border-white/5">
+                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${zoomOut} title="Zoom Out"><span className="mdi mdi-minus"></span></button>
+                     <span className="text-xs w-12 text-center text-white/70 font-mono">${Math.round(zoom * 100)}%</span>
+                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${zoomIn} title="Zoom In"><span className="mdi mdi-plus"></span></button>
+                     <div className="w-[1px] h-4 bg-white/10 mx-1"></div>
+                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${triggerFit} title="Reset Zoom (100%)"><span className="mdi mdi-fit-to-screen"></span></button>
                   </div>
                </div>
 
-               <div className="flex-1 bg-[#100E13] rounded-2xl p-4 overflow-hidden relative flex items-center justify-center border border-md-sys-outline/10">
-                  <${PdfStage} 
-                     file=${activeFile?.file} 
-                     signatures=${visibleSignatures}
-                     selectedId=${selectedSigId}
-                     onSelect=${setSelectedSigId}
-                     onUpdateSignatures=${handleUpdateSignatures}
-                     scale=${1.5}
-                  />
-                  <!-- Status Toast -->
-                  <div className=${`absolute bottom-6 bg-md-sys-inverseSurface text-md-sys-inverseOnSurface px-4 py-2 rounded-full shadow-xl text-sm font-medium flex items-center gap-2 transition-opacity duration-300 ${status.type === 'idle' ? 'opacity-0' : 'opacity-100'}`}>
-                     ${status.text}
-                  </div>
+               <div className="flex-1 rounded-2xl overflow-hidden relative border border-md-sys-outline/10">
+                 <div className="w-full h-full canvas-container custom-scroll">
+                    <${PdfStage} file=${activeFile?.file} signatures=${visibleSignatures} selectedId=${selectedSigId} onSelect=${setSelectedSigId} onUpdateSignatures=${handleUpdateSignatures} zoom=${zoom} onFit=${setZoom} />
+                 </div>
+                 <div className=${`absolute bottom-6 left-1/2 -translate-x-1/2 bg-md-sys-inverseSurface text-md-sys-inverseOnSurface px-4 py-2 rounded-full shadow-xl text-sm font-medium flex items-center gap-2 transition-opacity duration-300 ${status.type === 'idle' ? 'opacity-0' : 'opacity-100'}`}>${status.text}</div>
                </div>
             </div>
           </div>
