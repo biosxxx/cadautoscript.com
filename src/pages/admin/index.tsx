@@ -43,12 +43,17 @@ const formatDate = (value?: string | null) =>
         hour: '2-digit',
         minute: '2-digit',
       })
-    : '—';
+    : '-';
 
 const initialState: {profiles: ProfileRow[]; comments: CommentRow[]} = {
   profiles: [],
   comments: [],
 };
+
+type ActionState =
+  | {kind: 'idle'}
+  | {kind: 'deleting'; targetId: string | null}
+  | {kind: 'inviting'};
 
 export default function AdminPage(): JSX.Element {
   const history = useHistory();
@@ -60,9 +65,11 @@ export default function AdminPage(): JSX.Element {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionState, setActionState] = useState<ActionState>({kind: 'idle'});
   const [roleUpdating, setRoleUpdating] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // Access control: fetch session + profile, redirect if not admin.
   useEffect(() => {
@@ -168,19 +175,19 @@ export default function AdminPage(): JSX.Element {
 
   const handleDeleteComment = async (commentId: string) => {
     if (!commentId) return;
-    setDeletingId(commentId);
+    setActionState({kind: 'deleting', targetId: commentId});
     const {error: deleteError} = await supabase.from('comments').delete().eq('id', commentId);
     if (deleteError) {
       console.error('[Admin] Unable to delete comment', deleteError.message);
       setError('Unable to delete comment. Check RLS or permissions.');
-      setDeletingId(null);
+      setActionState({kind: 'idle'});
       return;
     }
     setData((prev) => ({
       ...prev,
       comments: prev.comments.filter((c) => c.id !== commentId),
     }));
-    setDeletingId(null);
+    setActionState({kind: 'idle'});
   };
 
   const displayName = useMemo(
@@ -189,7 +196,7 @@ export default function AdminPage(): JSX.Element {
   );
 
   const formatRelative = (value?: string | null) => {
-    if (!value) return '—';
+    if (!value) return '-';
     const date = new Date(value);
     const now = Date.now();
     const diffMs = now - date.getTime();
@@ -222,6 +229,52 @@ export default function AdminPage(): JSX.Element {
     }));
     setRoleUpdating(null);
     setToast('Role updated');
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!userId) return;
+    if (!window.confirm('Удалить пользователя? Это действие необратимо.')) return;
+    setError(null);
+    setToast(null);
+    setActionState({kind: 'deleting', targetId: userId});
+    const {error: fnError} = await supabase.functions.invoke('admin-actions', {
+      body: {action: 'delete', targetUserId: userId},
+    });
+    if (fnError) {
+      console.error('[Admin] Unable to delete user', fnError.message);
+      setError('Не удалось удалить пользователя. Проверьте edge function или права.');
+      setActionState({kind: 'idle'});
+      return;
+    }
+    setData((prev) => ({
+      ...prev,
+      profiles: prev.profiles.filter((p) => p.id !== userId),
+    }));
+    setToast('User deleted');
+    setActionState({kind: 'idle'});
+  };
+
+  const handleInviteUser = async () => {
+    if (!inviteEmail) {
+      setError('Введите email для приглашения.');
+      return;
+    }
+    setError(null);
+    setToast(null);
+    setActionState({kind: 'inviting'});
+    const {data: result, error: fnError} = await supabase.functions.invoke('admin-actions', {
+      body: {action: 'invite', email: inviteEmail},
+    });
+    if (fnError) {
+      console.error('[Admin] Unable to invite user', fnError.message);
+      setError('Не удалось отправить приглашение. Проверьте edge function или права.');
+      setActionState({kind: 'idle'});
+      return;
+    }
+    setToast(result?.message || 'Invitation sent');
+    setInviteEmail('');
+    setInviteOpen(false);
+    setActionState({kind: 'idle'});
   };
 
   if (loadingAuth) {
@@ -271,7 +324,14 @@ export default function AdminPage(): JSX.Element {
         {activeTab === 'users' ? (
           <section className={styles.panel}>
             <div className={styles.toolbar}>
-              {loadingUsers ? 'Refreshing users...' : `${data.profiles.length} users`}
+              <div className={styles.toolbarLeft}>
+                {loadingUsers ? 'Refreshing users...' : `${data.profiles.length} users`}
+              </div>
+              <div className={styles.toolbarRight}>
+                <button type="button" className={styles.primaryBtn} onClick={() => setInviteOpen(true)}>
+                  + Invite user
+                </button>
+              </div>
             </div>
             {data.profiles.length === 0 ? (
               <p className={styles.muted}>No users found.</p>
@@ -286,6 +346,7 @@ export default function AdminPage(): JSX.Element {
                     <th>Role</th>
                     <th>Last Seen</th>
                     <th>Created</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -300,9 +361,9 @@ export default function AdminPage(): JSX.Element {
                           )}
                         </div>
                       </td>
-                      <td>{row.full_name || '—'}</td>
-                      <td>{row.email || '—'}</td>
-                      <td>{row.username || '—'}</td>
+                      <td>{row.full_name || '-'}</td>
+                      <td>{row.email || '-'}</td>
+                      <td>{row.username || '-'}</td>
                       <td>
                         <select
                           value={row.role || 'user'}
@@ -317,6 +378,20 @@ export default function AdminPage(): JSX.Element {
                       </td>
                       <td>{formatRelative(row.last_seen_at)}</td>
                       <td>{formatDate(row.created_at)}</td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            type="button"
+                            className={styles.deleteBtn}
+                            onClick={() => handleDeleteUser(row.id)}
+                            disabled={actionState.kind === 'deleting' && actionState.targetId === row.id}
+                          >
+                            {actionState.kind === 'deleting' && actionState.targetId === row.id
+                              ? 'Deleting...'
+                              : 'Delete'}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -346,7 +421,6 @@ export default function AdminPage(): JSX.Element {
                 <tbody>
                   {data.comments.map((row) => {
                     const author = row.profiles?.full_name || row.profiles?.username || 'Unknown';
-                    const snippet = row.content.length > 120 ? `${row.content.slice(0, 117)}...` : row.content;
                     return (
                       <tr key={row.id}>
                         <td>
@@ -358,9 +432,9 @@ export default function AdminPage(): JSX.Element {
                             )}
                           </div>
                         </td>
-                    <td>
-                      <span dangerouslySetInnerHTML={{__html: row.content}} />
-                    </td>
+                        <td>
+                          <span dangerouslySetInnerHTML={{__html: row.content}} />
+                        </td>
                         <td>{row.post_slug}</td>
                         <td>{formatDate(row.created_at)}</td>
                         <td>
@@ -369,10 +443,12 @@ export default function AdminPage(): JSX.Element {
                               type="button"
                               className={styles.deleteBtn}
                               onClick={() => handleDeleteComment(row.id)}
-                              disabled={deletingId === row.id}
+                              disabled={actionState.kind === 'deleting' && actionState.targetId === row.id}
                               title="Delete comment"
                             >
-                              {deletingId === row.id ? 'Deleting...' : '🗑 Delete'}
+                              {actionState.kind === 'deleting' && actionState.targetId === row.id
+                                ? 'Deleting...'
+                                : '🗑 Delete'}
                             </button>
                           </div>
                         </td>
@@ -383,6 +459,38 @@ export default function AdminPage(): JSX.Element {
               </table>
             )}
           </section>
+        ) : null}
+
+        {inviteOpen ? (
+          <div className={styles.modalBackdrop}>
+            <div className={styles.modal}>
+              <h3>Invite user</h3>
+              <p className={styles.muted}>Отправим приглашение через Supabase Auth.</p>
+              <label className={styles.modalLabel}>
+                Email
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(event) => setInviteEmail(event.target.value)}
+                  className={styles.input}
+                  placeholder="user@example.com"
+                />
+              </label>
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.secondaryBtn} onClick={() => setInviteOpen(false)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={handleInviteUser}
+                  disabled={actionState.kind === 'inviting'}
+                >
+                  {actionState.kind === 'inviting' ? 'Sending...' : 'Send invite'}
+                </button>
+              </div>
+            </div>
+          </div>
         ) : null}
       </main>
     </Layout>
