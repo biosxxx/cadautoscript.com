@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import clsx from 'clsx';
 import {useHistory} from '@docusaurus/router';
 import type {User} from '@supabase/supabase-js';
@@ -71,6 +71,40 @@ export default function AdminPage(): JSX.Element {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteOpen, setInviteOpen] = useState(false);
 
+  const loadProfiles = useCallback(async () => {
+    setLoadingUsers(true);
+    setError(null);
+
+    // Primary path: RPC with email join
+    const {data: rpcProfiles, error: profilesError} = await supabase
+      .rpc('get_admin_users_list')
+      .order('created_at', {ascending: false});
+
+    let merged = rpcProfiles ?? [];
+
+    // Fallback: fetch profiles table directly and merge missing ids (no email in this fallback)
+    const {data: rawProfiles, error: profilesFallbackError} = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, role, created_at, last_seen_at')
+      .order('created_at', {ascending: false});
+
+    if (profilesFallbackError) {
+      console.error('[Admin] Unable to load profiles fallback', profilesFallbackError.message);
+    } else if (rawProfiles) {
+      const existingIds = new Set(merged.map((p: ProfileRow) => p.id));
+      const missing = rawProfiles.filter((p) => !existingIds.has(p.id));
+      merged = [...merged, ...missing];
+    }
+
+    if (profilesError && !merged.length) {
+      console.error('[Admin] Unable to fetch profiles', profilesError.message);
+      setError('Unable to load users.');
+    }
+
+    setData((prev) => ({...prev, profiles: merged as ProfileRow[]}));
+    setLoadingUsers(false);
+  }, []);
+
   // Access control: fetch session + profile, redirect if not admin.
   useEffect(() => {
     let isMounted = true;
@@ -124,26 +158,8 @@ export default function AdminPage(): JSX.Element {
     if (loadingAuth || profile?.role !== 'admin') {
       return;
     }
-    const loadProfiles = async () => {
-      setLoadingUsers(true);
-      setError(null);
-      const {data: profiles, error: profilesError} = await supabase
-        .rpc('get_admin_users_list')
-        .order('created_at', {ascending: false});
-
-      if (profilesError) {
-        console.error('[Admin] Unable to fetch profiles', profilesError.message);
-        setError('Unable to load users.');
-        setLoadingUsers(false);
-        return;
-      }
-
-      setData((prev) => ({...prev, profiles: profiles ?? []}));
-      setLoadingUsers(false);
-    };
-
     void loadProfiles();
-  }, [loadingAuth, profile?.role]);
+  }, [loadProfiles, loadingAuth, profile?.role]);
 
   // Fetch comments
   useEffect(() => {
@@ -231,6 +247,40 @@ export default function AdminPage(): JSX.Element {
     setToast('Role updated');
   };
 
+  const loadProfiles = useCallback(async () => {
+    setLoadingUsers(true);
+    setError(null);
+
+    // Primary path: RPC with email join
+    const {data: rpcProfiles, error: profilesError} = await supabase
+      .rpc('get_admin_users_list')
+      .order('created_at', {ascending: false});
+
+    let merged = rpcProfiles ?? [];
+
+    // Fallback: fetch profiles table directly and merge missing ids (no email in this fallback)
+    const {data: rawProfiles, error: profilesFallbackError} = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, role, created_at, last_seen_at')
+      .order('created_at', {ascending: false});
+
+    if (profilesFallbackError) {
+      console.error('[Admin] Unable to load profiles fallback', profilesFallbackError.message);
+    } else if (rawProfiles) {
+      const existingIds = new Set(merged.map((p: ProfileRow) => p.id));
+      const missing = rawProfiles.filter((p) => !existingIds.has(p.id));
+      merged = [...merged, ...missing];
+    }
+
+    if (profilesError && !merged.length) {
+      console.error('[Admin] Unable to fetch profiles', profilesError.message);
+      setError('Unable to load users.');
+    }
+
+    setData((prev) => ({...prev, profiles: merged as ProfileRow[]}));
+    setLoadingUsers(false);
+  }, []);
+
   const handleDeleteUser = async (userId: string) => {
     if (!userId) return;
     if (!window.confirm('Удалить пользователя? Это действие необратимо.')) return;
@@ -275,6 +325,7 @@ export default function AdminPage(): JSX.Element {
     setInviteEmail('');
     setInviteOpen(false);
     setActionState({kind: 'idle'});
+    void loadProfiles();
   };
 
   if (loadingAuth) {
