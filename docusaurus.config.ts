@@ -19,6 +19,7 @@ const config: Config = {
   customFields: {
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+    AUTH_REDIRECT_URL: process.env.AUTH_REDIRECT_URL,
   },
   onBrokenLinks: 'ignore',
   markdown: {

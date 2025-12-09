@@ -249,7 +249,7 @@ export default function AdminPage(): JSX.Element {
     setError(null);
     setToast(null);
     setActionState({kind: 'deleting', targetId: userId});
-    const {error: fnError} = await supabase.functions.invoke('admin-actions', {
+    const {error: fnError} = await supabase.functions.invoke('super-function', {
       body: {action: 'delete', targetUserId: userId},
     });
     if (fnError) {
@@ -274,7 +274,7 @@ export default function AdminPage(): JSX.Element {
     setError(null);
     setToast(null);
     setActionState({kind: 'inviting'});
-    const {data: result, error: fnError} = await supabase.functions.invoke('admin-actions', {
+    const {data: result, error: fnError} = await supabase.functions.invoke('super-function', {
       body: {action: 'invite', email: inviteEmail},
     });
     if (fnError) {

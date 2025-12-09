@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import type {User} from '@supabase/supabase-js';
 import {supabase} from '@site/src/lib/supabaseClient';
+import {getAuthRedirectUrl, rememberReturnTo} from '@site/src/utils/authRedirect';
 
 const AuthTest = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -46,8 +47,8 @@ const AuthTest = () => {
   const handleLogin = async () => {
     setError(null);
     try {
-      const redirectTo =
-        typeof window !== 'undefined' ? window.location.origin : undefined;
+      rememberReturnTo();
+      const redirectTo = getAuthRedirectUrl();
       const {error: signInError} = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

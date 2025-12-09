@@ -11,65 +11,74 @@
   containers.forEach((container) => {
     const stage = container.querySelector(".utility-stage");
     const infoPanel = container.querySelector(".utility-info");
-    const toggle = container.querySelector(".utility-toggle");
-    const fullscreenBtn = container.querySelector(".utility-fullscreen");
     const exitZone = container.querySelector(".utility-fullscreen-exit-zone");
     if (!stage) {
       return;
     }
 
-    if (toggle && infoPanel) {
+    if (infoPanel) {
       const setCollapsed = (collapsed) => {
         infoPanel.classList.toggle("is-collapsed", collapsed);
-        toggle.setAttribute("aria-expanded", (!collapsed).toString());
-        toggle.textContent = collapsed ? "Show info" : "Hide info";
+        const toggleBtn = container.querySelector(".utility-toggle");
+        if (toggleBtn) {
+          toggleBtn.setAttribute("aria-expanded", (!collapsed).toString());
+          toggleBtn.textContent = collapsed ? "Show info" : "Hide info";
+        }
       };
 
       setCollapsed(false);
-
-      toggle.addEventListener("click", () => {
-        const nextState = !infoPanel.classList.contains("is-collapsed");
-        setCollapsed(nextState);
-      });
     }
 
-    if (fullscreenBtn) {
-      const exitFullscreen = (targetStage, btn) => {
-        targetStage.classList.remove("is-fullscreen");
-        if (btn) {
-          btn.textContent = "Full screen";
-          btn.setAttribute("aria-pressed", "false");
-        }
-        syncFullscreenState();
-      };
+    const exitFullscreen = (targetStage, btn) => {
+      targetStage.classList.remove("is-fullscreen");
+      if (btn) {
+        btn.textContent = "Full screen";
+        btn.setAttribute("aria-pressed", "false");
+      }
+      syncFullscreenState();
+    };
 
-      const handleExit = () => {
-        const active = stage.classList.contains("is-fullscreen");
-        if (active) {
-          exitFullscreen(stage, fullscreenBtn);
-          stage.scrollIntoView({behavior: "smooth", block: "start"});
-          return;
-        }
+    const handleFullscreen = (triggerBtn) => {
+      const active = stage.classList.contains("is-fullscreen");
+      const fullscreenBtn = triggerBtn ?? container.querySelector(".utility-fullscreen");
+      if (active) {
+        exitFullscreen(stage, fullscreenBtn);
+        stage.scrollIntoView({behavior: "smooth", block: "start"});
+        return;
+      }
 
-        document.querySelectorAll(".utility-stage.is-fullscreen").forEach((otherStage) => {
-          const otherBtn = otherStage.closest(".utility-shell")?.querySelector(".utility-fullscreen");
-          exitFullscreen(otherStage, otherBtn);
-        });
+      document.querySelectorAll(".utility-stage.is-fullscreen").forEach((otherStage) => {
+        const otherBtn = otherStage.closest(".utility-shell")?.querySelector(".utility-fullscreen");
+        exitFullscreen(otherStage, otherBtn);
+      });
 
-        stage.classList.add("is-fullscreen");
+      stage.classList.add("is-fullscreen");
+      if (fullscreenBtn) {
         fullscreenBtn.textContent = "Exit full screen";
         fullscreenBtn.setAttribute("aria-pressed", "true");
-        syncFullscreenState();
-      };
-
-      fullscreenBtn.addEventListener("click", handleExit);
-      if (exitZone) {
-        exitZone.addEventListener("click", (event) => {
-          if (event.target.closest(".utility-fullscreen-exit-button")) {
-            handleExit();
-          }
-        });
       }
-    }
+      syncFullscreenState();
+    };
+
+    container.addEventListener("click", (event) => {
+      const toggleBtn = event.target.closest(".utility-toggle");
+      if (toggleBtn && infoPanel) {
+        const nextState = !infoPanel.classList.contains("is-collapsed");
+        infoPanel.classList.toggle("is-collapsed", nextState);
+        toggleBtn.setAttribute("aria-expanded", (!nextState).toString());
+        toggleBtn.textContent = nextState ? "Show info" : "Hide info";
+        return;
+      }
+
+      const fullscreenBtn = event.target.closest(".utility-fullscreen");
+      if (fullscreenBtn) {
+        handleFullscreen(fullscreenBtn);
+        return;
+      }
+
+      if (exitZone && event.target.closest(".utility-fullscreen-exit-button")) {
+        handleFullscreen();
+      }
+    });
   });
 })();

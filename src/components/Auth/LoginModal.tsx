@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import type {Provider} from '@supabase/supabase-js';
 import {supabase} from '@site/src/lib/supabaseClient';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
+import {getAuthRedirectUrl, rememberReturnTo} from '@site/src/utils/authRedirect';
 import styles from './LoginModal.module.css';
 
 const providers: Array<{provider: Provider; label: string; className: string; Icon: () => JSX.Element}> = [
@@ -56,7 +57,8 @@ export default function LoginModal(): JSX.Element | null {
   const handleSignIn = async (provider: Provider) => {
     setError(null);
     try {
-      const redirectTo = typeof window !== 'undefined' ? window.location.href : undefined;
+      rememberReturnTo();
+      const redirectTo = getAuthRedirectUrl();
       const {error: signInError} = await supabase.auth.signInWithOAuth({
         provider,
         options: {redirectTo, flowType: 'pkce'},
