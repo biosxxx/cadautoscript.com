@@ -10,7 +10,8 @@ export type UtilityPageSlug =
   | 'qr-nameplate'
   | 'dxf-editor'
   | 'pdf-master'
-  | 'qr-master';
+  | 'qr-master'
+  | 'pdf-bom-extractor';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -169,6 +170,23 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Paste or image upload scanning',
       'Generate Wi-Fi, link, or contact codes',
       'Local history with import/export',
+    ],
+    scriptType: 'module',
+  },
+  'pdf-bom-extractor': {
+    slug: 'pdf-bom-extractor',
+    title: 'PDF BOM Extractor',
+    subtitle: 'Web utility - Pull BOM and spec tables into CSV',
+    description:
+      'Extract BOM and specification tables from vector PDFs into clean CSVs, batch-downloadable locally.',
+    about:
+      'Drop CAD-generated PDFs (SolidWorks, AutoCAD, etc.) and automatically detect headers/columns, trim revision/footer noise, review rows, and export either per-file CSVs or a merged master report.',
+    tags: ['PDF', 'BOM', 'CSV'],
+    note: 'Runs 100% in the browser with PDF.js. Drawings and extracted data stay on your device.',
+    features: [
+      'Smart header + column detection (no OCR)',
+      'Auto-trim revision tables and footer notes',
+      'Batch upload with per-file CSV or master report export',
     ],
     scriptType: 'module',
   },

@@ -114,6 +114,16 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Scan QR & barcodes', 'Generate Wi-Fi/link codes', 'History with import/export', 'Smart paste & image scan'],
     href: '/utilities/qr-master/',
   },
+  {
+    id: 'pdf-bom-extractor',
+    name: 'PDF BOM Extractor',
+    description:
+      'Extract BOM and specification tables from CAD PDFs into clean CSVs with optional master report export.',
+    tech: 'React + PDF.js',
+    standards: 'Client-side parsing',
+    features: ['Smart table detection', 'Auto-trim footers/revisions', 'Per-file CSV + master report'],
+    href: '/utilities/pdf-bom-extractor/',
+  },
 ];
 
 
