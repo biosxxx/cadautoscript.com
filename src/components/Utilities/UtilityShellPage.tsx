@@ -133,9 +133,6 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
           <div className="utility-reactions">
             <ReactionsBar slug={reactionsSlug} />
           </div>
-          <div className="utility-comments">
-            <Comments slug={reactionsSlug} />
-          </div>
           <aside className="utility-info" data-collapsible>
             <div className="utility-info__header">
               <h2>About this tool</h2>
@@ -160,6 +157,9 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
               </div>
             ) : null}
           </aside>
+          <div className="utility-comments">
+            <Comments slug={reactionsSlug} />
+          </div>
           <div className="utility-fullscreen-exit-zone">
             <div className="utility-fullscreen-indicator" aria-hidden="true"></div>
             <button type="button" className="utility-fullscreen-exit-button">
