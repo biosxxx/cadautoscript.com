@@ -47,11 +47,13 @@ export default function Comments({slug}: Props): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const {openLoginModal} = useAuthModal();
 
-  const hasProfileName = !!(profile?.full_name && profile.full_name.trim().length > 0);
+  const hasProfileName =
+    !!(profile?.username && profile.username.trim().length > 0) ||
+    !!(profile?.full_name && profile.full_name.trim().length > 0);
 
   const authorDisplay = (value: Profile | null) =>
-    value?.full_name?.trim() ||
     value?.username?.trim() ||
+    value?.full_name?.trim() ||
     'Anonymous';
 
   const fetchComments = useCallback(async () => {
@@ -175,7 +177,7 @@ export default function Comments({slug}: Props): JSX.Element {
   };
 
   const avatarFallback = (value: Profile | null) =>
-    (value?.full_name || value?.username || 'U').charAt(0).toUpperCase();
+    (value?.username || value?.full_name || 'U').charAt(0).toUpperCase();
 
   const notice = useMemo(() => {
     if (!user) {
