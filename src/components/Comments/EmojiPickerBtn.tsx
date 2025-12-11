@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import EmojiPicker, {type CustomEmoji, type EmojiClickData} from 'emoji-picker-react';
 import {supabase} from '@site/src/lib/supabaseClient';
 import styles from './Comments.module.css';
@@ -10,6 +10,7 @@ type Props = {
 export default function EmojiPickerBtn({onEmojiSelect}: Props): JSX.Element {
   const [customEmojis, setCustomEmojis] = useState<CustomEmoji[]>([]);
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -44,8 +45,20 @@ export default function EmojiPickerBtn({onEmojiSelect}: Props): JSX.Element {
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClickAway = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (wrapperRef.current && target && !wrapperRef.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, [open]);
+
   return (
-    <div className={styles.pickerWrapper}>
+    <div className={styles.pickerWrapper} ref={wrapperRef}>
       <button
         type="button"
         className={styles.pickerButton}

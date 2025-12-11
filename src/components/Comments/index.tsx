@@ -42,7 +42,7 @@ export default function Comments({slug}: Props): JSX.Element {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editorHtml, setEditorHtml] = useState('');
-  const [replyContext, setReplyContext] = useState<{author: string; preview: string} | null>(null);
+  const [replyContext, setReplyContext] = useState<{author: string; authorId: string; preview: string} | null>(null);
   const editorRef = useRef<RichCommentInputHandle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const {openLoginModal} = useAuthModal();
@@ -179,6 +179,35 @@ export default function Comments({slug}: Props): JSX.Element {
   const avatarFallback = (value: Profile | null) =>
     (value?.username || value?.full_name || 'U').charAt(0).toUpperCase();
 
+  const profileMap = useMemo(() => {
+    const map = new Map<string, Profile | null>();
+    comments.forEach((comment) => map.set(comment.user_id, comment.profiles));
+    return map;
+  }, [comments]);
+
+  const authorText = (userId: string) => {
+    const value = profileMap.get(userId) ?? null;
+    return authorDisplay(value);
+  };
+
+  const rewriteQuotes = (html: string) => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      doc.querySelectorAll('blockquote[data-author-id]').forEach((node) => {
+        const id = node.getAttribute('data-author-id');
+        if (!id) return;
+        const strong = node.querySelector('strong');
+        if (strong) {
+          strong.textContent = authorText(id);
+        }
+      });
+      return doc.body.innerHTML;
+    } catch (err) {
+      return html;
+    }
+  };
+
   const notice = useMemo(() => {
     if (!user) {
       return null;
@@ -198,10 +227,10 @@ export default function Comments({slug}: Props): JSX.Element {
   const handleReply = (comment: CommentRow) => {
     const author = authorDisplay(comment.profiles);
     const preview = extractText(comment.content).slice(0, 220);
-    setReplyContext({author, preview});
+    setReplyContext({author, authorId: comment.user_id, preview});
     const snippet = preview.length === 220 ? `${preview}...` : preview;
     editorRef.current?.focus();
-    editorRef.current?.insertQuote(author, snippet);
+    editorRef.current?.insertQuote(comment.user_id, author, snippet);
   };
 
   const clearReply = () => {
@@ -259,7 +288,7 @@ export default function Comments({slug}: Props): JSX.Element {
                 </div>
                 <p
                   className={styles.content}
-                  dangerouslySetInnerHTML={{__html: comment.content}}
+                  dangerouslySetInnerHTML={{__html: rewriteQuotes(comment.content)}}
                 />
               </div>
             </li>

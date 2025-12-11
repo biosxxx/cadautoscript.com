@@ -11,7 +11,7 @@ export type RichCommentInputHandle = {
   getHtml: () => string;
   insertText: (text: string) => void;
   insertCustomEmoji: (src: string, alt?: string) => void;
-  insertQuote: (author: string, text: string) => void;
+  insertQuote: (authorId: string, author: string, text: string) => void;
   clear: () => void;
   focus: () => void;
 };
@@ -77,9 +77,10 @@ const RichCommentInput = forwardRef<RichCommentInputHandle, Props>(
           const textNode = document.createTextNode(text);
           insertNode(textNode);
         },
-        insertQuote: (author: string, text: string) => {
+        insertQuote: (authorId: string, author: string, text: string) => {
           const block = document.createElement('blockquote');
           block.className = styles.quote;
+          block.setAttribute('data-author-id', authorId);
           const authorEl = document.createElement('strong');
           authorEl.textContent = author;
           const bodyEl = document.createElement('p');
