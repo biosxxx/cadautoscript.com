@@ -230,6 +230,78 @@
   pointer-events: none;
 }
 
+.quote {
+  margin: 0 0 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border-left: 3px solid rgba(100, 255, 218, 0.6);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.quote strong {
+  display: block;
+  color: #e6edff;
+}
+
+.quote p {
+  margin: 0;
+  color: #cbd5f5;
+  font-size: 0.95rem;
+}
+
+.replyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba(100, 255, 218, 0.08);
+  border: 1px solid rgba(100, 255, 218, 0.35);
+  border-radius: 999px;
+  color: #9ae6d4;
+  font-size: 0.9rem;
+}
+
+.replyControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.replyActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.replyButton {
+  background: none;
+  border: none;
+  color: #9aa5c8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.replyButton:hover {
+  color: #e6edff;
+}
+
+.metaActions {
+  margin-left: auto;
+}
+
+.actionLink {
+  color: #8eb5ff;
+  font-size: 0.85rem;
+  margin-left: 0.75rem;
+  cursor: pointer;
+}
+
+.actionLink:hover {
+  color: #c4dcff;
+}
+
 @media (max-width: 600px) {
   .comment {
     grid-template-columns: 36px 1fr;

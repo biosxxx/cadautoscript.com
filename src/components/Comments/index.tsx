@@ -42,6 +42,7 @@ export default function Comments({slug}: Props): JSX.Element {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editorHtml, setEditorHtml] = useState('');
+  const [replyContext, setReplyContext] = useState<{author: string; preview: string} | null>(null);
   const editorRef = useRef<RichCommentInputHandle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const {openLoginModal} = useAuthModal();
@@ -152,6 +153,7 @@ export default function Comments({slug}: Props): JSX.Element {
 
     editorRef.current?.clear();
     setEditorHtml('');
+    setReplyContext(null);
     setSubmitting(false);
     void fetchComments();
   };
@@ -184,6 +186,28 @@ export default function Comments({slug}: Props): JSX.Element {
     }
     return null;
   }, [hasProfileName, user]);
+
+  const extractText = (html: string) => {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || '';
+  };
+
+  const handleReply = (comment: CommentRow) => {
+    const author = authorDisplay(comment.profiles);
+    const preview = extractText(comment.content).slice(0, 220);
+    setReplyContext({author, preview});
+    const snippet = preview.length === 220 ? `${preview}...` : preview;
+    editorRef.current?.focus();
+    editorRef.current?.insertQuote(author, snippet);
+  };
+
+  const clearReply = () => {
+    setReplyContext(null);
+    editorRef.current?.clear();
+    setEditorHtml('');
+    editorRef.current?.focus();
+  };
 
   return (
     <section className={styles.container}>
@@ -221,6 +245,15 @@ export default function Comments({slug}: Props): JSX.Element {
                   <span className={styles.author}>{authorDisplay(comment.profiles)}</span>
                   <span className={styles.dot}>•</span>
                   <time dateTime={comment.created_at}>{formatTimestamp(comment.created_at)}</time>
+                  <div className={styles.metaActions}>
+                    <button
+                      type="button"
+                      className={styles.actionLink}
+                      onClick={() => handleReply(comment)}
+                    >
+                      Reply
+                    </button>
+                  </div>
                 </div>
                 <p
                   className={styles.content}
@@ -235,6 +268,18 @@ export default function Comments({slug}: Props): JSX.Element {
       <div className={styles.composer}>
         {user ? (
           <form className={styles.form} onSubmit={handleSubmit}>
+            {replyContext ? (
+              <div className={styles.replyControls}>
+                <span className={styles.replyBadge}>
+                  Replying to {replyContext.author}: “{replyContext.preview}”
+                </span>
+                <div className={styles.replyActions}>
+                  <button type="button" className={styles.replyButton} onClick={clearReply}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <div className={styles.inputStack}>
               <RichCommentInput
                 ref={editorRef}
