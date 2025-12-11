@@ -100,7 +100,7 @@
         position: relative;
         background-color: #ffffff;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-        /* No margin auto here, let flex parent handle centering */
+        margin: auto; /* Critical for safe centering with scroll */
       }
       
       .canvas-container {
@@ -111,9 +111,7 @@
         background-image: radial-gradient(#302e33 1px, transparent 1px);
         background-size: 20px 20px;
         display: flex;
-        /* Center content if smaller than container */
-        justify-content: center;
-        align-items: center; 
+        /* REMOVED justify-content: center to prevent clipping of large content at top/left */
         padding: 40px;
       }
 
@@ -273,7 +271,16 @@
           const rect = canvas.getBoundingClientRect();
           const clientX = e.touches ? e.touches[0].clientX : e.clientX;
           const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-          return { x: clientX - rect.left, y: clientY - rect.top };
+          
+          // Calculate scale factors
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+
+          // Apply scaling to coordinates
+          return { 
+            x: (clientX - rect.left) * scaleX, 
+            y: (clientY - rect.top) * scaleY 
+          };
         }
 
         const startDraw = (e) => {
@@ -402,8 +409,7 @@
                  // --- Auto Fit Logic ---
                  // Calculate best fit scale immediately after loading
                  if (wrapperRef.current) {
-                   // Look up to the scrollable container (parent of wrapper, or parent's parent)
-                   // The structure is: .canvas-container > .canvas-wrapper > canvas
+                   // Look up to the scrollable container
                    const container = wrapperRef.current.parentElement;
                    if (container) {
                       const padding = 80; // 40px padding each side
@@ -414,9 +420,8 @@
                       const scaleW = availW / vp.width;
                       const scaleH = availH / vp.height;
                       
-                      // Fit entire page
-                      const bestFit = Math.min(scaleW, scaleH);
-                      // Clamp slightly to avoid edge-case scrollbars
+                      // Fit entire page, clamp at min 0.1 for huge docs
+                      const bestFit = Math.max(0.1, Math.min(scaleW, scaleH));
                       onFit(Math.floor(bestFit * 100) / 100); 
                    }
                  }
@@ -429,7 +434,7 @@
           return () => { active = false; };
         }, [file]);
 
-        // 2. Render Page Logic
+        // 2. Render Page Logic (with Resolution Cap for A0)
         useEffect(() => {
           if (!pdfPage) return;
           
@@ -443,21 +448,35 @@
           const ctx = canvas.getContext('2d');
           const dpr = window.devicePixelRatio || 1;
           
-          const viewport = pdfPage.getViewport({ scale: zoom * dpr });
+          // 2.1 Calculate Logical Size (CSS pixels)
+          const cssViewport = pdfPage.getViewport({ scale: zoom });
           
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+          // 2.2 Calculate Safe Rendering Scale (Max 4096px)
+          const MAX_CANVAS_DIM = 4096;
+          const proposedW = cssViewport.width * dpr;
+          const proposedH = cssViewport.height * dpr;
           
-          canvas.style.width = `${viewport.width / dpr}px`;
-          canvas.style.height = `${viewport.height / dpr}px`;
+          let renderDpr = dpr;
+          if (proposedW > MAX_CANVAS_DIM || proposedH > MAX_CANVAS_DIM) {
+             const scaleW = MAX_CANVAS_DIM / cssViewport.width;
+             const scaleH = MAX_CANVAS_DIM / cssViewport.height;
+             renderDpr = Math.min(scaleW, scaleH);
+          }
+          
+          // 2.3 Set Canvas Dimensions (Bitmap)
+          const renderViewport = pdfPage.getViewport({ scale: zoom * renderDpr });
+          canvas.width = renderViewport.width;
+          canvas.height = renderViewport.height;
+          
+          // 2.4 Set CSS Dimensions (Visual)
+          canvas.style.width = `${cssViewport.width}px`;
+          canvas.style.height = `${cssViewport.height}px`;
 
-          const renderContext = {
-            canvasContext: ctx,
-            viewport: viewport,
-            transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null
-          };
-
-          const task = pdfPage.render(renderContext);
+          const task = pdfPage.render({
+             canvasContext: ctx, 
+             viewport: renderViewport 
+          });
+          
           renderTaskRef.current = task;
 
           task.promise.catch(err => {
@@ -506,7 +525,7 @@
         };
 
         if (!file) {
-          return html`<div className="flex flex-col items-center justify-center h-full text-md-sys-onSurfaceVariant"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
+          return html`<div className="w-full flex flex-col items-center justify-center h-full text-md-sys-onSurfaceVariant"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
         }
 
         return html`
@@ -589,6 +608,12 @@
           setFiles(prev => [...prev, ...entries]);
           if (!activeFileId && entries.length) setActiveFileId(entries[0].id);
           setStatus({ text: `Added ${entries.length} files`, type: 'success' });
+        };
+        
+        const clearFiles = () => {
+          setFiles([]);
+          setActiveFileId(null);
+          setStatus({ text: 'List cleared', type: 'idle' });
         };
 
         const updateFileConfig = (id, key, value) => {
@@ -721,15 +746,6 @@
         
         // Manual trigger for Fit to Screen
         const triggerFit = () => {
-           // We can't easily call the internal logic from here without context/refs
-           // But we can reset to a sensible default or try to trigger a ref update.
-           // Simplified: Just reset to 0.5 (often good for A2) or 1.0
-           // Better: Trigger a state change that PdfStage listens to? 
-           // Simplest: Just setZoom(1) for now, but user requested Fit.
-           // Let's make PdfStage expose this via a ref or similar, but for now let's just refresh by toggling active file? No.
-           // Actually, we can just calculate it here if we had page size.
-           // Let's just make the button "Reset (100%)" for simplicity or keep logic inside PdfStage.
-           // Since I moved logic to PdfStage, let's keep it automatic on load.
            setZoom(1.0);
         };
 
@@ -744,10 +760,17 @@
               <div className="md-card flex flex-col gap-4">
                 <div className="flex justify-between items-center">
                    <h2 className="text-base font-medium text-md-sys-primary">1. Files</h2>
-                   <label className="md-btn md-btn-tonal text-xs h-8 px-3 cursor-pointer">
-                      <span className="mdi mdi-plus mr-1"></span> Add
-                      <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
-                   </label>
+                   <div className="flex gap-2">
+                     ${files.length > 0 && html`
+                       <button className="md-btn md-btn-tonal text-xs h-8 px-3 hover:bg-md-sys-error/10 hover:text-md-sys-error transition-colors" onClick=${clearFiles}>
+                          <span className="mdi mdi-delete-sweep mr-1"></span> Clear
+                       </button>
+                     `}
+                     <label className="md-btn md-btn-tonal text-xs h-8 px-3 cursor-pointer">
+                        <span className="mdi mdi-plus mr-1"></span> Add
+                        <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
+                     </label>
+                   </div>
                 </div>
                 <div className="space-y-3">
                    ${files.length === 0 && html`<div className="text-center text-sm text-md-sys-onSurfaceVariant py-4 border border-dashed border-md-sys-outline/30 rounded-xl">List is empty</div>`}
