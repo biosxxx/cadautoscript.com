@@ -11,7 +11,8 @@ export type UtilityPageSlug =
   | 'dxf-editor'
   | 'pdf-master'
   | 'qr-master'
-  | 'pdf-bom-extractor';
+  | 'pdf-bom-extractor'
+  | 'file-renamer';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -188,6 +189,19 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Auto-trim revision tables and footer notes',
       'Batch upload with per-file CSV or master report export',
     ],
+    scriptType: 'module',
+  },
+  'file-renamer': {
+    slug: 'file-renamer',
+    title: 'Batch File Renamer',
+    subtitle: 'Web utility - Bulk rename and export as ZIP',
+    description:
+      'Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download—all locally.',
+    about:
+      'Upload multiple files, preview automatic renames with regex or literal find/replace, add prefixes/suffixes, change casing, apply numbering, and download the renamed set as a ZIP without sending files anywhere.',
+    tags: ['Files', 'Rename', 'Offline'],
+    note: 'Runs fully client-side. ZIP creation and name conflict handling stay in your browser.',
+    features: ['Regex or literal find/replace', 'Prefix/suffix + numbering', 'ZIP download with conflict handling'],
     scriptType: 'module',
   },
 };

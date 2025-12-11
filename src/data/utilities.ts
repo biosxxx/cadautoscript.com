@@ -124,6 +124,15 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Smart table detection', 'Auto-trim footers/revisions', 'Per-file CSV + master report'],
     href: '/utilities/pdf-bom-extractor/',
   },
+  {
+    id: 'file-renamer',
+    name: 'Batch File Renamer',
+    description: 'Bulk rename files with find/replace, prefixes, numbering, and instant ZIP export.',
+    tech: 'React',
+    standards: 'Local-only',
+    features: ['Regex or literal find/replace', 'Prefix/suffix + numbering', 'ZIP download with conflicts handled'],
+    href: '/utilities/file-renamer/',
+  },
 ];
 
 
