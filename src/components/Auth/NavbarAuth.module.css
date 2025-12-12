@@ -62,7 +62,7 @@
 .dropdown {
   position: absolute;
   top: calc(100% + 0.5rem);
-  right: 0;
+  left: 0;
   background: var(--ifm-background-surface-color);
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 12px;

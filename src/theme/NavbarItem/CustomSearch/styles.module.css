@@ -3,6 +3,14 @@
   padding-inline: 1rem;
 }
 
+.mobileTrigger {
+  display: inline-flex;
+  align-self: flex-start;
+  width: auto;
+  min-width: 138px;
+  justify-content: center;
+}
+
 .backdrop {
   position: fixed;
   inset: 0;

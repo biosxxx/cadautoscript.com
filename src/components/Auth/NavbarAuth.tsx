@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import clsx from 'clsx';
 import type {User} from '@supabase/supabase-js';
 import Link from '@docusaurus/Link';
 import {supabase} from '@site/src/lib/supabaseClient';
@@ -128,7 +129,7 @@ export default function NavbarAuth(): JSX.Element {
   }
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={clsx(styles.container, 'navbar-auth-control')} ref={containerRef}>
       {user ? (
         <>
           <button type="button" className={styles.avatarButton} onClick={() => setMenuOpen((value) => !value)}>

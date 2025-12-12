@@ -6,6 +6,7 @@ import styles from './styles.module.css';
 
 type Props = {
   className?: string;
+  mobile?: boolean;
 };
 
 function useSearchResults(query: string) {
@@ -23,7 +24,7 @@ function useSearchResults(query: string) {
   }, [query]);
 }
 
-export default function CustomSearchNavbarItem({className}: Props): JSX.Element {
+export default function CustomSearchNavbarItem({className, mobile}: Props): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -54,7 +55,13 @@ export default function CustomSearchNavbarItem({className}: Props): JSX.Element 
     <>
       <button
         type="button"
-        className={clsx('button button--primary', styles.trigger, className)}
+        data-search-trigger
+        className={clsx(
+          'button button--primary',
+          styles.trigger,
+          {[styles.mobileTrigger]: mobile},
+          className,
+        )}
         onClick={() => setIsOpen(true)}
       >
         Search

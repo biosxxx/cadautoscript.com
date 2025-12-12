@@ -44,8 +44,8 @@ body {
 }
 
 .navbar-sidebar {
-  width: min(420px, 92vw);
-  max-width: none;
+  width: min(420px, 100vw);
+  max-width: 100vw;
   height: 100vh;
   top: 0;
   left: 0;
@@ -88,24 +88,73 @@ body {
   opacity: 0.65;
 }
 
-.navbar-sidebar__item {
-  padding: 0.5rem 1rem;
+.navbar-sidebar__items .menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem 1rem;
 }
 
-.navbar-sidebar__items .menu__list {
-  gap: 0.35rem;
+.navbar-sidebar__item {
+  padding: 0;
+}
+
+.navbar-sidebar__items--secondary {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
 }
 
 .navbar-sidebar__items .menu__link {
   font-size: 1.05rem;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   border-radius: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
+  display: block;
 }
 
 .navbar-sidebar__items .menu__list-item {
   width: 100%;
+}
+
+.navbar-sidebar__items--split {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 0.5rem;
+}
+
+.navbar-sidebar__primary-panel {
+  padding-bottom: 0.25rem;
+}
+
+.navbar-sidebar__secondary-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem 1rem 0.5rem;
+  margin: 0;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.navbar-sidebar__secondary-panel--visible {
+  max-height: calc(100vh - 230px);
+  opacity: 1;
+}
+
+.navbar-sidebar__secondary-panel .menu__list {
+  padding: 0.25rem 0 0.75rem;
+  gap: 0.35rem;
+}
+
+.navbar-sidebar__secondary-panel .menu__link {
+  padding: 0.65rem 0.75rem;
 }
 
 @media (max-width: 996px) {
@@ -136,6 +185,14 @@ html[data-theme='light'] .navbar-sidebar__close {
   color: #0f172a;
 }
 
+html[data-theme='light'] .navbar-sidebar__items--secondary {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] .navbar-sidebar__secondary-panel {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
 html[data-theme='light'] .navbar-sidebar__items .menu__link:hover,
 html[data-theme='light'] .navbar-sidebar__items .menu__link--active {
   color: var(--ifm-color-primary);
@@ -146,6 +203,46 @@ html[data-theme='light'] .navbar-sidebar__items .menu__link--active {
 .navbar-sidebar__items .menu__link:hover,
 .navbar-sidebar__items .menu__link--active {
   background: rgba(100, 255, 218, 0.08);
+}
+
+.navbar-sidebar__items--secondary .button {
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  justify-content: center;
+}
+
+.navbar-sidebar__items--secondary .navbar__item {
+  width: auto;
+}
+
+.navbar-sidebar__items [data-search-trigger] {
+  width: auto;
+  min-width: 136px;
+  display: inline-flex;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+.navbar-sidebar__items .navbar-auth-control {
+  width: 100%;
+  max-width: 260px;
+  align-self: flex-start;
+  position: relative;
+}
+
+.navbar-sidebar__items .navbar-auth-control .avatarButton,
+.navbar-sidebar__items .navbar-auth-control .signInButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.navbar-sidebar__items .navbar-auth-control .dropdown {
+  left: 0;
+  right: auto;
+  min-width: 100%;
 }
 
 .utilityTable {

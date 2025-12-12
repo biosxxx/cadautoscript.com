@@ -75,7 +75,7 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        {to: '/blog', label: 'Updates', position: 'left'},
+        {to: '/blog', label: 'Blog', position: 'left'},
         {to: '/mini-games', label: 'Mini Games', position: 'left'},
         {type: 'custom-search', position: 'right'},
         {type: 'custom-navbar-auth', position: 'right'},
