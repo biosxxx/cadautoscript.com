@@ -30,14 +30,18 @@ export default function AuthCallbackPage() {
           url.hash = '';
         } else {
           const code = url.searchParams.get('code');
-          if (!code) {
-            setStatus('error');
-            setMessage('Missing auth code. Please retry sign in.');
-            return;
-          }
-          const {error} = await supabase.auth.exchangeCodeForSession({code});
-          if (error) {
-            throw error;
+          if (code) {
+            const {error} = await supabase.auth.exchangeCodeForSession({code});
+            if (error) {
+              throw error;
+            }
+          } else {
+            const {data: sessionData} = await supabase.auth.getSession();
+            if (!sessionData?.session) {
+              setStatus('error');
+              setMessage('Missing auth code. Please retry sign in.');
+              return;
+            }
           }
         }
 
