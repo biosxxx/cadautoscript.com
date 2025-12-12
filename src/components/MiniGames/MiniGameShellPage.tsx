@@ -25,6 +25,10 @@ export default function MiniGameShellPage(config: MiniGamePageConfig) {
 
   const heroLinks = defaultHeroLinks;
   const reactionsSlug = config.reactionSlug ?? `mini-${slug}`;
+  React.useEffect(() => {
+    document.body.classList.add('utility-shell-page');
+    return () => document.body.classList.remove('utility-shell-page');
+  }, []);
 
   return (
     <Layout title={title} description={description}>

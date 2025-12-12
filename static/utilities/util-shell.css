@@ -2,7 +2,8 @@
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.utility-shell .navbar {
+.utility-shell .navbar,
+body.utility-shell-page .navbar {
   background: #020714;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
@@ -10,12 +11,17 @@
 
 .utility-shell .navbar__brand,
 .utility-shell .navbar__title,
-.utility-shell .navbar__link {
+.utility-shell .navbar__link,
+body.utility-shell-page .navbar__brand,
+body.utility-shell-page .navbar__title,
+body.utility-shell-page .navbar__link {
   color: #f5f7ff;
 }
 
 .utility-shell .navbar__link--active,
-.utility-shell .navbar__link:hover {
+.utility-shell .navbar__link:hover,
+body.utility-shell-page .navbar__link--active,
+body.utility-shell-page .navbar__link:hover {
   color: #64ffda;
 }
 

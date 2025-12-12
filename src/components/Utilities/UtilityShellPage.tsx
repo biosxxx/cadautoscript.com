@@ -37,6 +37,10 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
   const shellScriptSrc = useBaseUrl('/utilities/util-shell.js');
   const {isAuthenticated, authChecked} = useAuthStatus();
   const {openLoginModal} = useAuthModal();
+  React.useEffect(() => {
+    document.body.classList.add('utility-shell-page');
+    return () => document.body.classList.remove('utility-shell-page');
+  }, []);
 
   const utilityIndex = useMemo(
     () => utilities.findIndex((utility) => utility.href === `/utilities/${slug}/` || utility.id === slug),

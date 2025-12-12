@@ -3,7 +3,8 @@
   color: #0f172a;
 }
 
-:root[data-theme='light'] .utility-shell .navbar {
+:root[data-theme='light'] .utility-shell .navbar,
+body.utility-shell-page[data-theme='light'] .navbar {
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
@@ -11,12 +12,17 @@
 
 :root[data-theme='light'] .utility-shell .navbar__brand,
 :root[data-theme='light'] .utility-shell .navbar__title,
-:root[data-theme='light'] .utility-shell .navbar__link {
+:root[data-theme='light'] .utility-shell .navbar__link,
+body.utility-shell-page[data-theme='light'] .navbar__brand,
+body.utility-shell-page[data-theme='light'] .navbar__title,
+body.utility-shell-page[data-theme='light'] .navbar__link {
   color: #0f172a;
 }
 
 :root[data-theme='light'] .utility-shell .navbar__link--active,
-:root[data-theme='light'] .utility-shell .navbar__link:hover {
+:root[data-theme='light'] .utility-shell .navbar__link:hover,
+body.utility-shell-page[data-theme='light'] .navbar__link--active,
+body.utility-shell-page[data-theme='light'] .navbar__link:hover {
   color: #1a3fbf;
 }
 
