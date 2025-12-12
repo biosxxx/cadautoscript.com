@@ -43,6 +43,14 @@ body {
   backdrop-filter: blur(14px);
 }
 
+.navbar-sidebar {
+  width: min(420px, 92vw);
+  max-width: none;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
 .navbar-sidebar__brand {
   background: transparent;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -68,6 +76,76 @@ body {
 /* Ensure sidebar list remains visible over hero/video backgrounds */
 .navbar-sidebar__items {
   background: rgba(3, 5, 12, 0.96);
+  height: calc(100vh - var(--ifm-navbar-height, 64px));
+  max-height: calc(100vh - var(--ifm-navbar-height, 64px));
+  overflow-y: auto;
+  padding: 0.75rem 0;
+}
+
+.navbar-sidebar__backdrop {
+  position: fixed;
+  inset: 0;
+  opacity: 0.65;
+}
+
+.navbar-sidebar__item {
+  padding: 0.5rem 1rem;
+}
+
+.navbar-sidebar__items .menu__list {
+  gap: 0.35rem;
+}
+
+.navbar-sidebar__items .menu__link {
+  font-size: 1.05rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.navbar-sidebar__items .menu__list-item {
+  width: 100%;
+}
+
+@media (max-width: 996px) {
+  .navbar__items--right {
+    gap: 0.35rem;
+  }
+
+  .navbar__brand {
+    gap: 0.35rem;
+  }
+}
+
+/* Light theme sidebar */
+html[data-theme='light'] .navbar-sidebar,
+html[data-theme='light'] .navbar-sidebar__backdrop,
+html[data-theme='light'] .navbar-sidebar__items {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+html[data-theme='light'] .navbar-sidebar__brand {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] .navbar-sidebar__item,
+html[data-theme='light'] .navbar-sidebar__items .menu__link,
+html[data-theme='light'] .navbar-sidebar__items .menu__link--active,
+html[data-theme='light'] .navbar-sidebar__close {
+  color: #0f172a;
+}
+
+html[data-theme='light'] .navbar-sidebar__items .menu__link:hover,
+html[data-theme='light'] .navbar-sidebar__items .menu__link--active {
+  color: var(--ifm-color-primary);
+  background: rgba(33, 92, 255, 0.08);
+}
+
+/* Dark hover state */
+.navbar-sidebar__items .menu__link:hover,
+.navbar-sidebar__items .menu__link--active {
+  background: rgba(100, 255, 218, 0.08);
 }
 
 .utilityTable {
