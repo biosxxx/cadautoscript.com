@@ -11,7 +11,8 @@ export const miniGames: MiniGameDescriptor[] = [
   {
     id: 'engineering-blueprint-ncr',
     name: 'Engineering Blueprint NCR',
-    description: 'Spot blueprint defects and raise NCRs in a timed mini-game for CAD QA fans.',
+    description:
+      'Clear a blueprint grid without triggering NCRs—millimeter-grid Minesweeper with CAD QA stakes.',
     tech: 'HTML5',
     tags: ['QA', 'Blueprints', 'Mini game'],
     href: '/mini-games/engineering-blueprint-ncr/',
