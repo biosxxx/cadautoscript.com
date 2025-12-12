@@ -3,6 +3,23 @@
   color: #0f172a;
 }
 
+:root[data-theme='light'] .utility-shell .navbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+}
+
+:root[data-theme='light'] .utility-shell .navbar__brand,
+:root[data-theme='light'] .utility-shell .navbar__title,
+:root[data-theme='light'] .utility-shell .navbar__link {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .utility-shell .navbar__link--active,
+:root[data-theme='light'] .utility-shell .navbar__link:hover {
+  color: #1a3fbf;
+}
+
 :root[data-theme='light'] .utility-shell .utility-header {
   background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
