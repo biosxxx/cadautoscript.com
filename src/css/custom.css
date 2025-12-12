@@ -31,6 +31,45 @@ body {
   letter-spacing: 0.08em;
 }
 
+/* Mobile navbar */
+.navbar__toggle,
+.navbar__toggle svg {
+  color: #f5f7ff;
+}
+
+.navbar-sidebar,
+.navbar-sidebar__backdrop {
+  background: rgba(3, 5, 12, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.navbar-sidebar__brand {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-sidebar__item {
+  color: #f5f7ff;
+}
+
+.navbar-sidebar__items .menu__link {
+  color: #f5f7ff;
+}
+
+.navbar-sidebar__items .menu__link:hover,
+.navbar-sidebar__items .menu__link--active {
+  color: var(--ifm-color-primary);
+}
+
+.navbar-sidebar__close {
+  color: #f5f7ff;
+}
+
+/* Ensure sidebar list remains visible over hero/video backgrounds */
+.navbar-sidebar__items {
+  background: rgba(3, 5, 12, 0.96);
+}
+
 .utilityTable {
   width: 100%;
   border-collapse: collapse;
