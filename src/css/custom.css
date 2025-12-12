@@ -239,12 +239,6 @@ html[data-theme='light'] .navbar-sidebar__items .menu__link--active {
   justify-content: center;
 }
 
-.navbar-sidebar__items .navbar-auth-control .dropdown {
-  left: 0;
-  right: auto;
-  min-width: 100%;
-}
-
 .utilityTable {
   width: 100%;
   border-collapse: collapse;
