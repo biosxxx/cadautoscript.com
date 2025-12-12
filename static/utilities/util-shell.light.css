@@ -26,6 +26,15 @@ body.utility-shell-page[data-theme='light'] .navbar__link:hover {
   color: #1a3fbf;
 }
 
+body.utility-shell-page[data-theme='light'] {
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.92);
+  --ifm-navbar-link-color: #0f172a;
+  --ifm-navbar-link-hover-color: #1a3fbf;
+  --ifm-navbar-link-active-color: #1a3fbf;
+  --ifm-navbar-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+  --ifm-navbar-border-color: rgba(15, 23, 42, 0.08);
+}
+
 :root[data-theme='light'] .utility-shell .utility-header {
   background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);

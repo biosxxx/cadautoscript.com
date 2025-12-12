@@ -18,6 +18,15 @@ body.utility-shell-page .navbar__link {
   color: #f5f7ff;
 }
 
+body.utility-shell-page {
+  --ifm-navbar-background-color: #020714;
+  --ifm-navbar-link-color: #f5f7ff;
+  --ifm-navbar-link-hover-color: #64ffda;
+  --ifm-navbar-link-active-color: #64ffda;
+  --ifm-navbar-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  --ifm-navbar-border-color: rgba(255, 255, 255, 0.08);
+}
+
 .utility-shell .navbar__link--active,
 .utility-shell .navbar__link:hover,
 body.utility-shell-page .navbar__link--active,
