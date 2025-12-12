@@ -27,17 +27,23 @@
             /* Typography */
             --font-tech: 'Courier New', Courier, monospace;
 
-            /* Sizing */
+            /* Sizing (Calculated via JS now) */
             --cell-size: 38px;
-            --cell-gap: 1px; /* Minimal gap for precision look */
+            --cell-gap: 1px; 
         }
 
         /* --- Reset & Base --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        body {
             background-color: var(--bp-bg);
             /* Millimeter Paper CSS Pattern */
             background-image: 
@@ -51,25 +57,21 @@
             color: var(--bp-text);
             font-family: var(--font-tech);
             display: flex;
-            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
             justify-content: center;
-            overflow: hidden;
         }
 
         /* --- Layout --- */
         .app-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            width: 98vw;
+            height: 98vh;
+            max-width: none; /* Full screen adaption */
             padding: 10px;
-            width: 100%;
-            max-width: 650px;
-            align-items: center;
-            border: 4px solid var(--bp-lines); /* Border of the drawing */
-            background: rgba(27, 58, 94, 0.9);
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
+            border: 4px solid var(--bp-lines);
+            background: rgba(27, 58, 94, 0.95);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
             position: relative;
         }
 
@@ -81,6 +83,7 @@
             border-bottom: 2px solid var(--bp-lines);
             padding-bottom: 10px;
             align-items: center;
+            flex-shrink: 0; /* Prevent shrinking */
         }
 
         .tech-stat {
@@ -90,6 +93,7 @@
             border: 1px solid var(--bp-lines);
             padding: 4px 8px;
             background: rgba(0,0,0,0.2);
+            white-space: nowrap;
         }
         .tech-stat label { opacity: 0.7; font-size: 0.6rem; text-transform: uppercase; }
         .tech-stat span { font-size: 1.2rem; font-weight: bold; color: var(--color-hold); letter-spacing: 2px; }
@@ -98,21 +102,23 @@
             background: transparent;
             color: var(--bp-lines);
             border: 2px solid var(--bp-lines);
-            width: 60px; height: 60px;
+            width: 50px; height: 50px;
             display: grid; place-items: center;
             cursor: pointer;
             transition: all 0.2s;
-            border-radius: 50%; /* Stamp shape */
+            border-radius: 50%;
         }
         .btn-reset:active { background: rgba(255,255,255,0.1); transform: rotate(-2deg); }
-        .btn-reset svg { width: 32px; height: 32px; fill: currentColor; }
+        .btn-reset svg { width: 28px; height: 28px; fill: currentColor; }
 
-        /* --- Mode Selector (Tabs looking like CAD layers) --- */
+        /* --- Mode Selector --- */
         .layer-selector {
             display: flex;
             width: 100%;
             border-bottom: 1px solid var(--bp-lines);
-            margin-bottom: 5px;
+            margin-bottom: 0;
+            flex-shrink: 0;
+            overflow-x: auto; /* Allow scroll on very small screens */
         }
 
         .layer-btn {
@@ -120,12 +126,13 @@
             color: var(--bp-text);
             border: 1px solid var(--bp-lines);
             border-bottom: none;
-            padding: 6px 12px;
+            padding: 8px 12px;
             margin-right: 4px;
             font-family: var(--font-tech);
             font-size: 0.75rem;
             cursor: pointer;
             opacity: 0.6;
+            white-space: nowrap;
         }
         .layer-btn:hover { opacity: 0.8; }
         .layer-btn.active {
@@ -135,39 +142,43 @@
             font-weight: bold;
         }
 
-        /* --- Drawing Board (Grid) --- */
+        /* --- Drawing Board (Grid Container) --- */
         .drawing-board {
+            flex-grow: 1; /* Occupy all remaining vertical space */
+            width: 100%;
             padding: 10px;
-            background: rgba(0,0,0,0.2); /* Darker underlay */
+            background: rgba(0,0,0,0.2);
             border: 1px dashed var(--bp-lines);
-            overflow: auto;
-            max-width: 100%;
-            max-height: 60vh;
-            display: grid;
-            place-items: center;
+            overflow: hidden; /* Hide overflow to force scaling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            position: relative;
         }
 
         .grid { 
             display: grid; 
-            gap: 0; /* No gap for technical drawing look */
+            gap: 0; 
             border: 1px solid var(--bp-lines);
+            /* Transition for smooth resizing */
+            transition: width 0.1s, height 0.1s; 
         }
 
         .cell {
             width: var(--cell-size);
             height: var(--cell-size);
             background-color: transparent;
-            border: 1px solid rgba(255,255,255,0.2); /* Thin drafting lines */
+            border: 1px solid rgba(255,255,255,0.2);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 1.1rem;
-            cursor: crosshair; /* Precision cursor */
+            font-size: calc(var(--cell-size) * 0.6); /* Scale text with cell */
+            cursor: crosshair;
             position: relative;
         }
 
-        /* Unrevealed state: Hathcing pattern */
         .cell:not(.revealed) {
             background-image: linear-gradient(135deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent);
             background-size: 10px 10px;
@@ -176,7 +187,7 @@
         .cell:hover:not(.revealed) { background-color: rgba(255,255,255,0.1); }
 
         .cell.revealed {
-            background-color: rgba(0,0,0,0.1); /* Slightly darker "checked" area */
+            background-color: rgba(0,0,0,0.1);
             border-color: rgba(255,255,255,0.1);
             cursor: default;
         }
@@ -204,17 +215,18 @@
         /* HOLD (Flag) */
         .cell.flagged::after {
             content: 'HOLD';
-            font-size: 0.6rem;
+            font-size: calc(var(--cell-size) * 0.35); /* Scale flag text */
             color: var(--bp-bg);
             background: var(--color-hold);
             padding: 2px;
             transform: rotate(-15deg);
             border: 1px solid white;
+            white-space: nowrap;
         }
         
         .cell.mine-icon::after {
             content: 'NCR';
-            font-size: 0.7rem;
+            font-size: calc(var(--cell-size) * 0.4);
             font-weight: bold;
         }
 
@@ -227,11 +239,12 @@
             padding-top: 5px;
             font-size: 0.7rem;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
-        /* --- Dialog (Stamp style) --- */
+        /* --- Dialog --- */
         dialog {
-            background: #e0e0e0; /* Paper color */
+            background: #e0e0e0;
             color: #222;
             border: 4px double #222;
             padding: 20px;
@@ -265,7 +278,6 @@
             width: 100%;
         }
 
-        /* Inputs */
         .input-group label { display: block; margin-bottom: 5px; }
         .input-group input { 
             width: 100%; padding: 5px; font-family: var(--font-tech); 
@@ -275,9 +287,10 @@
         @keyframes flash { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
         
         @media (max-width: 500px) {
-            :root { --cell-size: 32px; }
             .app-container { padding: 5px; border-width: 2px; }
-            .drawing-info { font-size: 0.6rem; }
+            .drawing-info { font-size: 0.5rem; }
+            .tech-stat span { font-size: 1rem; }
+            .layer-btn { padding: 6px 8px; font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -291,7 +304,6 @@
         </div>
         
         <button class="btn-reset" id="btn-reset" title="RE-ISSUE DRAWING">
-            <!-- Refresh / Recycle icon -->
             <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
         </button>
         
@@ -314,19 +326,17 @@
     
     <div class="drawing-info">
         <span>DWG NO: <span id="dwg-no">MS-2024-X</span></span>
-        <span>SCALE: 1:1</span>
+        <span>SCALE: AUTO</span>
         <span>APPR: PENDING</span>
     </div>
 </div>
 
-<!-- Result Stamp Dialog -->
 <dialog id="game-dialog">
     <div id="stamp-box" class="stamp-box stamp-fail">REJECTED<br><span style="font-size:0.8rem">NCR FOUND</span></div>
     <p id="dialog-msg">Critical Design Flaw Detected.</p>
     <button class="dialog-btn" id="dialog-restart">NEW REVISION</button>
 </dialog>
 
-<!-- Custom Config Dialog -->
 <dialog id="custom-dialog">
     <div class="stamp-box" style="border-color:#333; color:#333; transform:none; font-size:1.2rem;">PARAMETRIC INPUT</div>
     <div class="input-group">
@@ -348,7 +358,6 @@
 </dialog>
 
 <script>
-    /* --- CONFIG & STATE --- */
     const CONFIG = {
         easy: { rows: 9, cols: 9, mines: 10 },
         medium: { rows: 16, cols: 16, mines: 40 },
@@ -367,7 +376,6 @@
     let touchTimer = null;
     let isLongPress = false;
 
-    /* --- DOM --- */
     const gridEl = document.getElementById('grid');
     const minesLeftEl = document.getElementById('mines-left');
     const timerEl = document.getElementById('timer');
@@ -375,17 +383,15 @@
     const dialog = document.getElementById('game-dialog');
     const customDialog = document.getElementById('custom-dialog');
     const layerBtns = document.querySelectorAll('.layer-btn');
+    const boardEl = document.querySelector('.drawing-board');
     
-    // Dialog Elements
     const stampBox = document.getElementById('stamp-box');
     const dialogMsg = document.getElementById('dialog-msg');
     
-    // Inputs
     const inpWidth = document.getElementById('inp-width');
     const inpHeight = document.getElementById('inp-height');
     const inpMines = document.getElementById('inp-mines');
 
-    /* --- INITIALIZATION --- */
     function initGame(mode = currentMode) {
         clearInterval(timerInterval);
         gameOver = false;
@@ -400,12 +406,10 @@
         const { rows, cols, mines } = CONFIG[currentMode];
         minesLeftEl.textContent = String(mines).padStart(3, '0');
         
-        // Random Drawing Number
         dwgNoEl.textContent = `MS-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`;
 
-        gridEl.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+        // Build Grid DOM
         gridEl.innerHTML = '';
-
         for (let r = 0; r < rows; r++) {
             let row = [];
             for (let c = 0; c < cols; c++) {
@@ -419,13 +423,40 @@
             }
             grid.push(row);
         }
+
+        // Apply grid dimensions and initial resize
+        gridEl.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+        resizeGrid();
     }
 
-    /* --- LOGIC --- */
+    // Auto-scaling logic
+    function resizeGrid() {
+        if (!gridEl || !boardEl) return;
+        
+        const { rows, cols } = CONFIG[currentMode];
+        // Get available space (subtract padding/borders approx)
+        const availableW = boardEl.clientWidth - 20; 
+        const availableH = boardEl.clientHeight - 20;
+        
+        // Calculate max allowed cell size for both dimensions
+        const sizeByW = Math.floor(availableW / cols);
+        const sizeByH = Math.floor(availableH / rows);
+        
+        // Use the smaller dimension to ensure fit
+        let cellSize = Math.min(sizeByW, sizeByH);
+        
+        // Ensure minimum visibility
+        if (cellSize < 15) cellSize = 15;
+        
+        document.documentElement.style.setProperty('--cell-size', `${cellSize}px`);
+    }
+
+    window.addEventListener('resize', resizeGrid);
+
     function addCellListeners(cell, r, c) {
         cell.addEventListener('mousedown', (e) => {
             if(gameOver) return;
-            if (e.button === 0) { /* Left click logic if needed visual feedback */ }
+            if (e.button === 0) {}
             else if (e.button === 2) { e.preventDefault(); toggleFlag(r, c); }
         });
         cell.addEventListener('mouseup', (e) => {
@@ -556,12 +587,10 @@
                 if (!cell.flagged) cell.el.classList.add('revealed', 'mine', 'mine-icon');
             });
             
-            // UI Fail
             stampBox.className = 'stamp-box stamp-fail';
             stampBox.innerHTML = 'REJECTED<br><span style="font-size:0.8rem">NCR ISSUED</span>';
             dialogMsg.textContent = `Failure at sector ${hitR}:${hitC}. Design does not meet specs.`;
         } else {
-            // UI Pass
             stampBox.className = 'stamp-box stamp-pass';
             stampBox.innerHTML = 'APPROVED<br><span style="font-size:0.8rem">QA PASSED</span>';
             dialogMsg.textContent = `Drawing released for production. Time logged: ${timer}s.`;
@@ -569,7 +598,6 @@
         setTimeout(() => dialog.showModal(), 800);
     }
 
-    /* --- EVENT BINDING --- */
     document.getElementById('btn-reset').addEventListener('click', () => initGame());
     document.getElementById('dialog-restart').addEventListener('click', () => { dialog.close(); initGame(); });
 
