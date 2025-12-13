@@ -222,7 +222,7 @@ const mdxComponents = {
   YouTube,
 };
 
-const STARTER_MDX = `---
+const STARTER_MDX = String.raw`---
 title: "Embed and explain inside MDX"
 description: "Drop calculators into MDX, capture screenshots, or write run-books."
 tags: ["mdx", "docs", "editor"]
@@ -247,10 +247,10 @@ tags: ["mdx", "docs", "editor"]
 - Save: <Kbd>Ctrl</Kbd> + <Kbd>S</Kbd>
 - Toggle preview: <Kbd>Ctrl</Kbd> + <Kbd>Enter</Kbd>
 
-\\`\\`\\`ts
+\`\`\`ts
 // You can show code blocks normally
 export const sum = (a: number, b: number) => a + b
-\\`\\`\\`
+\`\`\`
 
 <YouTube id="dQw4w9WgXcQ" title="Demo" />
 `;
