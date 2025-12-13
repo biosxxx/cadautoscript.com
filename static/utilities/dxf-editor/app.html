@@ -1,87 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebDXF Editor</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/dxf-parser@1.1.2/dist/dxf-parser.js"></script>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body class="bg-gray-900 text-gray-200 h-screen flex flex-col font-sans">
-    <div
-      class="h-16 bg-gray-800 border-b border-gray-700 flex items-center px-4 justify-between select-none shrink-0"
-    >
-      <div class="flex items-center gap-4">
-        <h1 class="text-lg font-bold text-white mr-4">WebDXF</h1>
-        <div class="flex gap-2 border-r border-gray-600 pr-4">
-          <label class="tool-btn cursor-pointer bg-green-700 hover:bg-green-600 text-white">
-            <span>📂 Open</span>
-            <input type="file" id="fileInput" accept=".dxf" class="hidden" />
-          </label>
-          <button id="saveBtn" class="tool-btn bg-blue-700 hover:bg-blue-600 text-white">
-            💾 Save DXF
-          </button>
-        </div>
-        <div class="flex gap-2" id="toolbar" role="group" aria-label="Drawing tools">
-          <button data-tool="select" class="tool-btn active" title="Select (V)">↖ Select</button>
-          <button data-tool="trim" class="tool-btn" title="Smart Trim (T)">✂ Trim</button>
-          <button data-tool="measure" class="tool-btn" title="Measure (M)">📏 Measure</button>
-          <button data-tool="line" class="tool-btn" title="Line (L)">╱ Line</button>
-          <button data-tool="rect" class="tool-btn" title="Rectangle (R)">⬜ Rect</button>
-          <button data-tool="circle" class="tool-btn" title="Circle (C)">○ Circle</button>
-        </div>
+
+<head>
+  <script src="../../vendor/tailwindcss.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebDXF Editor</title>
+
+  <script src="../../vendor/dxf-parser.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="bg-gray-900 text-gray-200 h-screen flex flex-col font-sans">
+  <div class="h-16 bg-gray-800 border-b border-gray-700 flex items-center px-4 justify-between select-none shrink-0">
+    <div class="flex items-center gap-4">
+      <h1 class="text-lg font-bold text-white mr-4">WebDXF</h1>
+      <div class="flex gap-2 border-r border-gray-600 pr-4">
+        <label class="tool-btn cursor-pointer bg-green-700 hover:bg-green-600 text-white">
+          <span>📂 Open</span>
+          <input type="file" id="fileInput" accept=".dxf" class="hidden" />
+        </label>
+        <button id="saveBtn" class="tool-btn bg-blue-700 hover:bg-blue-600 text-white">
+          💾 Save DXF
+        </button>
       </div>
-      <div class="flex items-center gap-4">
-        <div class="flex flex-col items-end text-xs text-gray-400">
-          <span id="coords">X: 0.00 Y: 0.00</span>
-          <span id="statusText">Ready</span>
-        </div>
-        <div class="flex items-center gap-2 border-l border-gray-600 pl-4">
-          <label class="text-xs">Color:</label>
-          <input
-            type="color"
-            id="colorPicker"
-            value="#ffffff"
-            class="h-8 w-8 bg-transparent border-0 cursor-pointer"
-          />
-          <button
-            id="deleteBtn"
-            class="p-2 bg-red-800 hover:bg-red-700 rounded text-white text-xs"
-          >
-            Delete
-          </button>
-        </div>
+      <div class="flex gap-2" id="toolbar" role="group" aria-label="Drawing tools">
+        <button data-tool="select" class="tool-btn active" title="Select (V)">↖ Select</button>
+        <button data-tool="trim" class="tool-btn" title="Smart Trim (T)">✂ Trim</button>
+        <button data-tool="measure" class="tool-btn" title="Measure (M)">📏 Measure</button>
+        <button data-tool="line" class="tool-btn" title="Line (L)">╱ Line</button>
+        <button data-tool="rect" class="tool-btn" title="Rectangle (R)">⬜ Rect</button>
+        <button data-tool="circle" class="tool-btn" title="Circle (C)">○ Circle</button>
       </div>
     </div>
-
-    <div class="flex-1 relative bg-gray-900 overflow-hidden" id="canvasContainer">
-      <canvas id="cadCanvas" class="block"></canvas>
-      <div class="help-overlay absolute bottom-4 left-4 p-3 text-xs text-gray-300">
-        <p><strong>LMB:</strong> Select / start box</p>
-        <p><strong>LMB drag left:</strong> Crossing (green)</p>
-        <p><strong>LMB drag right:</strong> Window (blue)</p>
-        <p><strong>RMB drag:</strong> Pan view</p>
-        <p><strong>Wheel:</strong> Zoom</p>
-        <p><strong>Esc:</strong> Cancel</p>
+    <div class="flex items-center gap-4">
+      <div class="flex flex-col items-end text-xs text-gray-400">
+        <span id="coords">X: 0.00 Y: 0.00</span>
+        <span id="statusText">Ready</span>
+      </div>
+      <div class="flex items-center gap-2 border-l border-gray-600 pl-4">
+        <label class="text-xs">Color:</label>
+        <input type="color" id="colorPicker" value="#ffffff" class="h-8 w-8 bg-transparent border-0 cursor-pointer" />
+        <button id="deleteBtn" class="p-2 bg-red-800 hover:bg-red-700 rounded text-white text-xs">
+          Delete
+        </button>
       </div>
     </div>
+  </div>
 
-    <div
-      class="h-10 bg-gray-800 border-t border-gray-700 flex items-center px-4 justify-between select-none shrink-0"
-    >
-      <div class="flex items-center gap-2" id="angleSnapParams">
-        <span class="status-hint font-semibold mr-2">∠ Angle Snap:</span>
-        <button data-angle="0" class="snap-btn active">Off</button>
-        <button data-angle="15" class="snap-btn">15°</button>
-        <button data-angle="30" class="snap-btn">30°</button>
-        <button data-angle="45" class="snap-btn">45°</button>
-        <button data-angle="90" class="snap-btn">90°</button>
-      </div>
-      <div class="text-xs text-gray-500">WebDXF v1.2</div>
+  <div class="flex-1 relative bg-gray-900 overflow-hidden" id="canvasContainer">
+    <canvas id="cadCanvas" class="block"></canvas>
+    <div class="help-overlay absolute bottom-4 left-4 p-3 text-xs text-gray-300">
+      <p><strong>LMB:</strong> Select / start box</p>
+      <p><strong>LMB drag left:</strong> Crossing (green)</p>
+      <p><strong>LMB drag right:</strong> Window (blue)</p>
+      <p><strong>RMB drag:</strong> Pan view</p>
+      <p><strong>Wheel:</strong> Zoom</p>
+      <p><strong>Esc:</strong> Cancel</p>
     </div>
+  </div>
 
-    <script type="module" src="./scripts/main.js"></script>
-  </body>
+  <div class="h-10 bg-gray-800 border-t border-gray-700 flex items-center px-4 justify-between select-none shrink-0">
+    <div class="flex items-center gap-2" id="angleSnapParams">
+      <span class="status-hint font-semibold mr-2">∠ Angle Snap:</span>
+      <button data-angle="0" class="snap-btn active">Off</button>
+      <button data-angle="15" class="snap-btn">15°</button>
+      <button data-angle="30" class="snap-btn">30°</button>
+      <button data-angle="45" class="snap-btn">45°</button>
+      <button data-angle="90" class="snap-btn">90°</button>
+    </div>
+    <div class="text-xs text-gray-500">WebDXF v1.2</div>
+  </div>
+
+  <script type="module" src="./scripts/main.js"></script>
+</body>
+
 </html>

@@ -1,100 +1,157 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
+
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Генератор табличек с QR-кодом (UI-оболочка для прототипа)</title>
-    <link rel="stylesheet" href="./styles.css" />
-    
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
-            }
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Nameplate Generator - CAD AutoScript</title>
+
+  <!-- Lightweight utilities (no build step). If you prefer, you can remove Tailwind and keep only styles.css. -->
+  <script src="../../vendor/tailwindcss.js"></script>
+
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- QR generator -->
+  <script src="../../vendor/qrcode.min.js"></script>
+
+  <!-- ES module shim for import maps (Three.js) -->
+  <script async src="../../vendor/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../vendor/three.module.js",
+        "three/addons/controls/OrbitControls.js": "../../vendor/OrbitControls.js",
+        "three/addons/loaders/RGBELoader.js": "../../vendor/RGBELoader.js",
+        "three/addons/": "../../vendor/",
+        "@babel/runtime/helpers/typeof": "../../vendor/babel-typeof.js",
+        "fflate": "../../vendor/fflate.js"
+      }
+    }
+  </script>
 </head>
-<body class="bg-gray-900 text-gray-50 font-sans p-4 sm:p-6 lg:p-8">
-    <div class="container mx-auto max-w-7xl">
-        <header class="text-center mb-12">
-            <div class="flex justify-end mb-6">
-                <div class="inline-flex bg-gray-800 border border-gray-700 rounded-full p-1 gap-1" role="group" aria-label="Language switcher">
-                    <button type="button" class="lang-btn active" data-lang="ru">RU</button>
-                    <button type="button" class="lang-btn" data-lang="en">EN</button>
-                </div>
-            </div>
-            <h1 data-i18n="headerTitle">3D-табличка</h1>
-            <p class="text-base sm:text-lg text-gray-400" data-i18n="headerSubtitle">Создайте табличку с QR-кодом и интерактивным предпросмотром</p>
-        </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 bg-gray-800 p-8 rounded-2xl shadow-xl">
-                <div class="space-y-6">
-                    <h2 class="section-header" data-i18n="contentSectionTitle">Гравировка</h2>
+<body class="cas-app">
+  <div class="cas-shell">
+    <header class="cas-topbar">
+      <div class="cas-topbar__title">
+        <div class="cas-eyebrow">CAD AutoScript</div>
+        <h1>QR Nameplate Generator</h1>
+        <p class="cas-subtitle">Design a QR-enabled nameplate with 3D preview and a downloadable PDF report.</p>
+      </div>
+      <div class="cas-topbar__actions">
+        <a class="cas-link" href="https://cadautoscript.com" target="_blank" rel="noopener">cadautoscript.com</a>
+      </div>
+    </header>
 
-                    <div>
-                        <label for="plaque-text" data-i18n="plaqueTextLabel">Текст для гравировки</label>
-                        <input type="text" id="plaque-text" class="form-input" data-i18n-placeholder="plaqueTextPlaceholder" data-i18n-value="plaqueTextValue" value="Гравировка" placeholder="Введите текст..." />
-                    </div>
-
-                    <div>
-                        <label for="qr-url" data-i18n="qrUrlLabel">Ссылка для QR-кода</label>
-                        <input type="url" id="qr-url" class="form-input" data-i18n-placeholder="qrUrlPlaceholder" data-i18n-value="qrUrlValue" value="https://google.com/" placeholder="https://example.com/info" />
-                    </div>
-
-                    <h2 class="section-header mt-6" data-i18n="dimensionsSectionTitle">Габариты</h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="plaque-width" data-i18n="widthLabel">Ширина (мм)</label>
-                            <input type="number" id="plaque-width" class="form-input-num" value="150" placeholder="150" />
-                        </div>
-                        <div>
-                            <label for="plaque-height" data-i18n="heightLabel">Высота (мм)</label>
-                            <input type="number" id="plaque-height" class="form-input-num" value="150" placeholder="150" />
-                        </div>
-                        <div>
-                            <label for="plaque-depth" data-i18n="depthLabel">Толщина (мм)</label>
-                            <input type="number" id="plaque-depth" class="form-input-num" value="5" placeholder="5" />
-                        </div>
-                        <div>
-                            <label for="plaque-radius" data-i18n="radiusLabel">Радиус (мм)</label>
-                            <input type="number" id="plaque-radius" class="form-input-num" value="5" placeholder="5" />
-                        </div>
-                    </div>
-
-                    <div class="mt-2">
-                        <label id="add-border-label" for="add-border">
-                            <input type="checkbox" id="add-border" class="mr-2" />
-                            <span class="text-sm font-medium" data-i18n="addBorderLabel">Добавить рамку</span>
-                        </label>
-                    </div>
-
-                    <div>
-                        <label data-i18n="materialLabel">Материал</label>
-                        <div id="material-options" class="flex flex-col gap-3">
-                            <button class="option-btn active" data-material="steel" data-i18n="materialSteel">Нержавеющая сталь</button>
-                            <button class="option-btn" data-material="copper" data-i18n="materialCopper">Медь</button>
-                            <button class="option-btn" data-material="black-granite" data-i18n="materialGranite">Черный гранит</button>
-                        </div>
-                    </div>
-
-                    <button id="generate-btn" class="generate-btn" data-i18n="generateBtn">Показать 3D модель</button>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2 h-[400px] lg:h-[600px] flex items-center justify-center bg-gray-900 rounded-2xl shadow-inner relative">
-                <canvas id="plaque-canvas" class="w-full h-full"></canvas>
-            </div>
+    <main class="cas-grid">
+      <section class="cas-card cas-card--form">
+        <div class="cas-card__header">
+          <h2>Parameters</h2>
+          <p>All units are in millimeters (mm).</p>
         </div>
+
+        <div class="cas-card__body cas-stack">
+          <div>
+            <label for="plaque-text">Engraving text</label>
+            <input type="text" id="plaque-text" class="form-input" value="CAD AutoScript"
+              placeholder="Enter engraving text" />
+            <div class="hint">Text is auto-fit to the texture width.</div>
+          </div>
+
+          <div>
+            <label for="qr-url">QR link</label>
+            <input type="url" id="qr-url" class="form-input" value="https://cadautoscript.com"
+              placeholder="https://cadautoscript.com" />
+            <div class="hint">Default is the CAD AutoScript website.</div>
+          </div>
+
+          <div class="cas-divider"></div>
+
+          <div class="cas-grid-2">
+            <div>
+              <label for="plaque-width">Width (mm)</label>
+              <input type="number" id="plaque-width" class="form-input-num" value="150" min="20" step="1" />
+            </div>
+            <div>
+              <label for="plaque-height">Height (mm)</label>
+              <input type="number" id="plaque-height" class="form-input-num" value="150" min="20" step="1" />
+            </div>
+            <div>
+              <label for="plaque-depth">Thickness (mm)</label>
+              <input type="number" id="plaque-depth" class="form-input-num" value="5" min="1" step="0.5" />
+            </div>
+            <div>
+              <label for="plaque-radius">Corner radius (mm)</label>
+              <input type="number" id="plaque-radius" class="form-input-num" value="5" min="0" step="0.5" />
+            </div>
+          </div>
+
+          <div class="cas-grid-2 cas-grid-2--compact">
+            <label class="cas-toggle" id="add-border-label" for="add-border">
+              <input type="checkbox" id="add-border" />
+              <span>Add border</span>
+            </label>
+
+            <label class="cas-toggle" for="auto-update">
+              <input type="checkbox" id="auto-update" checked />
+              <span>Auto-update 3D</span>
+            </label>
+          </div>
+
+          <div>
+            <label>Material</label>
+            <div id="material-options" class="material-list" role="listbox" aria-label="Material">
+              <button class="option-btn active" data-material="steel" type="button">Stainless steel</button>
+              <button class="option-btn" data-material="copper" type="button">Copper</button>
+              <button class="option-btn" data-material="black-granite" type="button">Black granite</button>
+            </div>
+          </div>
+
+          <div id="validation" class="cas-validation" aria-live="polite"></div>
+
+          <div class="cas-actions">
+            <button id="generate-btn" class="generate-btn" type="button">Update 3D preview</button>
+            <button id="pdf-btn" class="secondary-btn" type="button">Download PDF report</button>
+          </div>
+
+          <button id="show-drawing-btn" class="show-drawing-btn" type="button">
+            View drawing preview
+          </button>
+        </div>
+      </section>
+
+      <section class="cas-card cas-card--preview">
+        <div class="cas-card__header">
+          <h2>3D preview</h2>
+          <p>Orbit and zoom to inspect. This preview is for visualization only.</p>
+        </div>
+        <div class="cas-card__body cas-preview3d">
+          <canvas id="plaque-canvas" class="cas-canvas"></canvas>
+        </div>
+      </section>
+
+      <section class="cas-card cas-card--drawing" style="display:none;"></section>
+    </main>
+
+    <!-- Modal for Drawing Preview -->
+    <div id="drawing-modal" class="cas-modal-overlay">
+      <div class="cas-modal-content">
+        <div class="cas-modal-header">
+          <h3>Report drawing preview</h3>
+          <button id="close-modal-btn" class="cas-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="cas-modal-body">
+          <p style="margin-top:0; color:var(--md-sys-color-on-surface-variant); font-size:13px; margin-bottom:12px;">
+            This preview is embedded into the PDF report.</p>
+          <div id="drawing-preview" class="cas-drawing"></div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <canvas id="engraving-map-canvas" style="display:none;"></canvas>
+  <canvas id="engraving-map-canvas" style="display:none;"></canvas>
 
-    <script type="module" src="./scripts/main.js"></script>
+  <script type="module" src="./scripts/main.js"></script>
 </body>
+
 </html>

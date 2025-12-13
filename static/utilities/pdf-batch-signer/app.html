@@ -1,347 +1,425 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>PDF Batch Signer (Pro)</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Google+Sans:wght@400;500;700&family=Caveat:wght@600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      if (window.pdfjsLib) {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-      }
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              md: {
-                sys: {
-                  primary: '#D0BCFF',
-                  onPrimary: '#381E72',
-                  primaryContainer: '#4F378B',
-                  onPrimaryContainer: '#EADDFF',
-                  secondary: '#CCC2DC',
-                  onSecondary: '#332D41',
-                  secondaryContainer: '#4A4458',
-                  onSecondaryContainer: '#E8DEF8',
-                  tertiary: '#EFB8C8',
-                  onTertiary: '#492532',
-                  tertiaryContainer: '#633B48',
-                  onTertiaryContainer: '#FFD8E4',
-                  error: '#F2B8B5',
-                  onError: '#601410',
-                  background: '#141218',
-                  onBackground: '#E6E1E5',
-                  surface: '#141218',
-                  onSurface: '#E6E1E5',
-                  surfaceVariant: '#49454F',
-                  onSurfaceVariant: '#CAC4D0',
-                  outline: '#938F99',
-                }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PDF Batch Signer (Pro)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Fonts/Icons Removed/Local -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Google+Sans:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet" /> -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" /> -->
+
+  <script src="../../vendor/pdf-lib.min.js"></script>
+  <script src="../../vendor/pdf.min.js"></script>
+  <script src="../../vendor/jszip.min.js"></script>
+  <script src="../../vendor/tailwindcss.js"></script>
+
+  <!-- React Dependencies (Local UMD) -->
+  <script src="../../vendor/react.production.min.js"></script>
+  <script src="../../vendor/react-dom.production.min.js"></script>
+
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = '../../vendor/pdf.worker.min.js';
+    }
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            md: {
+              sys: {
+                primary: '#D0BCFF',
+                onPrimary: '#381E72',
+                primaryContainer: '#4F378B',
+                onPrimaryContainer: '#EADDFF',
+                secondary: '#CCC2DC',
+                onSecondary: '#332D41',
+                secondaryContainer: '#4A4458',
+                onSecondaryContainer: '#E8DEF8',
+                tertiary: '#EFB8C8',
+                onTertiary: '#492532',
+                tertiaryContainer: '#633B48',
+                onTertiaryContainer: '#FFD8E4',
+                error: '#F2B8B5',
+                onError: '#601410',
+                background: '#141218',
+                onBackground: '#E6E1E5',
+                surface: '#141218',
+                onSurface: '#E6E1E5',
+                surfaceVariant: '#49454F',
+                onSurfaceVariant: '#CAC4D0',
+                outline: '#938F99',
               }
-            },
-            fontFamily: {
-              sans: ['Google Sans', 'Roboto', 'sans-serif'],
-              hand: ['Caveat', 'cursive'],
             }
+          },
+          fontFamily: {
+            sans: ['Google Sans', 'Roboto', 'sans-serif'],
+            hand: ['Caveat', 'cursive'],
           }
         }
       }
-    </script>
-    <style>
-      body {
-        background-color: #141218;
-        color: #E6E1E5;
-        font-family: 'Roboto', sans-serif;
-        -webkit-tap-highlight-color: transparent;
-      }
-      
-      .md-card {
-        background-color: #1D1B20;
-        border-radius: 24px;
-        padding: 24px;
-        transition: background-color 0.2s;
-      }
-      
-      .md-btn {
-        height: 40px;
-        border-radius: 20px;
-        padding: 0 24px;
-        font-family: 'Google Sans', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        letter-spacing: 0.1px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-        cursor: pointer;
-        user-select: none;
-      }
-      .md-btn:active { transform: scale(0.98); }
-      .md-btn-primary { background-color: #D0BCFF; color: #381E72; }
-      .md-btn-primary:hover { background-color: #E8DEF8; }
-      .md-btn-tonal { background-color: #4A4458; color: #E8DEF8; }
-      .md-btn-tonal:hover { background-color: #635F70; }
-      .md-btn-icon { width: 40px; padding: 0; border-radius: 50%; }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #141218;
+      color: #E6E1E5;
+      font-family: 'Roboto', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-      /* Canvas & Interaction */
-      .canvas-wrapper {
-        position: relative;
-        background-color: #ffffff;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-        margin: auto; /* Critical for safe centering with scroll */
-      }
-      
-      .canvas-container {
-        overflow: auto;
-        border-radius: 16px;
-        background-color: #100E13;
-        /* Grid pattern */
-        background-image: radial-gradient(#302e33 1px, transparent 1px);
-        background-size: 20px 20px;
-        display: flex;
-        /* REMOVED justify-content: center to prevent clipping of large content at top/left */
-        padding: 40px;
-      }
+    /* ... styles omitted for brevity ... */
+    /* Since mdi icons are removed, maybe define fallback or just hide them? 
+         I will leave them as is, they just won't render. 
+      */
 
-      .sig-box {
-        position: absolute;
-        border: 2px solid #D0BCFF;
-        background: rgba(208, 188, 255, 0.15);
-        cursor: grab;
-        user-select: none;
-        touch-action: none;
-        box-sizing: border-box;
-        z-index: 10;
-      }
-      .sig-box.selected {
-        border-color: #FFF;
-        background: rgba(208, 188, 255, 0.25);
-        z-index: 20;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      }
-      .sig-box:active { cursor: grabbing; }
+    .md-card {
+      background-color: #1D1B20;
+      border-radius: 24px;
+      padding: 24px;
+      transition: background-color 0.2s;
+    }
 
-      .resize-handle {
-        width: 14px;
-        height: 14px;
-        background-color: #FFF;
-        border: 2px solid #381E72;
-        border-radius: 50%;
-        position: absolute;
-        bottom: -7px;
-        right: -7px;
-        cursor: se-resize;
-        z-index: 21;
-        transition: transform 0.1s;
-      }
-      .resize-handle:hover { transform: scale(1.2); }
-      
-      .delete-btn {
-        position: absolute;
-        top: -14px;
-        right: -14px;
-        width: 28px;
-        height: 28px;
-        background: #F2B8B5;
-        color: #601410;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 18px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        z-index: 22;
-        transition: transform 0.1s;
-      }
-      .delete-btn:hover { transform: scale(1.1); }
+    .md-btn {
+      height: 40px;
+      border-radius: 20px;
+      padding: 0 24px;
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+      cursor: pointer;
+      user-select: none;
+    }
 
-      .drop-zone { border: 2px dashed #49454F; transition: all 0.2s; }
-      .drop-zone.active { border-color: #D0BCFF; background-color: rgba(208, 188, 255, 0.05); }
+    .md-btn:active {
+      transform: scale(0.98);
+    }
 
-      .spinner {
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
+    .md-btn-primary {
+      background-color: #D0BCFF;
+      color: #381E72;
+    }
+
+    .md-btn-primary:hover {
+      background-color: #E8DEF8;
+    }
+
+    .md-btn-tonal {
+      background-color: #4A4458;
+      color: #E8DEF8;
+    }
+
+    .md-btn-tonal:hover {
+      background-color: #635F70;
+    }
+
+    .md-btn-icon {
+      width: 40px;
+      padding: 0;
+      border-radius: 50%;
+    }
+
+    /* Canvas & Interaction */
+    .canvas-wrapper {
+      position: relative;
+      background-color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+      margin: auto;
+      /* Critical for safe centering with scroll */
+    }
+
+    .canvas-container {
+      overflow: auto;
+      border-radius: 16px;
+      background-color: #100E13;
+      /* Grid pattern */
+      background-image: radial-gradient(#302e33 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      flex-direction: column;
+      /* Stack pages vertically */
+      align-items: center;
+      padding: 40px;
+      gap: 40px;
+      /* Space between pages */
+    }
+
+    .sig-box {
+      position: absolute;
+      border: 2px solid #D0BCFF;
+      background: rgba(208, 188, 255, 0.15);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    .sig-box.selected {
+      border-color: #FFF;
+      background: rgba(208, 188, 255, 0.25);
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .sig-box:active {
+      cursor: grabbing;
+    }
+
+    .resize-handle {
+      width: 14px;
+      height: 14px;
+      background-color: #FFF;
+      border: 2px solid #381E72;
+      border-radius: 50%;
+      position: absolute;
+      bottom: -7px;
+      right: -7px;
+      cursor: se-resize;
+      z-index: 21;
+      transition: transform 0.1s;
+    }
+
+    .resize-handle:hover {
+      transform: scale(1.2);
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 28px;
+      height: 28px;
+      background: #F2B8B5;
+      color: #601410;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      z-index: 22;
+      transition: transform 0.1s;
+    }
+
+    .delete-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .drop-zone {
+      border: 2px dashed #49454F;
+      transition: all 0.2s;
+    }
+
+    .drop-zone.active {
+      border-color: #D0BCFF;
+      background-color: rgba(208, 188, 255, 0.05);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      
-      .md-input {
-        background: #25232A;
-        border: 1px solid #49454F;
-        border-radius: 8px;
-        padding: 8px 12px;
-        color: #E6E1E5;
-        width: 100%;
-        font-size: 14px;
-        transition: all 0.2s;
-      }
-      .md-input:focus {
-        border-color: #D0BCFF;
-        outline: 2px solid rgba(208, 188, 255, 0.3);
-      }
-      
-      .toggle-checkbox:checked { right: 0; border-color: #D0BCFF; }
-      .toggle-checkbox:checked + .toggle-label { background-color: #D0BCFF; }
-      
-      select.md-input {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E6E1E5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 8px center;
-        background-size: 16px;
-        padding-right: 30px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="app" class="min-h-screen"></div>
+    }
 
-    <script type="module">
-      import React, {useEffect, useMemo, useRef, useState, useCallback} from "https://esm.sh/react@18.3.1";
-      import {createRoot} from "https://esm.sh/react-dom@18.3.1/client";
-      import htm from "https://esm.sh/htm@3.1.1";
-      const html = htm.bind(React.createElement);
+    .md-input {
+      background: #25232A;
+      border: 1px solid #49454F;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #E6E1E5;
+      width: 100%;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
 
-      const {PDFDocument} = window.PDFLib;
-      const JSZip = window.JSZip;
+    .md-input:focus {
+      border-color: #D0BCFF;
+      outline: 2px solid rgba(208, 188, 255, 0.3);
+    }
 
-      const generateId = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #D0BCFF;
+    }
 
-      const usePersistentState = (key, fallback) => {
-        const [value, setValue] = useState(() => {
-          try {
-            const stored = localStorage.getItem(key);
-            if (stored !== null) return JSON.parse(stored);
-          } catch (err) { console.warn(err); }
-          return fallback;
-        });
-        useEffect(() => {
-          try {
-            localStorage.setItem(key, JSON.stringify(value));
-          } catch (err) {}
-        }, [key, value]);
-        return [value, setValue];
+    .toggle-checkbox:checked+.toggle-label {
+      background-color: #D0BCFF;
+    }
+
+    select.md-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E6E1E5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      padding-right: 30px;
+    }
+
+    .page-label {
+      position: absolute;
+      top: -25px;
+      left: 0;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="min-h-screen"></div>
+
+  <script type="module">
+    const React = window.React;
+    const { useEffect, useMemo, useRef, useState, useCallback } = React;
+    const ReactDOM = window.ReactDOM;
+    const { createRoot } = ReactDOM;
+    import htm from "../../vendor/htm.module.js";
+    const html = htm.bind(React.createElement);
+
+    const { PDFDocument } = window.PDFLib;
+    const JSZip = window.JSZip;
+
+    const generateId = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+    const usePersistentState = (key, fallback) => {
+      const [value, setValue] = useState(() => {
+        try {
+          const stored = localStorage.getItem(key);
+          if (stored !== null) return JSON.parse(stored);
+        } catch (err) { console.warn(err); }
+        return fallback;
+      });
+      useEffect(() => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) { }
+      }, [key, value]);
+      return [value, setValue];
+    };
+
+    // --- SignaturePad Component ---
+    const SignaturePad = ({ mode, onChange }) => {
+      const canvasRef = useRef(null);
+      const [isDrawing, setIsDrawing] = useState(false);
+      const [color, setColor] = useState('#000000');
+      const [text, setText] = useState('Approved');
+
+      const initCanvas = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = color;
+      }, [color]);
+
+      useEffect(() => {
+        if (mode === 'draw') initCanvas();
+      }, [mode, initCanvas]);
+
+      const emitFromCanvas = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        onChange(canvas.toDataURL('image/png'));
       };
 
-      // --- SignaturePad Component ---
-      const SignaturePad = ({mode, onChange}) => {
-        const canvasRef = useRef(null);
-        const [isDrawing, setIsDrawing] = useState(false);
-        const [color, setColor] = useState('#000000');
-        const [text, setText] = useState('Approved');
-        
-        const initCanvas = useCallback(() => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
-          const ctx = canvas.getContext('2d');
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = color;
-        }, [color]);
+      const getCoords = (e) => {
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        useEffect(() => {
-          if (mode === 'draw') initCanvas();
-        }, [mode, initCanvas]);
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
-        const emitFromCanvas = () => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
-          onChange(canvas.toDataURL('image/png'));
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
         };
+      }
 
-        const getCoords = (e) => {
-          const canvas = canvasRef.current;
-          const rect = canvas.getBoundingClientRect();
-          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-          
-          // Calculate scale factors
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
+      const startDraw = (e) => {
+        if (mode !== 'draw') return;
+        e.preventDefault();
+        const { x, y } = getCoords(e);
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setIsDrawing(true);
+      };
 
-          // Apply scaling to coordinates
-          return { 
-            x: (clientX - rect.left) * scaleX, 
-            y: (clientY - rect.top) * scaleY 
-          };
-        }
+      const draw = (e) => {
+        if (!isDrawing || mode !== 'draw') return;
+        e.preventDefault();
+        const { x, y } = getCoords(e);
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      };
 
-        const startDraw = (e) => {
-          if (mode !== 'draw') return;
-          e.preventDefault();
-          const {x, y} = getCoords(e);
-          const ctx = canvasRef.current.getContext('2d');
-          ctx.strokeStyle = color;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          setIsDrawing(true);
-        };
+      const stopDraw = () => {
+        if (!isDrawing) return;
+        setIsDrawing(false);
+        emitFromCanvas();
+      };
 
-        const draw = (e) => {
-          if (!isDrawing || mode !== 'draw') return;
-          e.preventDefault();
-          const {x, y} = getCoords(e);
-          const ctx = canvasRef.current.getContext('2d');
-          ctx.lineTo(x, y);
-          ctx.stroke();
-        };
+      const clear = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        onChange(null);
+      };
 
-        const stopDraw = () => {
-          if (!isDrawing) return;
-          setIsDrawing(false);
-          emitFromCanvas();
-        };
+      useEffect(() => {
+        if (mode !== 'text') return;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const fontSize = 64;
+        ctx.font = `${fontSize}px "Caveat"`;
+        const metrics = ctx.measureText(text || ' ');
+        canvas.width = metrics.width + 40;
+        canvas.height = fontSize + 40;
+        ctx.font = `${fontSize}px "Caveat"`;
+        ctx.fillStyle = color;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.fillText(text || '', canvas.width / 2, canvas.height / 2);
+        onChange(canvas.toDataURL('image/png'));
+      }, [mode, text, color]);
 
-        const clear = () => {
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          onChange(null);
-        };
+      const handleUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => onChange(reader.result);
+        reader.readAsDataURL(file);
+      };
 
-        useEffect(() => {
-          if (mode !== 'text') return;
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          const fontSize = 64;
-          ctx.font = `${fontSize}px "Caveat"`;
-          const metrics = ctx.measureText(text || ' ');
-          canvas.width = metrics.width + 40;
-          canvas.height = fontSize + 40;
-          ctx.font = `${fontSize}px "Caveat"`;
-          ctx.fillStyle = color;
-          ctx.textBaseline = 'middle';
-          ctx.textAlign = 'center';
-          ctx.fillText(text || '', canvas.width / 2, canvas.height / 2);
-          onChange(canvas.toDataURL('image/png'));
-        }, [mode, text, color]);
-
-        const handleUpload = (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => onChange(reader.result);
-          reader.readAsDataURL(file);
-        };
-
-        return html`
+      return html`
           <div className="flex flex-col gap-4">
             ${mode === 'draw' && html`
               <div className="relative bg-md-sys-surfaceVariant/30 rounded-xl overflow-hidden touch-none border border-md-sys-outline/20">
@@ -356,7 +434,7 @@
                   onPointerLeave=${stopDraw}
                 ></canvas>
                 <button className="absolute top-2 right-2 p-2 bg-md-sys-surface/80 rounded-full hover:bg-md-sys-error/20 text-md-sys-onSurface transition-colors" onClick=${clear} title="Clear">
-                  <span className="mdi mdi-delete-outline"></span>
+                  <img src="../../icons/delete_outline.svg" className="w-5 h-5 invert" />
                 </button>
               </div>
               <div className="flex items-center gap-3">
@@ -376,380 +454,426 @@
             ${mode === 'image' && html`
               <div className="border-2 border-dashed border-md-sys-outline/40 rounded-xl p-8 text-center hover:bg-md-sys-primary/5 transition-colors cursor-pointer relative">
                 <input type="file" accept="image/*" onChange=${handleUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                <div className="mdi mdi-upload text-4xl text-md-sys-primary mb-2"></div>
+                <div className="flex justify-center mb-2"><img src="../../icons/upload.svg" className="w-10 h-10 invert opacity-50" /></div>
                 <div className="text-md-sys-onSurfaceVariant">Upload signature image</div>
               </div>
             `}
           </div>
         `;
-      };
+    };
 
-      // --- Optimised PdfStage Component ---
-      const PdfStage = ({file, signatures, selectedId, onUpdateSignatures, onSelect, zoom, onFit}) => {
-        const canvasRef = useRef(null);
-        const wrapperRef = useRef(null);
-        const [pdfPage, setPdfPage] = useState(null);
-        const renderTaskRef = useRef(null);
-        
-        // 1. Load Document Logic
-        useEffect(() => {
-          let active = true;
-          setPdfPage(null);
+    // --- Single Page Renderer Component ---
+    const PdfPageRenderer = ({ pdfPage, pageIndex, zoom, signatures, selectedId, onSigAction }) => {
+      const canvasRef = useRef(null);
+      const renderTaskRef = useRef(null);
 
-          const loadDoc = async () => {
-             if (!file) return;
-             try {
-               const arrayBuffer = await file.arrayBuffer();
-               const loadingTask = window.pdfjsLib.getDocument({data: arrayBuffer});
-               const pdf = await loadingTask.promise;
-               const page = await pdf.getPage(1);
-               if (active) {
-                 setPdfPage(page);
-                 
-                 // --- Auto Fit Logic ---
-                 // Calculate best fit scale immediately after loading
-                 if (wrapperRef.current) {
-                   // Look up to the scrollable container
-                   const container = wrapperRef.current.parentElement;
-                   if (container) {
-                      const padding = 80; // 40px padding each side
-                      const availW = container.clientWidth - padding;
-                      const availH = container.clientHeight - padding;
-                      
-                      const vp = page.getViewport({scale: 1});
-                      const scaleW = availW / vp.width;
-                      const scaleH = availH / vp.height;
-                      
-                      // Fit entire page, clamp at min 0.1 for huge docs
-                      const bestFit = Math.max(0.1, Math.min(scaleW, scaleH));
-                      onFit(Math.floor(bestFit * 100) / 100); 
-                   }
-                 }
-               }
-             } catch (e) {
-               console.error("PDF Load Error", e);
-             }
-          };
-          loadDoc();
-          return () => { active = false; };
-        }, [file]);
+      useEffect(() => {
+        if (!pdfPage) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-        // 2. Render Page Logic (with Resolution Cap for A0)
-        useEffect(() => {
-          if (!pdfPage) return;
-          
-          const canvas = canvasRef.current;
-          if (!canvas) return;
+        if (renderTaskRef.current) renderTaskRef.current.cancel();
 
-          if (renderTaskRef.current) {
-            renderTaskRef.current.cancel();
-          }
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const cssViewport = pdfPage.getViewport({ scale: zoom });
 
-          const ctx = canvas.getContext('2d');
-          const dpr = window.devicePixelRatio || 1;
-          
-          // 2.1 Calculate Logical Size (CSS pixels)
-          const cssViewport = pdfPage.getViewport({ scale: zoom });
-          
-          // 2.2 Calculate Safe Rendering Scale (Max 4096px)
-          const MAX_CANVAS_DIM = 4096;
-          const proposedW = cssViewport.width * dpr;
-          const proposedH = cssViewport.height * dpr;
-          
-          let renderDpr = dpr;
-          if (proposedW > MAX_CANVAS_DIM || proposedH > MAX_CANVAS_DIM) {
-             const scaleW = MAX_CANVAS_DIM / cssViewport.width;
-             const scaleH = MAX_CANVAS_DIM / cssViewport.height;
-             renderDpr = Math.min(scaleW, scaleH);
-          }
-          
-          // 2.3 Set Canvas Dimensions (Bitmap)
-          const renderViewport = pdfPage.getViewport({ scale: zoom * renderDpr });
-          canvas.width = renderViewport.width;
-          canvas.height = renderViewport.height;
-          
-          // 2.4 Set CSS Dimensions (Visual)
-          canvas.style.width = `${cssViewport.width}px`;
-          canvas.style.height = `${cssViewport.height}px`;
-
-          const task = pdfPage.render({
-             canvasContext: ctx, 
-             viewport: renderViewport 
-          });
-          
-          renderTaskRef.current = task;
-
-          task.promise.catch(err => {
-             if (err.name !== 'RenderingCancelledException') console.error(err);
-          });
-        }, [pdfPage, zoom]);
-
-        // 3. Coordinate System Logic
-        const handlePointerDown = (e, sigId, type) => {
-          e.stopPropagation();
-          e.target.setPointerCapture(e.pointerId);
-          onSelect(sigId);
-          const sig = signatures.find(s => s.id === sigId);
-          const startX = e.clientX;
-          const startY = e.clientY;
-          
-          const handleMove = (ev) => {
-            const dx = (ev.clientX - startX) / zoom;
-            const dy = (ev.clientY - startY) / zoom;
-            
-            const updated = signatures.map(s => {
-              if (s.id !== sigId) return s;
-              if (type === 'move') {
-                return { ...s, x: sig.x + dx, y: sig.y + dy };
-              } else if (type === 'resize') {
-                return { ...s, width: Math.max(20, sig.width + dx), height: Math.max(20, sig.height + dy) };
-              }
-              return s;
-            });
-            onUpdateSignatures(updated);
-          };
-
-          const handleUp = (ev) => {
-             e.target.releasePointerCapture(ev.pointerId);
-             window.removeEventListener('pointermove', handleMove);
-             window.removeEventListener('pointerup', handleUp);
-          };
-
-          window.addEventListener('pointermove', handleMove);
-          window.addEventListener('pointerup', handleUp);
-        };
-
-        const deleteSig = (e, id) => {
-          e.stopPropagation();
-          onUpdateSignatures(signatures.filter(s => s.id !== id));
-        };
-
-        if (!file) {
-          return html`<div className="w-full flex flex-col items-center justify-center h-full text-md-sys-onSurfaceVariant"><span className="mdi mdi-file-document-outline text-6xl mb-4 opacity-50"></span><p>Select a file to preview</p></div>`;
+        // Cap resolution for huge pages
+        const MAX_DIM = 4096;
+        const proposedW = cssViewport.width * dpr;
+        const proposedH = cssViewport.height * dpr;
+        let renderDpr = dpr;
+        if (proposedW > MAX_DIM || proposedH > MAX_DIM) {
+          renderDpr = Math.min(MAX_DIM / cssViewport.width, MAX_DIM / cssViewport.height);
         }
 
-        return html`
-          <div ref=${wrapperRef} className="canvas-wrapper inline-block relative">
+        const renderViewport = pdfPage.getViewport({ scale: zoom * renderDpr });
+        canvas.width = renderViewport.width;
+        canvas.height = renderViewport.height;
+        canvas.style.width = `${cssViewport.width}px`;
+        canvas.style.height = `${cssViewport.height}px`;
+
+        const task = pdfPage.render({ canvasContext: ctx, viewport: renderViewport });
+        renderTaskRef.current = task;
+        task.promise.catch(() => { });
+      }, [pdfPage, zoom]);
+
+      const handlePointerDown = (e, sigId, type) => {
+        e.stopPropagation();
+        e.target.setPointerCapture(e.pointerId);
+        onSigAction('select', sigId);
+        const sig = signatures.find(s => s.id === sigId);
+        const startX = e.clientX;
+        const startY = e.clientY;
+
+        const handleMove = (ev) => {
+          const dx = (ev.clientX - startX) / zoom;
+          const dy = (ev.clientY - startY) / zoom;
+          onSigAction('update', { id: sigId, type, dx, dy, original: sig });
+        };
+
+        const handleUp = (ev) => {
+          e.target.releasePointerCapture(ev.pointerId);
+          window.removeEventListener('pointermove', handleMove);
+          window.removeEventListener('pointerup', handleUp);
+        };
+        window.addEventListener('pointermove', handleMove);
+        window.addEventListener('pointerup', handleUp);
+      };
+
+      return html`
+          <div className="canvas-wrapper inline-block relative">
+            <div className="page-label">Page ${pageIndex + 1}</div>
             <canvas ref=${canvasRef} className="block shadow-lg rounded-sm bg-white"></canvas>
             ${signatures.map(sig => html`
               <div key=${sig.id} 
                    className=${`sig-box ${selectedId === sig.id ? 'selected' : ''}`} 
                    style=${{
-                     left: `${sig.x * zoom}px`, 
-                     top: `${sig.y * zoom}px`, 
-                     width: `${sig.width * zoom}px`, 
-                     height: `${sig.height * zoom}px`
-                   }} 
+          left: `${sig.x * zoom}px`,
+          top: `${sig.y * zoom}px`,
+          width: `${sig.width * zoom}px`,
+          height: `${sig.height * zoom}px`
+        }} 
                    onPointerDown=${(e) => handlePointerDown(e, sig.id, 'move')}>
                 <img src=${sig.src} className="w-full h-full object-contain pointer-events-none" />
                 ${selectedId === sig.id && html`
                   <div className="resize-handle" onPointerDown=${(e) => handlePointerDown(e, sig.id, 'resize')}></div>
-                  <div className="delete-btn" onClick=${(e) => deleteSig(e, sig.id)}><span className="mdi mdi-close"></span></div>
+                  <div className="delete-btn" onClick=${(e) => { e.stopPropagation(); onSigAction('delete', sig.id); }}><img src="../../icons/close.svg" className="w-4 h-4 invert" /></div>
                 `}
               </div>
             `)}
           </div>
         `;
+    };
+
+    // --- Optimised PdfStage Component (Multi-Page) ---
+    const PdfStage = ({ file, signatures, selectedId, onUpdateSignatures, onSelect, zoom, onFit, onLoad, onOptimalScale }) => {
+      const [pdfDoc, setPdfDoc] = useState(null);
+      const [pages, setPages] = useState([]);
+      const containerRef = useRef(null);
+
+      // 1. Load Document
+      useEffect(() => {
+        let active = true;
+        setPdfDoc(null);
+        setPages([]);
+
+        const loadDoc = async () => {
+          if (!file || !file.file) return;
+          try {
+            const arrayBuffer = await file.file.arrayBuffer();
+            const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+
+            if (active) {
+              setPdfDoc(pdf);
+              if (onLoad) onLoad({ numPages: pdf.numPages });
+
+              // Calculate Best Fit Scale using the correct container dimensions
+              if (containerRef.current) {
+                const p1 = await pdf.getPage(1);
+                const padding = 80; // 40px padding on each side
+                const availW = containerRef.current.clientWidth - padding;
+                const availH = containerRef.current.clientHeight - padding;
+
+                // Only calculate if we have valid dimensions
+                if (availW > 0 && availH > 0) {
+                  const vp = p1.getViewport({ scale: 1 });
+
+                  const scaleW = availW / vp.width;
+                  const scaleH = availH / vp.height;
+
+                  const bestFit = Math.max(0.1, Math.min(scaleW, scaleH));
+                  const roundedFit = Math.floor(bestFit * 100) / 100;
+
+                  if (onOptimalScale) onOptimalScale(roundedFit);
+                }
+              }
+
+              onFit(1.0);
+            }
+          } catch (e) { console.error("PDF Load Error", e); }
+        };
+        loadDoc();
+        return () => { active = false; };
+      }, [file?.file]);
+
+      // 2. Determine Pages to Render based on Config
+      useEffect(() => {
+        if (!pdfDoc || !file) return;
+
+        const loadPages = async () => {
+          const mode = file.config.pageMode;
+          const targetNum = file.config.pageNum;
+          const total = pdfDoc.numPages;
+
+          let indices = [];
+          if (mode === 'first') indices = [1];
+          else if (mode === 'custom') indices = [Math.min(Math.max(1, targetNum), total)];
+          else if (mode === 'all') indices = Array.from({ length: total }, (_, i) => i + 1);
+
+          const safeIndices = indices.slice(0, 20);
+
+          const pagePromises = safeIndices.map(i => pdfDoc.getPage(i));
+          const loadedPages = await Promise.all(pagePromises);
+          setPages(loadedPages.map((p, i) => ({ page: p, index: safeIndices[i] - 1 })));
+        };
+        loadPages();
+      }, [pdfDoc, file?.config?.pageMode, file?.config?.pageNum]);
+
+      // 3. Handle Signature Actions
+      const handleSigAction = (action, payload) => {
+        if (action === 'select') onSelect(payload);
+        else if (action === 'delete') onUpdateSignatures(signatures.filter(s => s.id !== payload));
+        else if (action === 'update') {
+          const { id, type, dx, dy, original } = payload;
+          const updated = signatures.map(s => {
+            if (s.id !== id) return s;
+            if (type === 'move') return { ...s, x: original.x + dx, y: original.y + dy };
+            if (type === 'resize') return { ...s, width: Math.max(20, original.width + dx), height: Math.max(20, original.height + dy) };
+            return s;
+          });
+          onUpdateSignatures(updated);
+        }
       };
 
-      // --- App Component ---
-      const App = () => {
-        // State
-        const [files, setFiles] = useState([]);
-        const [activeFileId, setActiveFileId] = useState(null);
-        const [globalSignatures, setGlobalSignatures] = useState([]);
-        const [currentSignature, setCurrentSignature] = usePersistentState('batch-signer-current-sig', null);
-        const [sigMode, setSigMode] = useState('draw');
-        const [selectedSigId, setSelectedSigId] = useState(null);
-        const [status, setStatus] = useState({ text: 'Ready', type: 'idle' });
-        const [geminiKey, setGeminiKey] = usePersistentState('gemini-api-key', '');
-        const [isProcessing, setIsProcessing] = useState(false);
-        const [zoom, setZoom] = useState(1.0);
+      if (!file) return html`<div className="w-full flex flex-col items-center justify-center h-full text-md-sys-onSurfaceVariant"><img src="../../icons/file_document_outline.svg" className="w-16 h-16 mb-4 invert opacity-50" /><p>Select a file to preview</p></div>`;
 
-        const activeFile = useMemo(() => files.find(f => f.id === activeFileId), [files, activeFileId]);
+      return html`
+          <div ref=${containerRef} className="w-full h-full canvas-container custom-scroll">
+            ${pages.map(p => html`
+               <${PdfPageRenderer} 
+                  key=${p.index}
+                  pdfPage=${p.page}
+                  pageIndex=${p.index}
+                  zoom=${zoom}
+                  signatures=${signatures} 
+                  selectedId=${selectedId}
+                  onSigAction=${handleSigAction}
+               />
+            `)}
+            ${file.config.pageMode === 'all' && pdfDoc && pdfDoc.numPages > 20 && html`<div className="text-white/50 pb-4">Display limited to first 20 pages</div>`}
+          </div>
+        `;
+    };
 
-        const visibleSignatures = useMemo(() => {
-          if (activeFile && activeFile.config.uniqueLayout) {
-            return activeFile.config.uniqueSignatures || [];
-          }
-          return globalSignatures;
-        }, [activeFile, globalSignatures]);
+    // --- App Component ---
+    const App = () => {
+      // State
+      const [files, setFiles] = useState([]);
+      const [activeFileId, setActiveFileId] = useState(null);
+      const [globalSignatures, setGlobalSignatures] = useState([]);
+      const [currentSignature, setCurrentSignature] = usePersistentState('batch-signer-current-sig', null);
+      const [sigMode, setSigMode] = useState('draw');
+      const [selectedSigId, setSelectedSigId] = useState(null);
+      const [status, setStatus] = useState({ text: 'Ready', type: 'idle' });
+      const [geminiKey, setGeminiKey] = usePersistentState('gemini-api-key', '');
+      const [isProcessing, setIsProcessing] = useState(false);
+      const [zoom, setZoom] = useState(1.0);
+      const [optimalScale, setOptimalScale] = useState(1.0); // Store optimal scale
+      const [activePageCount, setActivePageCount] = useState(0);
 
-        const handleUpdateSignatures = (newSigs) => {
-          if (activeFile && activeFile.config.uniqueLayout) {
-             setFiles(prev => prev.map(f => {
-                if (f.id === activeFileId) {
-                   return { ...f, config: { ...f.config, uniqueSignatures: newSigs } };
-                }
-                return f;
-             }));
-          } else {
-             setGlobalSignatures(newSigs);
-          }
-        };
+      const activeFile = useMemo(() => files.find(f => f.id === activeFileId), [files, activeFileId]);
 
-        const handleAddFiles = (e) => {
-          const newFiles = Array.from(e.target.files || []).filter(f => f.type === 'application/pdf');
-          if (!newFiles.length) return;
+      const visibleSignatures = useMemo(() => {
+        if (activeFile && activeFile.config.uniqueLayout) {
+          return activeFile.config.uniqueSignatures || [];
+        }
+        return globalSignatures;
+      }, [activeFile, globalSignatures]);
 
-          const entries = newFiles.map(f => ({
-            id: generateId(),
-            file: f,
-            name: f.name,
-            status: 'pending',
-            config: {
-              pageMode: 'first', 
-              pageNum: 1,
-              uniqueLayout: false,
-              uniqueSignatures: []
+      const handleUpdateSignatures = (newSigs) => {
+        if (activeFile && activeFile.config.uniqueLayout) {
+          setFiles(prev => prev.map(f => {
+            if (f.id === activeFileId) {
+              return { ...f, config: { ...f.config, uniqueSignatures: newSigs } };
             }
+            return f;
           }));
+        } else {
+          setGlobalSignatures(newSigs);
+        }
+      };
 
-          setFiles(prev => [...prev, ...entries]);
-          if (!activeFileId && entries.length) setActiveFileId(entries[0].id);
-          setStatus({ text: `Added ${entries.length} files`, type: 'success' });
-        };
-        
-        const clearFiles = () => {
-          setFiles([]);
-          setActiveFileId(null);
-          setStatus({ text: 'List cleared', type: 'idle' });
-        };
+      const handleAddFiles = (e) => {
+        const newFiles = Array.from(e.target.files || []).filter(f => f.type === 'application/pdf');
+        if (!newFiles.length) return;
 
-        const updateFileConfig = (id, key, value) => {
-           setFiles(prev => prev.map(f => {
-              if (f.id !== id) return f;
-              let newConfig = { ...f.config, [key]: value };
-              if (key === 'uniqueLayout' && value === true && f.config.uniqueSignatures.length === 0) {
-                 newConfig.uniqueSignatures = [...globalSignatures];
-              }
-              return { ...f, config: newConfig };
-           }));
-        };
+        const entries = newFiles.map(f => ({
+          id: generateId(),
+          file: f,
+          name: f.name,
+          status: 'pending',
+          config: {
+            pageMode: 'first',
+            pageNum: 1,
+            uniqueLayout: false,
+            uniqueSignatures: []
+          }
+        }));
 
-        const removeFile = (e, id) => {
-          e.stopPropagation();
-          setFiles(prev => prev.filter(f => f.id !== id));
-          if (activeFileId === id) setActiveFileId(null);
-        };
+        setFiles(prev => [...prev, ...entries]);
+        if (!activeFileId && entries.length) setActiveFileId(entries[0].id);
+        setStatus({ text: `Added ${entries.length} files`, type: 'success' });
+      };
 
-        const addSignatureToCanvas = () => {
-          if (!currentSignature) return setStatus({ text: 'Create a signature first', type: 'error' });
-          if (!activeFile) return setStatus({ text: 'Load a document first', type: 'error' });
-          
-          const offset = visibleSignatures.length * 20;
-          const newSig = {
-            id: generateId(),
-            src: currentSignature,
-            x: 100 + offset,
-            y: 100 + offset,
-            width: 200,
-            height: 100
+      const clearFiles = () => {
+        setFiles([]);
+        setActiveFileId(null);
+        setStatus({ text: 'List cleared', type: 'idle' });
+      };
+
+      const updateFileConfig = (id, key, value) => {
+        setFiles(prev => prev.map(f => {
+          if (f.id !== id) return f;
+          let newConfig = { ...f.config, [key]: value };
+          if (key === 'uniqueLayout' && value === true && f.config.uniqueSignatures.length === 0) {
+            newConfig.uniqueSignatures = [...globalSignatures];
+          }
+          return { ...f, config: newConfig };
+        }));
+      };
+
+      // Header Page Navigation Logic
+      const changePage = (delta) => {
+        if (!activeFile) return;
+        const currentMode = activeFile.config.pageMode;
+        let currentNum = activeFile.config.pageNum;
+
+        // If in 'first' mode, treat as page 1
+        if (currentMode === 'first') currentNum = 1;
+
+        const nextNum = Math.max(1, Math.min(activePageCount, currentNum + delta));
+
+        // Update file to 'custom' mode and set new page
+        setFiles(prev => prev.map(f => {
+          if (f.id !== activeFileId) return f;
+          return {
+            ...f,
+            config: { ...f.config, pageMode: 'custom', pageNum: nextNum }
           };
-          
-          handleUpdateSignatures([...visibleSignatures, newSig]);
-          setSelectedSigId(newSig.id);
+        }));
+      };
+
+      const removeFile = (e, id) => {
+        e.stopPropagation();
+        setFiles(prev => prev.filter(f => f.id !== id));
+        if (activeFileId === id) setActiveFileId(null);
+      };
+
+      const addSignatureToCanvas = () => {
+        if (!currentSignature) return setStatus({ text: 'Create a signature first', type: 'error' });
+        if (!activeFile) return setStatus({ text: 'Load a document first', type: 'error' });
+
+        const offset = visibleSignatures.length * 20;
+        const newSig = {
+          id: generateId(),
+          src: currentSignature,
+          x: 100 + offset,
+          y: 100 + offset,
+          width: 200,
+          height: 100
         };
 
-        const handleSignAll = async () => {
-          if (files.length === 0) return;
-          setIsProcessing(true);
-          setStatus({ text: 'Processing...', type: 'loading' });
+        handleUpdateSignatures([...visibleSignatures, newSig]);
+        setSelectedSigId(newSig.id);
+      };
 
-          try {
-            const zip = new JSZip();
-            const VIEW_SCALE_FACTOR = 1.0; 
+      const handleSignAll = async () => {
+        if (files.length === 0) return;
+        setIsProcessing(true);
+        setStatus({ text: 'Processing...', type: 'loading' });
 
-            for (const entry of files) {
-              const arrayBuffer = await entry.file.arrayBuffer();
-              const pdfDoc = await PDFDocument.load(arrayBuffer);
-              const pages = pdfDoc.getPages();
-              const totalPages = pages.length;
+        try {
+          const zip = new JSZip();
+          const VIEW_SCALE_FACTOR = 1.0;
 
-              let pagesToSign = [];
-              if (entry.config.pageMode === 'first') pagesToSign.push(0);
-              else if (entry.config.pageMode === 'all') pagesToSign = pages.map((_, i) => i);
-              else if (entry.config.pageMode === 'custom') {
-                const pIndex = (entry.config.pageNum || 1) - 1;
-                if (pIndex >= 0 && pIndex < totalPages) pagesToSign.push(pIndex);
-              }
+          for (const entry of files) {
+            const arrayBuffer = await entry.file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+            const pages = pdfDoc.getPages();
+            const totalPages = pages.length;
 
-              const signaturesToApply = entry.config.uniqueLayout ? entry.config.uniqueSignatures : globalSignatures;
-              
-              if (signaturesToApply.length === 0 || pagesToSign.length === 0) {
-                 zip.file(entry.name, arrayBuffer);
-                 continue;
-              }
-
-              const imageCache = {};
-              for (const sig of signaturesToApply) {
-                if (!imageCache[sig.src]) {
-                   if (sig.src.startsWith('data:image/png')) {
-                     imageCache[sig.src] = await pdfDoc.embedPng(sig.src);
-                   } else {
-                     imageCache[sig.src] = await pdfDoc.embedJpg(sig.src);
-                   }
-                }
-              }
-
-              for (const pageIndex of pagesToSign) {
-                const page = pages[pageIndex];
-                const {width, height} = page.getSize();
-                
-                for (const sig of signaturesToApply) {
-                   const img = imageCache[sig.src];
-                   const boxX = sig.x;
-                   const boxY = height - (sig.y + sig.height);
-                   const boxW = sig.width;
-                   const boxH = sig.height;
-                   
-                   const scale = Math.min(boxW / img.width, boxH / img.height);
-                   const drawnW = img.width * scale;
-                   const drawnH = img.height * scale;
-                   const offsetX = (boxW - drawnW) / 2;
-                   const offsetY = (boxH - drawnH) / 2;
-
-                   page.drawImage(img, {
-                     x: boxX + offsetX,
-                     y: boxY + offsetY,
-                     width: drawnW,
-                     height: drawnH
-                   });
-                }
-              }
-              const modifiedBytes = await pdfDoc.save();
-              zip.file(entry.name.replace('.pdf', '') + '_signed.pdf', modifiedBytes);
+            let pagesToSign = [];
+            if (entry.config.pageMode === 'first') pagesToSign.push(0);
+            else if (entry.config.pageMode === 'all') pagesToSign = pages.map((_, i) => i);
+            else if (entry.config.pageMode === 'custom') {
+              const pIndex = (entry.config.pageNum || 1) - 1;
+              if (pIndex >= 0 && pIndex < totalPages) pagesToSign.push(pIndex);
             }
 
-            const content = await zip.generateAsync({type: 'blob'});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = 'signed_bundle.zip';
-            link.click();
-            setStatus({ text: 'Done!', type: 'success' });
-          } catch (e) {
-            console.error(e);
-            setStatus({ text: 'Error', type: 'error' });
-          } finally {
-            setIsProcessing(false);
+            const signaturesToApply = entry.config.uniqueLayout ? entry.config.uniqueSignatures : globalSignatures;
+
+            if (signaturesToApply.length === 0 || pagesToSign.length === 0) {
+              zip.file(entry.name, arrayBuffer);
+              continue;
+            }
+
+            const imageCache = {};
+            for (const sig of signaturesToApply) {
+              if (!imageCache[sig.src]) {
+                if (sig.src.startsWith('data:image/png')) {
+                  imageCache[sig.src] = await pdfDoc.embedPng(sig.src);
+                } else {
+                  imageCache[sig.src] = await pdfDoc.embedJpg(sig.src);
+                }
+              }
+            }
+
+            for (const pageIndex of pagesToSign) {
+              const page = pages[pageIndex];
+              const { width, height } = page.getSize();
+
+              for (const sig of signaturesToApply) {
+                const img = imageCache[sig.src];
+                const boxX = sig.x;
+                const boxY = height - (sig.y + sig.height);
+                const boxW = sig.width;
+                const boxH = sig.height;
+
+                const scale = Math.min(boxW / img.width, boxH / img.height);
+                const drawnW = img.width * scale;
+                const drawnH = img.height * scale;
+                const offsetX = (boxW - drawnW) / 2;
+                const offsetY = (boxH - drawnH) / 2;
+
+                page.drawImage(img, {
+                  x: boxX + offsetX,
+                  y: boxY + offsetY,
+                  width: drawnW,
+                  height: drawnH
+                });
+              }
+            }
+            const modifiedBytes = await pdfDoc.save();
+            zip.file(entry.name.replace('.pdf', '') + '_signed.pdf', modifiedBytes);
           }
-        };
 
-        const runAnalysis = async () => {
-          if (!geminiKey) return setStatus({text: 'API Key Required', type: 'error'});
-          setIsProcessing(true);
-          setTimeout(() => { setIsProcessing(false); setStatus({text: 'Demo Analysis Complete', type: 'success'}); }, 1000);
-        };
+          const content = await zip.generateAsync({ type: 'blob' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(content);
+          link.download = 'signed_bundle.zip';
+          link.click();
+          setStatus({ text: 'Done!', type: 'success' });
+        } catch (e) {
+          console.error(e);
+          setStatus({ text: 'Error', type: 'error' });
+        } finally {
+          setIsProcessing(false);
+        }
+      };
 
-        const zoomIn = () => setZoom(z => Math.min(z + 0.25, 3.0));
-        const zoomOut = () => setZoom(z => Math.max(z - 0.25, 0.1)); // Allow more zoom out for large drawings
-        
-        // Manual trigger for Fit to Screen
-        const triggerFit = () => {
-           setZoom(1.0);
-        };
+      const runAnalysis = async () => {
+        if (!geminiKey) return setStatus({ text: 'API Key Required', type: 'error' });
+        setIsProcessing(true);
+        setTimeout(() => { setIsProcessing(false); setStatus({ text: 'Demo Analysis Complete', type: 'success' }); }, 1000);
+      };
 
-        return html`
+      const zoomIn = () => setZoom(z => Math.min(z + 0.25, 3.0));
+      const zoomOut = () => setZoom(z => Math.max(z - 0.25, 0.1));
+      const triggerFit = () => setZoom(optimalScale); // Use calculated optimal scale
+
+      return html`
           <div className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 space-y-5 flex flex-col h-[calc(100vh-48px)] overflow-y-auto custom-scroll pr-1">
               <div>
@@ -761,15 +885,15 @@
                 <div className="flex justify-between items-center">
                    <h2 className="text-base font-medium text-md-sys-primary">1. Files</h2>
                    <div className="flex gap-2">
-                     ${files.length > 0 && html`
-                       <button className="md-btn md-btn-tonal text-xs h-8 px-3 hover:bg-md-sys-error/10 hover:text-md-sys-error transition-colors" onClick=${clearFiles}>
-                          <span className="mdi mdi-delete-sweep mr-1"></span> Clear
-                       </button>
-                     `}
-                     <label className="md-btn md-btn-tonal text-xs h-8 px-3 cursor-pointer">
-                        <span className="mdi mdi-plus mr-1"></span> Add
-                        <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
-                     </label>
+                      ${files.length > 0 && html`
+                        <button className="md-btn md-btn-tonal text-xs h-8 px-3 hover:bg-md-sys-error/10 hover:text-md-sys-error transition-colors flex items-center" onClick=${clearFiles}>
+                           <img src="../../icons/delete_sweep.svg" className="w-4 h-4 invert mr-1" /> Clear
+                        </button>
+                      `}
+                      <label className="md-btn md-btn-tonal text-xs h-8 px-3 cursor-pointer flex items-center">
+                         <img src="../../icons/plus.svg" className="w-4 h-4 invert mr-1" /> Add
+                         <input type="file" multiple accept="application/pdf" className="hidden" onChange=${handleAddFiles} />
+                      </label>
                    </div>
                 </div>
                 <div className="space-y-3">
@@ -780,9 +904,9 @@
                            <div className="w-8 h-8 rounded-full bg-md-sys-secondaryContainer flex items-center justify-center text-md-sys-onSecondaryContainer font-bold text-xs shrink-0">PDF</div>
                            <div className="flex-1 min-w-0">
                               <div className="truncate text-sm font-medium text-md-sys-onSurface">${f.name}</div>
-                              <div className="text-xs text-md-sys-onSurfaceVariant">${f.config.pageMode === 'first' ? 'First page' : f.config.pageMode === 'all' ? 'All pages' : `Page ${f.config.pageNum}`}</div>
+                               <div className="text-xs text-md-sys-onSurfaceVariant">${f.config.pageMode === 'first' ? 'First page' : f.config.pageMode === 'all' ? 'All pages' : `Page ${f.config.pageNum}`}</div>
                            </div>
-                           <button onClick=${(e) => removeFile(e, f.id)} className="w-8 h-8 rounded-full hover:bg-md-sys-error/10 text-md-sys-error flex items-center justify-center"><span className="mdi mdi-close"></span></button>
+                           <button onClick=${(e) => removeFile(e, f.id)} className="w-8 h-8 rounded-full hover:bg-md-sys-error/10 text-md-sys-error flex items-center justify-center"><img src="../../icons/close.svg" className="w-4 h-4 invert opacity-70" /></button>
                         </div>
                         ${activeFileId === f.id && html`
                           <div className="px-3 pb-3 pt-0 border-t border-md-sys-outline/10 mt-1 bg-black/20">
@@ -821,45 +945,66 @@
                     ${['draw', 'text', 'image'].map(m => html`<button key=${m} className=${`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${sigMode === m ? 'bg-md-sys-primaryContainer text-md-sys-onPrimaryContainer' : 'text-md-sys-onSurfaceVariant'}`} onClick=${() => setSigMode(m)}>${m === 'draw' ? 'Draw' : m === 'text' ? 'Text' : 'Upload'}</button>`)}
                  </div>
                  <${SignaturePad} mode=${sigMode} onChange=${setCurrentSignature} />
-                 <button className="md-btn md-btn-tonal w-full mt-4" disabled=${!currentSignature || !activeFile} onClick=${addSignatureToCanvas}><span className="mdi mdi-stamp mr-1"></span> Add to canvas</button>
+                 <button className="md-btn md-btn-tonal w-full mt-4 flex items-center justify-center" disabled=${!currentSignature || !activeFile} onClick=${addSignatureToCanvas}><img src="../../icons/stamp.svg" className="w-4 h-4 invert mr-1" /> Add to canvas</button>
               </div>
 
                <div className="md-card bg-[#2a2533]">
                   <h2 className="text-base font-medium text-white mb-2">3. Export</h2>
-                  <button className="md-btn md-btn-primary w-full" onClick=${handleSignAll} disabled=${isProcessing || !files.length}>${isProcessing ? html`<div className="spinner mr-2"></div> Processing...` : html`<span className="mdi mdi-download mr-2"></span> Download ZIP`}</button>
+                  <button className="md-btn md-btn-primary w-full flex items-center justify-center" onClick=${handleSignAll} disabled=${isProcessing || !files.length}>${isProcessing ? html`<div className="spinner mr-2"></div> Processing...` : html`<img src="../../icons/download.svg" className="w-4 h-4 invert mr-2" /> Download ZIP`}</button>
                </div>
             </div>
 
             <div className="lg:col-span-8 flex flex-col h-[calc(100vh-48px)]">
-               <div className="bg-[#1D1B20] p-3 rounded-xl border border-md-sys-outline/10 mb-4 flex justify-between items-center">
-                  <div className="text-sm px-2 truncate max-w-[50%]">
+               <div className="bg-[#1D1B20] p-3 rounded-xl border border-md-sys-outline/10 mb-4 flex justify-between items-center gap-4">
+                  <div className="text-sm px-2 truncate flex-1 min-w-0">
                      ${activeFile ? html`
                         <span className="text-md-sys-onSurface font-medium">${activeFile.name}</span>
                         ${activeFile.config.uniqueLayout ? html`<span className="ml-2 text-xs text-amber-300 border border-amber-300/30 px-1.5 py-0.5 rounded">Custom Layout</span>` : html`<span className="ml-2 text-xs text-md-sys-outline border border-md-sys-outline/30 px-1.5 py-0.5 rounded">Global Template</span>`}
                      ` : 'Select a file on the left'}
                   </div>
+                  
+                  ${activeFile && activePageCount > 0 && activeFile.config.pageMode !== 'all' && html`
+                    <div className="flex items-center bg-[#2a2533] rounded-lg p-1 gap-1 border border-white/5">
+                       <button className="md-btn-icon hover:bg-white/10 text-white flex items-center justify-center" onClick=${() => changePage(-1)} disabled=${(activeFile.config.pageMode === 'first' ? 1 : activeFile.config.pageNum) <= 1} title="Prev Page"><img src="../../icons/chevron_left.svg" className="w-5 h-5 invert" /></button>
+                       <span className="text-xs px-2 text-white/70 font-mono">
+                         Page ${activeFile.config.pageMode === 'first' ? 1 : activeFile.config.pageNum} / ${activePageCount}
+                       </span>
+                       <button className="md-btn-icon hover:bg-white/10 text-white flex items-center justify-center" onClick=${() => changePage(1)} disabled=${(activeFile.config.pageMode === 'first' ? 1 : activeFile.config.pageNum) >= activePageCount} title="Next Page"><img src="../../icons/chevron_right.svg" className="w-5 h-5 invert" /></button>
+                    </div>
+                    <div className="w-[1px] h-6 bg-white/10"></div>
+                  `}
+
                   <div className="flex items-center bg-[#2a2533] rounded-lg p-1 gap-1 border border-white/5">
-                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${zoomOut} title="Zoom Out"><span className="mdi mdi-minus"></span></button>
+                     <button className="md-btn-icon hover:bg-white/10 text-white flex items-center justify-center" onClick=${zoomOut} title="Zoom Out"><img src="../../icons/minus.svg" className="w-5 h-5 invert" /></button>
                      <span className="text-xs w-12 text-center text-white/70 font-mono">${Math.round(zoom * 100)}%</span>
-                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${zoomIn} title="Zoom In"><span className="mdi mdi-plus"></span></button>
+                     <button className="md-btn-icon hover:bg-white/10 text-white flex items-center justify-center" onClick=${zoomIn} title="Zoom In"><img src="../../icons/plus.svg" className="w-5 h-5 invert" /></button>
                      <div className="w-[1px] h-4 bg-white/10 mx-1"></div>
-                     <button className="md-btn-icon hover:bg-white/10 text-white" onClick=${triggerFit} title="Reset Zoom (100%)"><span className="mdi mdi-fit-to-screen"></span></button>
+                     <button className="md-btn-icon hover:bg-white/10 text-white flex items-center justify-center" onClick=${triggerFit} title="Fit to Screen"><img src="../../icons/fit_to_screen.svg" className="w-5 h-5 invert" /></button>
                   </div>
                </div>
 
                <div className="flex-1 rounded-2xl overflow-hidden relative border border-md-sys-outline/10">
-                 <div className="w-full h-full canvas-container custom-scroll">
-                    <${PdfStage} file=${activeFile?.file} signatures=${visibleSignatures} selectedId=${selectedSigId} onSelect=${setSelectedSigId} onUpdateSignatures=${handleUpdateSignatures} zoom=${zoom} onFit=${setZoom} />
-                 </div>
+                 <${PdfStage} 
+                    file=${activeFile} 
+                    signatures=${visibleSignatures} 
+                    selectedId=${selectedSigId} 
+                    onSelect=${setSelectedSigId} 
+                    onUpdateSignatures=${handleUpdateSignatures} 
+                    zoom=${zoom} 
+                    onFit=${setZoom}
+                    onLoad=${(info) => setActivePageCount(info.numPages)}
+                    onOptimalScale=${setOptimalScale} 
+                 />
                  <div className=${`absolute bottom-6 left-1/2 -translate-x-1/2 bg-md-sys-inverseSurface text-md-sys-inverseOnSurface px-4 py-2 rounded-full shadow-xl text-sm font-medium flex items-center gap-2 transition-opacity duration-300 ${status.type === 'idle' ? 'opacity-0' : 'opacity-100'}`}>${status.text}</div>
                </div>
             </div>
           </div>
         `;
-      };
+    };
 
-      const root = createRoot(document.getElementById('app'));
-      root.render(html`<${App} />`);
-    </script>
-  </body>
+    const root = createRoot(document.getElementById('app'));
+    root.render(html`<${App} />`);
+  </script>
+</body>
+
 </html>

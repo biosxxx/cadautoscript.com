@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pipe Notch Template Generator</title>
-    
+
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="../../vendor/tailwindcss.js"></script>
+
     <!-- Three.js & OrbitControls -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    
-    <!-- Google Fonts (Roboto for MD3 look) -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <script src="../../vendor/three.min.js"></script>
+    <script src="../../vendor/OrbitControls.script.js"></script>
+
+    <!-- Google Fonts (Removed) -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> -->
+
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -27,13 +28,16 @@
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #1e1e1e;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
@@ -43,6 +47,7 @@
             position: relative;
             margin-bottom: 1.5rem;
         }
+
         .md-input {
             width: 100%;
             background-color: #2d2d2d;
@@ -54,21 +59,26 @@
             outline: none;
             transition: all 0.2s ease;
         }
+
         .md-input:focus {
-            border-color: #a8c7fa; /* MD3 Primary Light */
+            border-color: #a8c7fa;
+            /* MD3 Primary Light */
             background-color: #363636;
             box-shadow: 0 0 0 1px #a8c7fa;
         }
+
         .md-label {
             position: absolute;
             top: -10px;
             left: 12px;
-            background-color: #1e1e1e; /* Match sidebar bg */
+            background-color: #1e1e1e;
+            /* Match sidebar bg */
             padding: 0 4px;
             color: #a8c7fa;
             font-size: 0.75rem;
             font-weight: 500;
         }
+
         .md-helper {
             font-size: 0.75rem;
             color: #888;
@@ -85,9 +95,11 @@
             padding: 10px 24px;
             transition: background 0.2s;
         }
+
         .btn-primary:hover {
             background-color: #d8e6ff;
         }
+
         .btn-secondary {
             background-color: #2d2d2d;
             color: #a8c7fa;
@@ -97,6 +109,7 @@
             padding: 10px 24px;
             transition: background 0.2s;
         }
+
         .btn-secondary:hover {
             background-color: #363636;
         }
@@ -108,12 +121,14 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="flex flex-col md:flex-row h-screen">
-        
+
         <!-- Sidebar Controls -->
-        <div class="w-full md:w-[400px] flex-shrink-0 bg-[#1e1e1e] shadow-2xl z-10 overflow-y-auto h-screen border-r border-[#333]">
+        <div
+            class="w-full md:w-[400px] flex-shrink-0 bg-[#1e1e1e] shadow-2xl z-10 overflow-y-auto h-screen border-r border-[#333]">
             <div class="p-6">
                 <h1 class="text-2xl font-bold mb-2 text-[#e2e2e2]">Pipe Notch Generator</h1>
                 <p class="text-sm text-[#aaaaaa] mb-8">
@@ -122,7 +137,7 @@
 
                 <!-- Input Groups -->
                 <div class="space-y-1">
-                    
+
                     <div class="md-input-group">
                         <label class="md-label">Main Pipe Diameter (D1)</label>
                         <input type="number" id="diameter1" value="100" class="md-input">
@@ -161,7 +176,7 @@
                         <input type="number" id="startAngle" value="0" class="md-input">
                         <div class="md-helper">Rotates the seam position.</div>
                     </div>
-                    
+
                     <!-- Padding Inputs hidden in a detail view or just smaller since less used -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="md-input-group">
@@ -177,17 +192,24 @@
                 </div>
 
                 <!-- Error Box -->
-                <div id="error-message" class="hidden mb-6 p-4 bg-[#3c1e1e] border border-[#f2b8b5] text-[#f2b8b5] rounded-lg text-sm">
+                <div id="error-message"
+                    class="hidden mb-6 p-4 bg-[#3c1e1e] border border-[#f2b8b5] text-[#f2b8b5] rounded-lg text-sm">
                 </div>
 
                 <!-- Actions -->
                 <div class="space-y-3 mt-2 pb-8">
                     <button id="download-dxf-pipe" class="btn-primary w-full flex justify-center items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
                         Download D2 Template (DXF)
                     </button>
                     <button id="download-dxf-hole" class="btn-secondary w-full flex justify-center items-center gap-2">
-                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
                         Download D1 Hole (DXF)
                     </button>
                 </div>
@@ -208,17 +230,17 @@
         // --- Core Variables ---
         let scene, camera, renderer, controls;
         let pipe1Mesh, pipe2Mesh, seamLineMesh;
-        
+
         // Materials
-        const mainPipeMat = new THREE.MeshStandardMaterial({ 
-            color: 0x444444, 
-            roughness: 0.4, 
-            metalness: 0.6 
+        const mainPipeMat = new THREE.MeshStandardMaterial({
+            color: 0x444444,
+            roughness: 0.4,
+            metalness: 0.6
         });
-        
-        const cutPipeMat = new THREE.MeshStandardMaterial({ 
+
+        const cutPipeMat = new THREE.MeshStandardMaterial({
             color: 0x3c83f6, // Vibrant Blue
-            roughness: 0.4, 
+            roughness: 0.4,
             metalness: 0.3,
             side: THREE.DoubleSide
         });
@@ -249,12 +271,12 @@
         // --- Initialization ---
         function init() {
             init3D();
-            
+
             // Event Listeners
             Object.values(inputs).forEach(el => {
-                if(el.tagName === 'INPUT') el.addEventListener('input', update);
+                if (el.tagName === 'INPUT') el.addEventListener('input', update);
             });
-            
+
             document.getElementById('download-dxf-pipe').addEventListener('click', () => downloadDXF('pipe'));
             document.getElementById('download-dxf-hole').addEventListener('click', () => downloadDXF('hole'));
             window.addEventListener('resize', onResize);
@@ -265,10 +287,10 @@
 
         function init3D() {
             const container = document.getElementById('3d-container');
-            
+
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x0f0f0f); // Very dark gray
-            
+
             // Fog for depth
             scene.fog = new THREE.Fog(0x0f0f0f, 200, 1000);
 
@@ -287,11 +309,11 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            
+
             // Lighting
             const ambient = new THREE.AmbientLight(0xffffff, 0.2);
             scene.add(ambient);
-            
+
             const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
             mainLight.position.set(50, 100, 50);
             scene.add(mainLight);
@@ -325,7 +347,7 @@
 
         function update() {
             inputs.err.classList.add('hidden');
-            
+
             const params = getParams();
             if (!params) return;
 
@@ -347,15 +369,15 @@
             const pipe2Length = D1 * 1.5 + 100; // Enough length
             const segments = 128; // High res for smooth cut
             const p2Geo = new THREE.BufferGeometry();
-            
+
             const vertices = [];
             const indices = [];
             const uvs = [];
-            
+
             // Math constants
             const sinTheta = Math.sin(angleRad);
             const tanTheta = Math.tan(angleRad);
-            
+
             // For texture calc
             const circumference = 2 * Math.PI * R2;
 
@@ -366,11 +388,11 @@
                     const cosAlpha = Math.cos(alpha);
 
                     // Intersection formula
-                    const R1_eff = R1 + gap; 
-                    
+                    const R1_eff = R1 + gap;
+
                     // Check intersection validity with safe term
                     let term = Math.pow(R1_eff, 2) - Math.pow(R2 * sinAlpha + offset, 2);
-                    
+
                     if (term < 0) {
                         // If term is extremely close to 0 (floating point error), clamp it
                         if (term > -0.01) {
@@ -383,9 +405,9 @@
 
                     // Local coords of the circle cross section
                     const localX = R2 * cosAlpha;
-                    
+
                     let len = 0;
-                    
+
                     if (y === 0) {
                         // CUT END
                         // y_cut calculation
@@ -395,14 +417,14 @@
 
                         const part1 = (1 / sT) * Math.sqrt(term);
                         const part2 = (R2 * cosAlpha) / tT;
-                        
+
                         // CHANGED: Inverted sign of part2 to flip the cut side
-                        const cutDepth = part1 + part2; 
-                        
-                        len = cutDepth; 
+                        const cutDepth = part1 + part2;
+
+                        len = cutDepth;
                     } else {
                         // FAR END
-                        len = (D1 + pipe2Length); 
+                        len = (D1 + pipe2Length);
                     }
 
                     // Vector W (Axis of Pipe 2 directed AWAY from Pipe 1)
@@ -431,7 +453,7 @@
                     } else {
                         vertices.push(pX, pY, pZ);
                     }
-                    
+
                     // UVs
                     uvs.push(x / segments, y);
                 }
@@ -443,7 +465,7 @@
                 const b = x + 1;
                 const c = x + segments + 1;
                 const d = x + segments + 2;
-                
+
                 indices.push(a, b, d);
                 indices.push(a, d, c);
             }
@@ -458,11 +480,11 @@
 
             // 3. Seam Line (Red)
             const seamPoints = [];
-            for(let i=0; i<=segments; i++) {
+            for (let i = 0; i <= segments; i++) {
                 seamPoints.push(new THREE.Vector3(
-                    vertices[i*3],
-                    vertices[i*3+1],
-                    vertices[i*3+2]
+                    vertices[i * 3],
+                    vertices[i * 3 + 1],
+                    vertices[i * 3 + 2]
                 ));
             }
             const seamGeo = new THREE.BufferGeometry().setFromPoints(seamPoints);
@@ -498,8 +520,8 @@
             // Clamp Angle
             angleDeg = Math.max(1, Math.min(90, angleDeg));
 
-            return { 
-                D1, D2, thickness, gap, 
+            return {
+                D1, D2, thickness, gap,
                 angleDeg, angleRad: angleDeg * Math.PI / 180,
                 offset, startAngleRad: startAngle * Math.PI / 180,
                 padD2: pd2, padD1: pd1
@@ -515,16 +537,16 @@
 
         function calculatePoints(type, params) {
             const { D1, D2, angleRad, offset, gap, thickness, startAngleRad } = params;
-            
+
             const R1 = D1 / 2;
             const R2_outer = D2 / 2;
             const R2_inner = R2_outer - thickness;
-            
+
             const points = [];
             const steps = 360;
             const sinTheta = Math.sin(angleRad);
             const tanTheta = Math.tan(angleRad);
-            
+
             if (type === 'pipe') {
                 const R1_eff = R1 + gap;
                 const R2 = R2_outer;
@@ -534,12 +556,12 @@
                     const angle = (i / steps) * 2 * Math.PI;
                     const effAngle = angle + startAngleRad;
                     const x = (i / steps) * circumference;
-                    
+
                     let term = Math.pow(R1_eff, 2) - Math.pow(R2 * Math.sin(effAngle) + offset, 2);
                     // Force term to 0 if slightly negative (happens at cusps when D1=D2)
                     if (term < 0) {
-                         if (term > -0.01) term = 0; 
-                         else continue; 
+                        if (term > -0.01) term = 0;
+                        else continue;
                     }
 
                     const sT = Math.abs(sinTheta) < 1e-6 ? 1e-6 : sinTheta;
@@ -547,27 +569,27 @@
 
                     // Same inverted sign as 3D for consistency
                     const y = (1 / sT) * Math.sqrt(term) + (R2 * Math.cos(effAngle) / tT);
-                    points.push({x, y});
+                    points.push({ x, y });
                 }
             } else if (type === 'hole') {
                 const cosTheta = Math.cos(angleRad);
                 const sT = Math.abs(sinTheta) < 1e-6 ? 1e-6 : sinTheta;
-                
+
                 for (let i = 0; i <= steps; i++) {
                     const alpha = (i / steps) * 2 * Math.PI;
                     const R2 = R2_inner;
-                    
+
                     const r2Sin = R2 * Math.sin(alpha);
                     const r2Cos = R2 * Math.cos(alpha);
-                    
+
                     const C1 = r2Cos * cosTheta;
                     const C2 = r2Sin + offset;
-                    
-                    const term = R1*R1 - C2*C2;
+
+                    const term = R1 * R1 - C2 * C2;
                     if (term < 0) continue;
 
                     const sqrtVal = Math.sqrt(term);
-                    
+
                     // Distance 't' to surface
                     // FIX: Changed minus to plus to match geometry (L*sin = sqrt + u*cos)
                     // This ensures points lie exactly on the cylinder surface (x3d = sqrtVal)
@@ -575,15 +597,15 @@
 
                     // 3D coordinates on Surface R1
                     const x3d = t * sinTheta - r2Cos * cosTheta;
-                    const z3d = r2Sin + offset; 
+                    const z3d = r2Sin + offset;
                     const y3d = t * cosTheta + r2Cos * sinTheta;
-                    
+
                     // Unwrap R1
                     let phi = Math.atan2(z3d, x3d);
                     if (phi < 0) phi += 2 * Math.PI;
-                    
+
                     let phiShift = phi - Math.PI;
-                    if (phiShift < 0) phiShift += 2*Math.PI;
+                    if (phiShift < 0) phiShift += 2 * Math.PI;
 
                     const xUnroll = R1 * phiShift;
                     points.push({ x: xUnroll, y: y3d });
@@ -604,7 +626,7 @@
             }
 
             const pad = type === 'pipe' ? params.padD2 : params.padD1;
-            
+
             // Normalize Y to start at 0 + padding
             const minY = Math.min(...points.map(p => p.y));
             const shiftedPoints = points.map(p => ({
@@ -614,7 +636,7 @@
 
             // Header
             let dxf = "0\nSECTION\n2\nENTITIES\n";
-            
+
             // Curve
             dxf += "0\nPOLYLINE\n8\n0\n66\n1\n";
             dxf += (type === 'pipe' ? "70\n1\n" : "70\n0\n"); // 1=Closed, 0=Open
@@ -622,10 +644,10 @@
             shiftedPoints.forEach(p => {
                 dxf += `0\nVERTEX\n8\n0\n10\n${p.x.toFixed(4)}\n20\n${p.y.toFixed(4)}\n30\n0.0\n`;
             });
-            
+
             if (type === 'pipe') {
                 // Close the loop at the bottom for the paper template
-                const lastX = shiftedPoints[shiftedPoints.length-1].x;
+                const lastX = shiftedPoints[shiftedPoints.length - 1].x;
                 dxf += `0\nVERTEX\n8\n0\n10\n${lastX.toFixed(4)}\n20\n0.0\n30\n0.0\n`;
                 dxf += `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n30\n0.0\n`;
             }
@@ -635,8 +657,8 @@
             // If Hole, add bounding box for reference
             if (type === 'hole') {
                 const maxY = Math.max(...shiftedPoints.map(p => p.y)) + pad;
-                const maxX = 2 * Math.PI * (params.D1/2);
-                
+                const maxX = 2 * Math.PI * (params.D1 / 2);
+
                 dxf += "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n";
                 dxf += `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n30\n0.0\n`;
                 dxf += `0\nVERTEX\n8\n0\n10\n${maxX.toFixed(4)}\n20\n0.0\n30\n0.0\n`;
@@ -662,4 +684,5 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>

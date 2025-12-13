@@ -1,680 +1,671 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>Batch File Renamer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {sans: ['Inter', 'system-ui', 'sans-serif']},
-          },
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Batch File Renamer</title>
+  <!-- Fonts removed/local -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /> -->
+  <script src="../../vendor/jszip.min.js"></script>
+  <script src="../../vendor/react.production.min.js"></script>
+  <script src="../../vendor/react-dom.production.min.js"></script>
+  <script src="../../vendor/babel.min.js"></script>
+  <script src="../../vendor/tailwindcss.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
         },
-      };
-    </script>
-    <style>
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        background: #f1f5f9;
-        color: #0f172a;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="text/babel">
-      const {useEffect, useState} = React;
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
 
-      const ICONS = {
-        upload:
-          'M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 9l5-5 5 5M12 4v12',
-        'trash-2':
-          'M3 6h18M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2M10 11v6M14 11v6',
-        download:
-          'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
-        'refresh-cw':
-          'M21 2v6h-6M3 22v-6h6M21 13a9 9 0 0 1-15 6.74L3 22M3 11a9 9 0 0 1 15-6.74L21 2',
-        'file-text': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0 6 6M8 13h8M8 17h5M8 9h1',
-        search: 'M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z',
-        hash: 'M4 9h16M4 15h16M10 3 8 21M16 3l-2 18',
-        'arrow-right': 'M5 12h14M13 5l7 7-7 7',
-        'arrow-up': 'M12 19V5M5 12l7-7 7 7',
-        'arrow-down': 'M12 5v14m7-7-7 7-7-7',
-        settings:
-          'M12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8.1 19.4 1.65 1.65 0 0 0 6.28 19l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.67 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 3.6 8.6 1.65 1.65 0 0 0 3.67 7l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.67 1.65 1.65 0 0 0 9.51 2H10a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.35 0 .69.07 1 .2h.09a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1 1.51z',
-        'file-archive': 'M9 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 4h6M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2',
-        'alert-circle': 'M12 9v4M12 17h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z',
-        'check-circle-2': 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
-        pencil: 'M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z',
-        undo2: 'M9 14 4 9l5-5M4 9h9a4 4 0 0 1 0 8h-1',
-        x: 'M18 6 6 18M6 6l12 12',
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useEffect, useState } = React;
+
+    const ICONS = {
+      upload:
+        'M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 9l5-5 5 5M12 4v12',
+      'trash-2':
+        'M3 6h18M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2M10 11v6M14 11v6',
+      download:
+        'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
+      'refresh-cw':
+        'M21 2v6h-6M3 22v-6h6M21 13a9 9 0 0 1-15 6.74L3 22M3 11a9 9 0 0 1 15-6.74L21 2',
+      'file-text': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0 6 6M8 13h8M8 17h5M8 9h1',
+      search: 'M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z',
+      hash: 'M4 9h16M4 15h16M10 3 8 21M16 3l-2 18',
+      'arrow-right': 'M5 12h14M13 5l7 7-7 7',
+      'arrow-up': 'M12 19V5M5 12l7-7 7 7',
+      'arrow-down': 'M12 5v14m7-7-7 7-7-7',
+      settings:
+        'M12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8.1 19.4 1.65 1.65 0 0 0 6.28 19l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.67 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 3.6 8.6 1.65 1.65 0 0 0 3.67 7l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.67 1.65 1.65 0 0 0 9.51 2H10a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.35 0 .69.07 1 .2h.09a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1 1.51z',
+      'file-archive': 'M9 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 4h6M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2',
+      'alert-circle': 'M12 9v4M12 17h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z',
+      'check-circle-2': 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
+      pencil: 'M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z',
+      undo2: 'M9 14 4 9l5-5M4 9h9a4 4 0 0 1 0 8h-1',
+      x: 'M18 6 6 18M6 6l12 12',
+    };
+
+    const Icon = ({ name, size = 16, className = '' }) => {
+      const d = ICONS[name];
+      if (!d) return null;
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={className}
+          aria-hidden="true"
+        >
+          <path d={d} />
+        </svg>
+      );
+    };
+
+    const generateId = () => Math.random().toString(36).substring(2, 9);
+    const formatBytes = (bytes, decimals = 2) => {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    };
+    const padNumber = (num, size) => {
+      let s = '000000000' + num;
+      return s.substr(s.length - size);
+    };
+    const toCamelCase = (str) =>
+      str
+        .replace(/(?:^\\w|[A-Z]|\\b\\w)/g, (word, index) => (index === 0 ? word.toLowerCase() : word.toUpperCase()))
+        .replace(/\\s+/g, '');
+
+    const DEFAULT_CONFIG = {
+      findText: '',
+      replaceText: '',
+      useRegex: false,
+      prefix: '',
+      suffix: '',
+      extension: '',
+      numbering: false,
+      numberingStart: 1,
+      numberingPadding: 3,
+      numberingLocation: 'end',
+      caseTransform: 'none',
+    };
+
+    function App() {
+      const [files, setFiles] = useState([]);
+      const [config, setConfig] = useState(DEFAULT_CONFIG);
+      const [isProcessing, setIsProcessing] = useState(false);
+      const [dragActive, setDragActive] = useState(false);
+      const [errorMessage, setErrorMessage] = useState(null);
+      const [downloadUrl, setDownloadUrl] = useState(null);
+      const [downloadFileName, setDownloadFileName] = useState('');
+
+      useEffect(() => () => downloadUrl && window.URL.revokeObjectURL(downloadUrl), [downloadUrl]);
+
+      useEffect(() => {
+        setFiles((prev) =>
+          prev.map((fileData, index) => {
+            if (fileData.manualName !== undefined) {
+              return { ...fileData, newName: fileData.manualName };
+            }
+
+            let name = fileData.originalName;
+            const lastDotIndex = name.lastIndexOf('.');
+            let baseName = lastDotIndex !== -1 ? name.substring(0, lastDotIndex) : name;
+            let ext = lastDotIndex !== -1 ? name.substring(lastDotIndex + 1) : '';
+
+            if (config.findText) {
+              try {
+                if (config.useRegex) {
+                  const regex = new RegExp(config.findText, 'g');
+                  baseName = baseName.replace(regex, config.replaceText);
+                } else {
+                  baseName = baseName.split(config.findText).join(config.replaceText);
+                }
+              } catch (e) { }
+            }
+
+            if (config.caseTransform === 'lowercase') baseName = baseName.toLowerCase();
+            if (config.caseTransform === 'uppercase') baseName = baseName.toUpperCase();
+            if (config.caseTransform === 'camelCase') baseName = toCamelCase(baseName);
+
+            baseName = `${config.prefix}${baseName}${config.suffix}`;
+
+            if (config.numbering) {
+              const numStr = padNumber(config.numberingStart + index, config.numberingPadding);
+              baseName =
+                config.numberingLocation === 'start' ? `${numStr}_${baseName}` : `${baseName}_${numStr}`;
+            }
+
+            const finalExt = config.extension ? config.extension.replace(/^\\./, '') : ext;
+            const finalName = finalExt ? `${baseName}.${finalExt}` : baseName;
+            return { ...fileData, newName: finalName };
+          }),
+        );
+      }, [config]);
+
+      const handleFilesAdded = (newFiles) => {
+        if (!newFiles?.length) return;
+        const newFileItems = Array.from(newFiles).map((file) => ({
+          id: generateId(),
+          file,
+          originalName: file.name,
+          newName: file.name,
+        }));
+        setFiles((prev) => [...prev, ...newFileItems]);
+        setConfig((prev) => ({ ...prev }));
+        setErrorMessage(null);
       };
 
-      const Icon = ({name, size = 16, className = ''}) => {
-        const d = ICONS[name];
-        if (!d) return null;
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-            aria-hidden="true"
-          >
-            <path d={d} />
-          </svg>
+      const handleManualRename = (id, value) => {
+        setFiles((prev) =>
+          prev.map((f) => (f.id === id ? { ...f, manualName: value, newName: value } : f)),
         );
       };
 
-      const generateId = () => Math.random().toString(36).substring(2, 9);
-      const formatBytes = (bytes, decimals = 2) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-      };
-      const padNumber = (num, size) => {
-        let s = '000000000' + num;
-        return s.substr(s.length - size);
-      };
-      const toCamelCase = (str) =>
-        str
-          .replace(/(?:^\\w|[A-Z]|\\b\\w)/g, (word, index) => (index === 0 ? word.toLowerCase() : word.toUpperCase()))
-          .replace(/\\s+/g, '');
-
-      const DEFAULT_CONFIG = {
-        findText: '',
-        replaceText: '',
-        useRegex: false,
-        prefix: '',
-        suffix: '',
-        extension: '',
-        numbering: false,
-        numberingStart: 1,
-        numberingPadding: 3,
-        numberingLocation: 'end',
-        caseTransform: 'none',
+      const revertToAuto = (id) => {
+        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, manualName: undefined } : f)));
+        setTimeout(() => setConfig((prev) => ({ ...prev })), 0);
       };
 
-      function App() {
-        const [files, setFiles] = useState([]);
-        const [config, setConfig] = useState(DEFAULT_CONFIG);
-        const [isProcessing, setIsProcessing] = useState(false);
-        const [dragActive, setDragActive] = useState(false);
-        const [errorMessage, setErrorMessage] = useState(null);
-        const [downloadUrl, setDownloadUrl] = useState(null);
-        const [downloadFileName, setDownloadFileName] = useState('');
+      const startEditing = (id, currentName) => handleManualRename(id, currentName);
 
-        useEffect(() => () => downloadUrl && window.URL.revokeObjectURL(downloadUrl), [downloadUrl]);
+      const handleDrag = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+        else if (e.type === 'dragleave') setDragActive(false);
+      };
 
-        useEffect(() => {
-          setFiles((prev) =>
-            prev.map((fileData, index) => {
-              if (fileData.manualName !== undefined) {
-                return {...fileData, newName: fileData.manualName};
-              }
+      const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFilesAdded(e.dataTransfer.files);
+      };
 
-              let name = fileData.originalName;
-              const lastDotIndex = name.lastIndexOf('.');
-              let baseName = lastDotIndex !== -1 ? name.substring(0, lastDotIndex) : name;
-              let ext = lastDotIndex !== -1 ? name.substring(lastDotIndex + 1) : '';
+      const removeFile = (id) => setFiles((prev) => prev.filter((f) => f.id !== id));
 
-              if (config.findText) {
-                try {
-                  if (config.useRegex) {
-                    const regex = new RegExp(config.findText, 'g');
-                    baseName = baseName.replace(regex, config.replaceText);
-                  } else {
-                    baseName = baseName.split(config.findText).join(config.replaceText);
-                  }
-                } catch (e) {}
-              }
+      const moveFile = (index, direction) => {
+        setFiles((prev) => {
+          const newFiles = [...prev];
+          if (index + direction < 0 || index + direction >= newFiles.length) return prev;
+          [newFiles[index], newFiles[index + direction]] = [newFiles[index + direction], newFiles[index]];
+          return newFiles;
+        });
+        setConfig((prev) => ({ ...prev }));
+      };
 
-              if (config.caseTransform === 'lowercase') baseName = baseName.toLowerCase();
-              if (config.caseTransform === 'uppercase') baseName = baseName.toUpperCase();
-              if (config.caseTransform === 'camelCase') baseName = toCamelCase(baseName);
-
-              baseName = `${config.prefix}${baseName}${config.suffix}`;
-
-              if (config.numbering) {
-                const numStr = padNumber(config.numberingStart + index, config.numberingPadding);
-                baseName =
-                  config.numberingLocation === 'start' ? `${numStr}_${baseName}` : `${baseName}_${numStr}`;
-              }
-
-              const finalExt = config.extension ? config.extension.replace(/^\\./, '') : ext;
-              const finalName = finalExt ? `${baseName}.${finalExt}` : baseName;
-              return {...fileData, newName: finalName};
-            }),
-          );
-        }, [config]);
-
-        const handleFilesAdded = (newFiles) => {
-          if (!newFiles?.length) return;
-          const newFileItems = Array.from(newFiles).map((file) => ({
-            id: generateId(),
-            file,
-            originalName: file.name,
-            newName: file.name,
-          }));
-          setFiles((prev) => [...prev, ...newFileItems]);
-          setConfig((prev) => ({...prev}));
+      const clearAll = () => {
+        if (confirm('Clear file list?')) {
+          setFiles([]);
           setErrorMessage(null);
-        };
-
-        const handleManualRename = (id, value) => {
-          setFiles((prev) =>
-            prev.map((f) => (f.id === id ? {...f, manualName: value, newName: value} : f)),
-          );
-        };
-
-        const revertToAuto = (id) => {
-          setFiles((prev) => prev.map((f) => (f.id === id ? {...f, manualName: undefined} : f)));
-          setTimeout(() => setConfig((prev) => ({...prev})), 0);
-        };
-
-        const startEditing = (id, currentName) => handleManualRename(id, currentName);
-
-        const handleDrag = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
-          else if (e.type === 'dragleave') setDragActive(false);
-        };
-
-        const handleDrop = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setDragActive(false);
-          if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFilesAdded(e.dataTransfer.files);
-        };
-
-        const removeFile = (id) => setFiles((prev) => prev.filter((f) => f.id !== id));
-
-        const moveFile = (index, direction) => {
-          setFiles((prev) => {
-            const newFiles = [...prev];
-            if (index + direction < 0 || index + direction >= newFiles.length) return prev;
-            [newFiles[index], newFiles[index + direction]] = [newFiles[index + direction], newFiles[index]];
-            return newFiles;
-          });
-          setConfig((prev) => ({...prev}));
-        };
-
-        const clearAll = () => {
-          if (confirm('Clear file list?')) {
-            setFiles([]);
-            setErrorMessage(null);
-            if (downloadUrl) {
-              window.URL.revokeObjectURL(downloadUrl);
-              setDownloadUrl(null);
-            }
+          if (downloadUrl) {
+            window.URL.revokeObjectURL(downloadUrl);
+            setDownloadUrl(null);
           }
-        };
+        }
+      };
 
-        const generateZip = async () => {
-          if (files.length === 0) return;
-          setIsProcessing(true);
-          setErrorMessage(null);
+      const generateZip = async () => {
+        if (files.length === 0) return;
+        setIsProcessing(true);
+        setErrorMessage(null);
 
-          try {
-            if (downloadUrl) {
-              const link = document.createElement('a');
-              link.href = downloadUrl;
-              link.download = downloadFileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              setIsProcessing(false);
-              return;
-            }
-
-            const JSZipConstructor = window.JSZip;
-            if (!JSZipConstructor) throw new Error('JSZip failed to load');
-            const zip = new JSZipConstructor();
-            const usedNames = {};
-
-            files.forEach((fileData) => {
-              let finalName = fileData.newName;
-              if (usedNames[finalName]) {
-                const parts = finalName.split('.');
-                const ext = parts.length > 1 ? parts.pop() : '';
-                const base = parts.join('.');
-                finalName = `${base} (${usedNames[finalName]})${ext ? '.' + ext : ''}`;
-                usedNames[fileData.newName]++;
-              } else {
-                usedNames[finalName] = 1;
-              }
-              zip.file(finalName, fileData.file);
-            });
-
-            const content = await zip.generateAsync({type: 'blob'});
-            const url = window.URL.createObjectURL(content);
-            const name = `renamed_files_${Date.now()}.zip`;
-
-            setDownloadUrl(url);
-            setDownloadFileName(name);
-
+        try {
+          if (downloadUrl) {
             const link = document.createElement('a');
-            link.href = url;
-            link.download = name;
+            link.href = downloadUrl;
+            link.download = downloadFileName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-          } catch (error) {
-            console.error('ZIP Error:', error);
-            setErrorMessage(`Error: ${error.message || 'Failed to create archive'}`);
-          } finally {
             setIsProcessing(false);
+            return;
           }
-        };
 
-        return (
-          <div className="flex flex-col h-screen bg-slate-100 text-slate-800 font-sans overflow-hidden">
-            <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm z-20">
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="bg-blue-600 p-2 rounded-lg text-white shrink-0">
-                  <Icon name="refresh-cw" size={20} />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-slate-800 leading-tight">Batch Renamer</h1>
-                </div>
+          const JSZipConstructor = window.JSZip;
+          if (!JSZipConstructor) throw new Error('JSZip failed to load');
+          const zip = new JSZipConstructor();
+          const usedNames = {};
+
+          files.forEach((fileData) => {
+            let finalName = fileData.newName;
+            if (usedNames[finalName]) {
+              const parts = finalName.split('.');
+              const ext = parts.length > 1 ? parts.pop() : '';
+              const base = parts.join('.');
+              finalName = `${base} (${usedNames[finalName]})${ext ? '.' + ext : ''}`;
+              usedNames[fileData.newName]++;
+            } else {
+              usedNames[finalName] = 1;
+            }
+            zip.file(finalName, fileData.file);
+          });
+
+          const content = await zip.generateAsync({ type: 'blob' });
+          const url = window.URL.createObjectURL(content);
+          const name = `renamed_files_${Date.now()}.zip`;
+
+          setDownloadUrl(url);
+          setDownloadFileName(name);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = name;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error('ZIP Error:', error);
+          setErrorMessage(`Error: ${error.message || 'Failed to create archive'}`);
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      return (
+        <div className="flex flex-col h-screen bg-slate-100 text-slate-800 font-sans overflow-hidden">
+          <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm z-20">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="bg-blue-600 p-2 rounded-lg text-white shrink-0">
+                <Icon name="refresh-cw" size={20} />
               </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-800 leading-tight">Batch Renamer</h1>
+              </div>
+            </div>
 
-              <div className="flex gap-2 w-full md:w-auto justify-end">
-                <button
-                  onClick={clearAll}
-                  disabled={files.length === 0}
-                  className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Icon name="trash-2" size={16} />
-                  <span className="hidden sm:inline">Clear</span>
-                </button>
+            <div className="flex gap-2 w-full md:w-auto justify-end">
+              <button
+                onClick={clearAll}
+                disabled={files.length === 0}
+                className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <Icon name="trash-2" size={16} />
+                <span className="hidden sm:inline">Clear</span>
+              </button>
 
-                <button
-                  onClick={generateZip}
-                  disabled={files.length === 0 || isProcessing}
-                  className={`px-4 md:px-6 py-2 text-sm font-bold text-white rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    downloadUrl ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
+              <button
+                onClick={generateZip}
+                disabled={files.length === 0 || isProcessing}
+                className={`px-4 md:px-6 py-2 text-sm font-bold text-white rounded-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${downloadUrl ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
                   }`}
-                >
-                  {isProcessing ? (
-                    <Icon name="refresh-cw" size={16} className="animate-spin" />
-                  ) : downloadUrl ? (
-                    <Icon name="check-circle-2" size={16} />
-                  ) : (
-                    <Icon name="download" size={16} />
-                  )}
-                  <span className="hidden sm:inline">{downloadUrl ? 'Download File' : 'Create ZIP'}</span>
-                  <span className="sm:hidden">{downloadUrl ? 'Download' : 'ZIP'}</span>
-                </button>
-              </div>
-            </header>
+              >
+                {isProcessing ? (
+                  <Icon name="refresh-cw" size={16} className="animate-spin" />
+                ) : downloadUrl ? (
+                  <Icon name="check-circle-2" size={16} />
+                ) : (
+                  <Icon name="download" size={16} />
+                )}
+                <span className="hidden sm:inline">{downloadUrl ? 'Download File' : 'Create ZIP'}</span>
+                <span className="sm:hidden">{downloadUrl ? 'Download' : 'ZIP'}</span>
+              </button>
+            </div>
+          </header>
 
-            {downloadUrl && (
-              <div className="bg-green-50 px-6 py-3 border-b border-green-100 flex items-center justify-between">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="bg-green-100 p-1.5 rounded-full text-green-700 shrink-0">
-                    <Icon name="download" size={16} />
-                  </div>
-                  <div className="text-sm text-green-800 truncate">
-                    <span className="font-semibold">Archive ready!</span>
-                  </div>
+          {downloadUrl && (
+            <div className="bg-green-50 px-6 py-3 border-b border-green-100 flex items-center justify-between">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="bg-green-100 p-1.5 rounded-full text-green-700 shrink-0">
+                  <Icon name="download" size={16} />
                 </div>
-                <a
-                  href={downloadUrl}
-                  download={downloadFileName}
-                  className="text-sm font-bold text-green-700 underline decoration-2 underline-offset-2 hover:text-green-900 whitespace-nowrap ml-4"
-                >
-                  Save ZIP
-                </a>
-              </div>
-            )}
-
-            {errorMessage && (
-              <div className="bg-red-50 text-red-700 px-6 py-3 text-sm flex items-center justify-between border-b border-red-100">
-                <div className="flex items-center gap-2">
-                  <Icon name="alert-circle" size={16} />
-                  {errorMessage}
+                <div className="text-sm text-green-800 truncate">
+                  <span className="font-semibold">Archive ready!</span>
                 </div>
-                <button onClick={() => setErrorMessage(null)} className="hover:bg-red-100 p-1 rounded">
-                  <Icon name="x" size={14} />
-                </button>
               </div>
-            )}
+              <a
+                href={downloadUrl}
+                download={downloadFileName}
+                className="text-sm font-bold text-green-700 underline decoration-2 underline-offset-2 hover:text-green-900 whitespace-nowrap ml-4"
+              >
+                Save ZIP
+              </a>
+            </div>
+          )}
 
-            <div className="flex flex-1 overflow-hidden">
-              <div className="w-full md:w-80 lg:w-96 bg-white border-r border-slate-200 overflow-y-auto flex flex-col z-10 shadow-lg">
-                <div
-                  className={`m-4 p-6 border-2 border-dashed rounded-xl text-center transition-all cursor-pointer group ${
-                    dragActive ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+          {errorMessage && (
+            <div className="bg-red-50 text-red-700 px-6 py-3 text-sm flex items-center justify-between border-b border-red-100">
+              <div className="flex items-center gap-2">
+                <Icon name="alert-circle" size={16} />
+                {errorMessage}
+              </div>
+              <button onClick={() => setErrorMessage(null)} className="hover:bg-red-100 p-1 rounded">
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-1 overflow-hidden">
+            <div className="w-full md:w-80 lg:w-96 bg-white border-r border-slate-200 overflow-y-auto flex flex-col z-10 shadow-lg">
+              <div
+                className={`m-4 p-6 border-2 border-dashed rounded-xl text-center transition-all cursor-pointer group ${dragActive ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
                   }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                >
-                  <input
-                    id="fileInput"
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleFilesAdded(e.target.files)}
-                  />
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                    <Icon name="upload" size={24} />
-                  </div>
-                  <p className="font-semibold text-slate-700 text-sm">Add files</p>
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('fileInput')?.click()}
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handleFilesAdded(e.target.files)}
+                />
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Icon name="upload" size={24} />
                 </div>
+                <p className="font-semibold text-slate-700 text-sm">Add files</p>
+              </div>
 
-                <div className="px-4 pb-4 space-y-6">
-                  <section className="space-y-3">
-                    <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
-                      <Icon name="search" size={16} className="text-blue-500" />
-                      Find & Replace
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+              <div className="px-4 pb-4 space-y-6">
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
+                    <Icon name="search" size={16} className="text-blue-500" />
+                    Find & Replace
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Find..."
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                      value={config.findText}
+                      onChange={(e) => setConfig({ ...config, findText: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Replace with..."
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
+                      value={config.replaceText}
+                      onChange={(e) => setConfig({ ...config, replaceText: e.target.value })}
+                    />
+                    <label className="flex items-center gap-2 cursor-pointer">
                       <input
-                        type="text"
-                        placeholder="Find..."
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        value={config.findText}
-                        onChange={(e) => setConfig({...config, findText: e.target.value})}
+                        type="checkbox"
+                        className="accent-blue-600 w-4 h-4"
+                        checked={config.useRegex}
+                        onChange={(e) => setConfig({ ...config, useRegex: e.target.checked })}
                       />
-                      <input
-                        type="text"
-                        placeholder="Replace with..."
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm focus:ring-2 focus:ring-blue-500/50 outline-none"
-                        value={config.replaceText}
-                        onChange={(e) => setConfig({...config, replaceText: e.target.value})}
-                      />
-                      <label className="flex items-center gap-2 cursor-pointer">
+                      <span className="text-xs text-slate-600">RegEx</span>
+                    </label>
+                  </div>
+                </section>
+
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
+                    <Icon name="settings" size={16} className="text-purple-500" />
+                    Add Text
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Prefix</span>
                         <input
-                          type="checkbox"
-                          className="accent-blue-600 w-4 h-4"
-                          checked={config.useRegex}
-                          onChange={(e) => setConfig({...config, useRegex: e.target.checked})}
+                          type="text"
+                          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
+                          value={config.prefix}
+                          onChange={(e) => setConfig({ ...config, prefix: e.target.value })}
                         />
-                        <span className="text-xs text-slate-600">RegEx</span>
-                      </label>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Suffix</span>
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
+                          value={config.suffix}
+                          onChange={(e) => setConfig({ ...config, suffix: e.target.value })}
+                        />
+                      </div>
                     </div>
-                  </section>
+                  </div>
+                </section>
 
-                  <section className="space-y-3">
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
-                      <Icon name="settings" size={16} className="text-purple-500" />
-                      Add Text
+                      <Icon name="hash" size={16} className="text-green-500" />
+                      Numbering
                     </div>
+                    <div
+                      onClick={() => setConfig({ ...config, numbering: !config.numbering })}
+                      className={`w-9 h-5 rounded-full flex items-center p-1 cursor-pointer transition-colors ${config.numbering ? 'bg-green-500' : 'bg-slate-300'
+                        }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform ${config.numbering ? 'translate-x-4' : 'translate-x-0'
+                          }`}
+                      />
+                    </div>
+                  </div>
+
+                  {config.numbering && (
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Prefix</span>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Start</span>
                           <input
-                            type="text"
+                            type="number"
                             className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                            value={config.prefix}
-                            onChange={(e) => setConfig({...config, prefix: e.target.value})}
+                            value={config.numberingStart}
+                            onChange={(e) =>
+                              setConfig({ ...config, numberingStart: parseInt(e.target.value) || 0 })
+                            }
                           />
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Suffix</span>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Padding</span>
                           <input
-                            type="text"
+                            type="number"
+                            min="1"
+                            max="10"
                             className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                            value={config.suffix}
-                            onChange={(e) => setConfig({...config, suffix: e.target.value})}
+                            value={config.numberingPadding}
+                            onChange={(e) =>
+                              setConfig({ ...config, numberingPadding: parseInt(e.target.value) || 1 })
+                            }
                           />
                         </div>
                       </div>
-                    </div>
-                  </section>
-
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
-                        <Icon name="hash" size={16} className="text-green-500" />
-                        Numbering
-                      </div>
-                      <div
-                        onClick={() => setConfig({...config, numbering: !config.numbering})}
-                        className={`w-9 h-5 rounded-full flex items-center p-1 cursor-pointer transition-colors ${
-                          config.numbering ? 'bg-green-500' : 'bg-slate-300'
-                        }`}
-                      >
-                        <div
-                          className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform ${
-                            config.numbering ? 'translate-x-4' : 'translate-x-0'
-                          }`}
-                        />
-                      </div>
-                    </div>
-
-                    {config.numbering && (
-                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Start</span>
+                      <div className="flex gap-4 pt-1">
+                        {['start', 'end'].map((loc) => (
+                          <label key={loc} className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
                             <input
-                              type="number"
-                              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                              value={config.numberingStart}
-                              onChange={(e) =>
-                                setConfig({...config, numberingStart: parseInt(e.target.value) || 0})
-                              }
+                              type="radio"
+                              name="numLoc"
+                              checked={config.numberingLocation === loc}
+                              onChange={() => setConfig({ ...config, numberingLocation: loc })}
+                              className="accent-green-500"
                             />
-                          </div>
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Padding</span>
-                            <input
-                              type="number"
-                              min="1"
-                              max="10"
-                              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                              value={config.numberingPadding}
-                              onChange={(e) =>
-                                setConfig({...config, numberingPadding: parseInt(e.target.value) || 1})
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="flex gap-4 pt-1">
-                          {['start', 'end'].map((loc) => (
-                            <label key={loc} className="flex items-center gap-2 cursor-pointer text-xs text-slate-600">
-                              <input
-                                type="radio"
-                                name="numLoc"
-                                checked={config.numberingLocation === loc}
-                                onChange={() => setConfig({...config, numberingLocation: loc})}
-                                className="accent-green-500"
-                              />
-                              {loc === 'start' ? 'At start' : 'At end'}
-                            </label>
-                          ))}
-                        </div>
+                            {loc === 'start' ? 'At start' : 'At end'}
+                          </label>
+                        ))}
                       </div>
-                    )}
-                  </section>
-
-                  <section className="space-y-3">
-                    <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
-                      <Icon name="file-archive" size={16} className="text-orange-500" />
-                      Format
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
-                      <select
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                        value={config.caseTransform}
-                        onChange={(e) => setConfig({...config, caseTransform: e.target.value})}
-                      >
-                        <option value="none">No case change</option>
-                        <option value="lowercase">lowercase</option>
-                        <option value="uppercase">UPPERCASE</option>
-                        <option value="camelCase">camelCase</option>
-                      </select>
+                  )}
+                </section>
 
-                      <input
-                        type="text"
-                        placeholder="New extension (e.g. jpg)"
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
-                        value={config.extension}
-                        onChange={(e) => setConfig({...config, extension: e.target.value})}
-                      />
-                    </div>
-                  </section>
+                <section className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
+                    <Icon name="file-archive" size={16} className="text-orange-500" />
+                    Format
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+                    <select
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
+                      value={config.caseTransform}
+                      onChange={(e) => setConfig({ ...config, caseTransform: e.target.value })}
+                    >
+                      <option value="none">No case change</option>
+                      <option value="lowercase">lowercase</option>
+                      <option value="uppercase">UPPERCASE</option>
+                      <option value="camelCase">camelCase</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      placeholder="New extension (e.g. jpg)"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-sm outline-none focus:border-blue-400"
+                      value={config.extension}
+                      onChange={(e) => setConfig({ ...config, extension: e.target.value })}
+                    />
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <div className="flex-1 bg-slate-100 overflow-hidden flex flex-col relative">
+              <div className="bg-slate-50/90 backdrop-blur-sm border-b border-slate-200 px-6 py-3 flex justify-between items-center z-10 shadow-sm">
+                <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2">
+                  <Icon name="file-text" size={14} />
+                  Preview ({files.length})
+                </h2>
+                <div className="text-xs text-slate-400 hidden sm:block">
+                  Original <Icon name="arrow-right" size={10} className="inline mx-1" /> Result
                 </div>
               </div>
 
-              <div className="flex-1 bg-slate-100 overflow-hidden flex flex-col relative">
-                <div className="bg-slate-50/90 backdrop-blur-sm border-b border-slate-200 px-6 py-3 flex justify-between items-center z-10 shadow-sm">
-                  <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2">
-                    <Icon name="file-text" size={14} />
-                    Preview ({files.length})
-                  </h2>
-                  <div className="text-xs text-slate-400 hidden sm:block">
-                    Original <Icon name="arrow-right" size={10} className="inline mx-1" /> Result
+              <div className="flex-1 overflow-auto p-4 sm:p-6">
+                {files.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                    <Icon name="file-text" size={48} className="opacity-20 mb-4" />
+                    <p className="font-medium">File list is empty</p>
                   </div>
-                </div>
-
-                <div className="flex-1 overflow-auto p-4 sm:p-6">
-                  {files.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                      <Icon name="file-text" size={48} className="opacity-20 mb-4" />
-                      <p className="font-medium">File list is empty</p>
-                    </div>
-                  ) : (
-                    <div
-                      className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
-                      style={{zoom: 0.65, width: '153.84%'}}
-                    >
-                      <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase border-b border-slate-200">
-                          <tr>
-                            <th className="px-4 py-3 w-10 text-center">#</th>
-                            <th className="px-4 py-3 w-1/3">Original Name</th>
-                            <th className="px-2 py-3 w-8"></th>
-                            <th className="px-4 py-3 w-1/3 text-blue-700">New Name</th>
-                            <th className="px-4 py-3 text-right"></th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 text-sm">
-                          {files.map((file, index) => {
-                            const isChanged = file.originalName !== file.newName;
-                            const isManual = file.manualName !== undefined;
-                            return (
-                              <tr key={file.id} className="group hover:bg-slate-50 transition-colors">
-                                <td className="px-4 py-3 text-center text-slate-400 font-mono text-xs">{index + 1}</td>
-                                <td className="px-4 py-3 text-slate-600 break-all" title={file.originalName}>
-                                  {file.originalName}
-                                  <div className="text-[10px] text-slate-400 mt-0.5">{formatBytes(file.file.size)}</div>
-                                </td>
-                                <td className="px-2 py-3 text-slate-300">
-                                  <Icon name="arrow-right" size={14} />
-                                </td>
-                                <td className="px-4 py-3 font-medium text-slate-800">
-                                  <div className="flex items-center gap-2">
-                                    {isManual ? (
-                                      <div className="flex items-center w-full">
-                                        <input
-                                          type="text"
-                                          value={file.newName}
-                                          onChange={(e) => handleManualRename(file.id, e.target.value)}
-                                          className="w-full px-2 py-1 text-sm border-blue-500 ring-2 ring-blue-100 rounded border focus:outline-none"
-                                          autoFocus
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div className="break-all" title={file.newName}>
-                                        <span
-                                          className={`px-1.5 py-0.5 rounded ${
-                                            isChanged ? 'bg-blue-100 text-blue-700' : 'text-slate-500'
+                ) : (
+                  <div
+                    className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+                    style={{ zoom: 0.65, width: '153.84%' }}
+                  >
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3 w-10 text-center">#</th>
+                          <th className="px-4 py-3 w-1/3">Original Name</th>
+                          <th className="px-2 py-3 w-8"></th>
+                          <th className="px-4 py-3 w-1/3 text-blue-700">New Name</th>
+                          <th className="px-4 py-3 text-right"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-sm">
+                        {files.map((file, index) => {
+                          const isChanged = file.originalName !== file.newName;
+                          const isManual = file.manualName !== undefined;
+                          return (
+                            <tr key={file.id} className="group hover:bg-slate-50 transition-colors">
+                              <td className="px-4 py-3 text-center text-slate-400 font-mono text-xs">{index + 1}</td>
+                              <td className="px-4 py-3 text-slate-600 break-all" title={file.originalName}>
+                                {file.originalName}
+                                <div className="text-[10px] text-slate-400 mt-0.5">{formatBytes(file.file.size)}</div>
+                              </td>
+                              <td className="px-2 py-3 text-slate-300">
+                                <Icon name="arrow-right" size={14} />
+                              </td>
+                              <td className="px-4 py-3 font-medium text-slate-800">
+                                <div className="flex items-center gap-2">
+                                  {isManual ? (
+                                    <div className="flex items-center w-full">
+                                      <input
+                                        type="text"
+                                        value={file.newName}
+                                        onChange={(e) => handleManualRename(file.id, e.target.value)}
+                                        className="w-full px-2 py-1 text-sm border-blue-500 ring-2 ring-blue-100 rounded border focus:outline-none"
+                                        autoFocus
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="break-all" title={file.newName}>
+                                      <span
+                                        className={`px-1.5 py-0.5 rounded ${isChanged ? 'bg-blue-100 text-blue-700' : 'text-slate-500'
                                           }`}
-                                        >
-                                          {file.newName}
-                                        </span>
-                                      </div>
-                                    )}
+                                      >
+                                        {file.newName}
+                                      </span>
+                                    </div>
+                                  )}
 
-                                    {isManual ? (
-                                      <button
-                                        onClick={() => revertToAuto(file.id)}
-                                        className="p-1 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded transition shrink-0"
-                                        title="Revert to Auto"
-                                      >
-                                        <Icon name="undo2" size={14} />
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() => startEditing(file.id, file.newName)}
-                                        className="p-1 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded transition opacity-0 group-hover:opacity-100 shrink-0"
-                                        title="Edit manually"
-                                      >
-                                        <Icon name="pencil" size={12} />
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3">
-                                  <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                  {isManual ? (
                                     <button
-                                      onClick={() => moveFile(index, -1)}
-                                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                      onClick={() => revertToAuto(file.id)}
+                                      className="p-1 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded transition shrink-0"
+                                      title="Revert to Auto"
                                     >
-                                      <Icon name="arrow-up" size={14} />
+                                      <Icon name="undo2" size={14} />
                                     </button>
+                                  ) : (
                                     <button
-                                      onClick={() => moveFile(index, 1)}
-                                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                      onClick={() => startEditing(file.id, file.newName)}
+                                      className="p-1 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded transition opacity-0 group-hover:opacity-100 shrink-0"
+                                      title="Edit manually"
                                     >
-                                      <Icon name="arrow-down" size={14} />
+                                      <Icon name="pencil" size={12} />
                                     </button>
-                                    <button
-                                      onClick={() => removeFile(file.id)}
-                                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded ml-1"
-                                    >
-                                      <Icon name="x" size={14} />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                  <button
+                                    onClick={() => moveFile(index, -1)}
+                                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                  >
+                                    <Icon name="arrow-up" size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => moveFile(index, 1)}
+                                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                  >
+                                    <Icon name="arrow-down" size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => removeFile(file.id)}
+                                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded ml-1"
+                                  >
+                                    <Icon name="x" size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        );
-      }
+        </div>
+      );
+    }
 
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
-    </script>
-  </body>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
 </html>

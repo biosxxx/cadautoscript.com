@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shell Rolling Master v0.02</title>
-    
+
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../vendor/tailwindcss.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -36,31 +37,52 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+                "three": "../../vendor/three.module.js",
+                "three/addons/controls/OrbitControls.js": "../../vendor/OrbitControls.js"
             }
         }
     </script>
-    
-    <!-- PDF Generation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- PDF Generation Libraries -->
+    <script src="../../vendor/jspdf.umd.min.js"></script>
+    <script src="../../vendor/purify.min.js"></script>
+
+    <!-- Fonts (System Fallback) -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"> -->
+    <!-- Material Icons (Removed external link) -->
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"> -->
 
     <style>
-        body { background-color: #141218; color: #e6e1e5; font-family: 'Roboto', sans-serif; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1d1b20; }
-        ::-webkit-scrollbar-thumb { background: #49454f; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        body {
+            background-color: #141218;
+            color: #e6e1e5;
+            font-family: 'Roboto', sans-serif;
+        }
 
-        .input-group { position: relative; margin-bottom: 1.5rem; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1d1b20;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #49454f;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
         .input-field {
             width: 100%;
             background: #1d1b20;
@@ -72,10 +94,12 @@
             transition: all 0.2s;
             outline: none;
         }
+
         .input-field:focus {
             border-color: #d0bcff;
             box-shadow: 0 0 0 2px rgba(208, 188, 255, 0.2);
         }
+
         .input-label {
             position: absolute;
             left: 14px;
@@ -86,60 +110,82 @@
             color: #d0bcff;
             font-weight: 500;
         }
-        
+
         .btn-primary {
             background-color: #d0bcff;
             color: #381e72;
             transition: filter 0.2s;
         }
-        .btn-primary:hover { filter: brightness(0.9); }
-        
+
+        .btn-primary:hover {
+            filter: brightness(0.9);
+        }
+
         .btn-secondary {
             background-color: #4a4458;
             color: #e8def8;
         }
-        .btn-secondary:hover { background-color: #554e65; }
 
-        .tab-active { border-bottom: 2px solid #d0bcff; color: #d0bcff; }
-        .tab-inactive { color: #938f99; }
-        .tab-inactive:hover { color: #e6e1e5; }
-        
+        .btn-secondary:hover {
+            background-color: #554e65;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #d0bcff;
+            color: #d0bcff;
+        }
+
+        .tab-inactive {
+            color: #938f99;
+        }
+
+        .tab-inactive:hover {
+            color: #e6e1e5;
+        }
+
         /* SVG Dimension Text */
         .dim-text {
             font-family: 'Roboto', sans-serif;
             fill: #d0bcff;
             text-anchor: middle;
-            background-color: #141218; /* fallback */
+            background-color: #141218;
+            /* fallback */
             paint-order: stroke;
             stroke: #141218;
             stroke-width: 3px;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
+
         .dim-line {
             stroke: #938f99;
         }
     </style>
 </head>
+
 <body class="h-screen overflow-hidden flex flex-col md:flex-row">
 
     <!-- SIDEBAR: CONTROLS -->
-    <aside class="w-full md:w-[400px] bg-md-surface2 flex flex-col h-full overflow-y-auto border-r border-[#49454f] shadow-2xl z-10">
+    <aside
+        class="w-full md:w-[400px] bg-md-surface2 flex flex-col h-full overflow-y-auto border-r border-[#49454f] shadow-2xl z-10">
         <div class="p-6">
             <h1 class="text-xl font-bold flex items-center gap-2 text-md-primary mb-6">
-                <span class="material-icons-round">architecture</span>
-                Shell Rolling Master <span class="text-xs bg-md-primary text-md-onPrimary px-2 py-0.5 rounded-full ml-1">v0.02</span>
+                <img src="../../icons/cube.svg" class="w-6 h-6 invert opacity-80" alt="" />
+                Shell Rolling Master <span
+                    class="text-xs bg-md-primary text-md-onPrimary px-2 py-0.5 rounded-full ml-1">v0.02</span>
             </h1>
 
             <!-- Mode Selector -->
             <div class="bg-md-surface rounded-xl p-1 flex mb-6 border border-[#49454f]">
-                <button id="mode-cylinder" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-md-primary text-md-onPrimary shadow-md">Cylinder</button>
-                <button id="mode-cone" class="flex-1 py-2 rounded-lg text-sm font-medium text-[#ccc2dc] hover:bg-[#36343b] transition-all">Cone</button>
+                <button id="mode-cylinder"
+                    class="flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-md-primary text-md-onPrimary shadow-md">Cylinder</button>
+                <button id="mode-cone"
+                    class="flex-1 py-2 rounded-lg text-sm font-medium text-[#ccc2dc] hover:bg-[#36343b] transition-all">Cone</button>
             </div>
 
             <!-- Parameters Form -->
             <div class="space-y-2">
-                
+
                 <!-- Diameter Spec -->
                 <div class="flex items-center justify-between mb-4 px-1">
                     <span class="text-sm text-md-secondary">Diameter Type:</span>
@@ -206,7 +252,7 @@
                         <span id="res-main" class="font-mono font-bold text-white text-lg">---</span>
                     </div>
                     <div id="res-cone-details" class="hidden space-y-2">
-                         <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-400">Outer Radius (R):</span>
                             <span id="res-r-out" class="font-mono text-white">---</span>
                         </div>
@@ -220,30 +266,35 @@
 
             <!-- Actions -->
             <div class="mt-6 space-y-3">
-                <button id="btn-pdf" class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-primary shadow-lg">
-                    <span class="material-icons-round text-lg">picture_as_pdf</span>
+                <button id="btn-pdf"
+                    class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-primary shadow-lg">
+                    <img src="../../icons/picture_as_pdf.svg" class="w-6 h-6" alt="PDF" />
                     Download PDF Report
                 </button>
-                <button id="btn-dxf" class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-secondary border border-[#79747e]">
-                    <span class="material-icons-round text-lg">data_object</span>
+                <button id="btn-dxf"
+                    class="w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 btn-secondary border border-[#79747e]">
+                    <img src="../../icons/data_object.svg" class="w-6 h-6 invert" alt="DXF" />
                     Download DXF
                 </button>
             </div>
-            
+
             <div id="error-msg" class="mt-4 text-md-error text-sm text-center hidden"></div>
         </div>
-        
+
         <div class="mt-auto p-4 text-center text-xs text-gray-600 border-t border-[#36343b]">
-             Shell Rolling Master v0.02
+            Shell Rolling Master v0.02
         </div>
     </aside>
 
     <!-- MAIN: VISUALIZATION -->
     <main class="flex-1 flex flex-col h-full relative bg-md-base">
         <!-- Tabs -->
-        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#2b2930] rounded-full p-1 flex shadow-xl z-20 border border-[#49454f]">
-            <button id="tab-3d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-active">3D Model</button>
-            <button id="tab-2d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-inactive">2D Pattern</button>
+        <div
+            class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#2b2930] rounded-full p-1 flex shadow-xl z-20 border border-[#49454f]">
+            <button id="tab-3d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-active">3D
+                Model</button>
+            <button id="tab-2d" class="px-6 py-2 rounded-full text-sm font-medium transition-all tab-inactive">2D
+                Pattern</button>
         </div>
 
         <!-- 3D Container -->
@@ -257,7 +308,8 @@
 
         <!-- 2D Container -->
         <div id="view-2d" class="w-full h-full hidden flex items-center justify-center p-8 bg-[#18181b]">
-            <div id="svg-wrapper" class="w-full h-full max-w-4xl max-h-[80vh] border border-[#333] rounded-lg bg-[#121212] relative overflow-hidden flex items-center justify-center shadow-2xl">
+            <div id="svg-wrapper"
+                class="w-full h-full max-w-4xl max-h-[80vh] border border-[#333] rounded-lg bg-[#121212] relative overflow-hidden flex items-center justify-center shadow-2xl">
                 <!-- SVG injected here -->
             </div>
         </div>
@@ -321,13 +373,13 @@
 
         // --- THREE.JS SETUP ---
         let scene, camera, renderer, controls, mesh, edges;
-        
+
         function initThree() {
             const container = document.getElementById('canvas-container');
-            
+
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x141218);
-            
+
             // Grid
             const gridHelper = new THREE.GridHelper(5000, 50, 0x333333, 0x222222);
             scene.add(gridHelper);
@@ -335,11 +387,11 @@
             // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
-            
+
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(2000, 3000, 3000); 
+            dirLight.position.set(2000, 3000, 3000);
             scene.add(dirLight);
-            
+
             const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
             backLight.position.set(-2000, 1000, -2000);
             scene.add(backLight);
@@ -372,7 +424,7 @@
 
         function onResize() {
             const container = document.getElementById('canvas-container');
-            if(!container) return;
+            if (!container) return;
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -389,17 +441,17 @@
             const geometry = new THREE.BufferGeometry();
             const vertices = [];
             const indices = [];
-            const segments = 64; 
+            const segments = 64;
             const totalAngle = endAngle - startAngle;
-            
+
             for (let i = 0; i <= segments; i++) {
                 const theta = startAngle + (i / segments) * totalAngle;
                 const cos = Math.cos(theta);
                 const sin = Math.sin(theta);
-                vertices.push(r1_out * cos, h/2, -r1_out * sin);
-                vertices.push(r1_in * cos, h/2, -r1_in * sin);
-                vertices.push(r2_out * cos, -h/2, -r2_out * sin);
-                vertices.push(r2_in * cos, -h/2, -r2_in * sin);
+                vertices.push(r1_out * cos, h / 2, -r1_out * sin);
+                vertices.push(r1_in * cos, h / 2, -r1_in * sin);
+                vertices.push(r2_out * cos, -h / 2, -r2_out * sin);
+                vertices.push(r2_in * cos, -h / 2, -r2_in * sin);
             }
 
             for (let i = 0; i < segments; i++) {
@@ -426,13 +478,13 @@
             const rad = (deg) => (deg - 90) * Math.PI / 180;
             const startAngle = -angle / 2;
             const endAngle = angle / 2;
-            
+
             // 4 Corners
             const points = [
-                { x: rOut*Math.cos(rad(startAngle)), y: rOut*Math.sin(rad(startAngle)) },
-                { x: rOut*Math.cos(rad(endAngle)), y: rOut*Math.sin(rad(endAngle)) },
-                { x: rIn*Math.cos(rad(endAngle)), y: rIn*Math.sin(rad(endAngle)) },
-                { x: rIn*Math.cos(rad(startAngle)), y: rIn*Math.sin(rad(startAngle)) }
+                { x: rOut * Math.cos(rad(startAngle)), y: rOut * Math.sin(rad(startAngle)) },
+                { x: rOut * Math.cos(rad(endAngle)), y: rOut * Math.sin(rad(endAngle)) },
+                { x: rIn * Math.cos(rad(endAngle)), y: rIn * Math.sin(rad(endAngle)) },
+                { x: rIn * Math.cos(rad(startAngle)), y: rIn * Math.sin(rad(startAngle)) }
             ];
 
             // Check Top Extremum (Arc passing through 0 deg / -90 rad)
@@ -446,22 +498,22 @@
             // Actually, simply:
             // Right edge (X max) is at 0 rad (SVG). Input deg = 90.
             // Left edge (X min) is at PI rad (SVG). Input deg = 270 (-90 is top).
-            
+
             // If half angle > 90, then we cross the X axis
-            if (angle/2 >= 90) {
-                 points.push({ x: rOut, y: 0 }); // Right edge of outer
-                 points.push({ x: -rOut, y: 0 }); // Left edge of outer
+            if (angle / 2 >= 90) {
+                points.push({ x: rOut, y: 0 }); // Right edge of outer
+                points.push({ x: -rOut, y: 0 }); // Left edge of outer
             }
 
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             points.forEach(p => {
-                if(p.x < minX) minX = p.x;
-                if(p.x > maxX) maxX = p.x;
-                if(p.y < minY) minY = p.y;
-                if(p.y > maxY) maxY = p.y;
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.y > maxY) maxY = p.y;
             });
-            
-            return { minX, maxX, minY, maxY, width: maxX-minX, height: maxY-minY };
+
+            return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
         }
 
 
@@ -474,8 +526,8 @@
             state.kFactor = parseFloat(els.inputs.k.value);
             state.gap = parseFloat(els.inputs.gap.value);
             state.bendLines = parseInt(els.inputs.bend.value) || 0;
-            
-            els.inputs.radios.forEach(r => { if(r.checked) state.specType = r.value; });
+
+            els.inputs.radios.forEach(r => { if (r.checked) state.specType = r.value; });
 
             state.isValid = true;
             els.ui.error.classList.add('hidden');
@@ -485,7 +537,7 @@
                 return;
             }
 
-            const offset = 2 * state.kFactor * state.thickness; 
+            const offset = 2 * state.kFactor * state.thickness;
             let d1_neutral, d2_neutral;
 
             if (state.specType === 'ID') {
@@ -522,7 +574,7 @@
                 const R_small = Math.min(R1, R2);
                 const PatternRadiusOuter = (slantHeight * R_large) / (R_large - R_small);
                 const PatternRadiusInner = PatternRadiusOuter - slantHeight;
-                
+
                 let angleDeg = (360 * R_large) / PatternRadiusOuter;
                 const currentArc = (angleDeg / 360) * 2 * Math.PI * PatternRadiusOuter;
                 const newArc = currentArc - state.gap;
@@ -569,11 +621,11 @@
 
             if (state.specType === 'ID') {
                 r1_in = state.d1 / 2; r1_out = r1_in + t;
-                r2_in = state.mode === 'cone' ? state.d2/2 : r1_in; 
+                r2_in = state.mode === 'cone' ? state.d2 / 2 : r1_in;
                 r2_out = r2_in + t;
-            } else { 
+            } else {
                 r1_out = state.d1 / 2; r1_in = r1_out - t;
-                r2_out = state.mode === 'cone' ? state.d2/2 : r1_out;
+                r2_out = state.mode === 'cone' ? state.d2 / 2 : r1_out;
                 r2_in = r2_out - t;
             }
             if (r1_in < 0.1) r1_in = 0.1; if (r2_in < 0.1) r2_in = 0.1;
@@ -585,7 +637,7 @@
             if (gapAngle > 2 * Math.PI - 0.1) gapAngle = 2 * Math.PI - 0.1;
 
             const thetaLength = 2 * Math.PI - gapAngle;
-            const thetaStart = Math.PI/2 + gapAngle/2;
+            const thetaStart = Math.PI / 2 + gapAngle / 2;
 
             const geometry = createThickShellGeometry(r1_in, r1_out, r2_in, r2_out, state.h, thetaStart, thetaStart + thetaLength);
             mesh.geometry = geometry;
@@ -617,12 +669,12 @@
             }
 
             const maxDim = Math.max(bbox.w, bbox.h);
-            const fontSize = Math.max(12, maxDim * 0.02); 
+            const fontSize = Math.max(12, maxDim * 0.02);
             const strokeWidth = Math.max(1, maxDim * 0.002);
             const arrowSize = fontSize * 0.8;
 
             // Helper Arrow
-            const createArrow = (x1, y1, x2, y2, text, isVertical=false) => {
+            const createArrow = (x1, y1, x2, y2, text, isVertical = false) => {
                 const grp = document.createElementNS(ns, "g");
                 const color = "#938f99";
                 const line = document.createElementNS(ns, "line");
@@ -631,13 +683,13 @@
                 line.setAttribute("stroke", color);
                 line.setAttribute("stroke-width", strokeWidth);
                 line.setAttribute("class", "dim-line");
-                
+
                 const angle = Math.atan2(y2 - y1, x2 - x1);
                 const drawHead = (tx, ty, ang) => {
-                    const h1x = tx - arrowSize * Math.cos(ang - Math.PI/6);
-                    const h1y = ty - arrowSize * Math.sin(ang - Math.PI/6);
-                    const h2x = tx - arrowSize * Math.cos(ang + Math.PI/6);
-                    const h2y = ty - arrowSize * Math.sin(ang + Math.PI/6);
+                    const h1x = tx - arrowSize * Math.cos(ang - Math.PI / 6);
+                    const h1y = ty - arrowSize * Math.sin(ang - Math.PI / 6);
+                    const h2x = tx - arrowSize * Math.cos(ang + Math.PI / 6);
+                    const h2y = ty - arrowSize * Math.sin(ang + Math.PI / 6);
                     const p = document.createElementNS(ns, "polyline");
                     p.setAttribute("points", `${h1x},${h1y} ${tx},${ty} ${h2x},${h2y}`);
                     p.setAttribute("fill", "none"); p.setAttribute("stroke", color); p.setAttribute("stroke-width", strokeWidth);
@@ -645,8 +697,8 @@
                 };
 
                 grp.appendChild(line);
-                grp.appendChild(drawHead(x1, y1, angle + Math.PI)); 
-                grp.appendChild(drawHead(x2, y2, angle)); 
+                grp.appendChild(drawHead(x1, y1, angle + Math.PI));
+                grp.appendChild(drawHead(x2, y2, angle));
 
                 const txt = document.createElementNS(ns, "text");
                 const midX = (x1 + x2) / 2;
@@ -654,9 +706,9 @@
                 txt.textContent = text;
                 txt.setAttribute("font-size", fontSize);
                 txt.setAttribute("class", "dim-text");
-                
+
                 const dist = fontSize * 0.8;
-                if(isVertical) {
+                if (isVertical) {
                     txt.setAttribute("transform", `rotate(-90, ${midX}, ${midY}) translate(0, -${dist})`);
                     txt.setAttribute("x", midX); txt.setAttribute("y", midY);
                 } else {
@@ -670,20 +722,20 @@
                 const w = state.calc.flatLength;
                 const h = state.calc.flatWidth;
                 const rect = document.createElementNS(ns, "rect");
-                rect.setAttribute("x", -w/2); rect.setAttribute("y", -h/2);
+                rect.setAttribute("x", -w / 2); rect.setAttribute("y", -h / 2);
                 rect.setAttribute("width", w); rect.setAttribute("height", h);
                 rect.setAttribute("fill", "#2b2930"); rect.setAttribute("stroke", "#d0bcff"); rect.setAttribute("stroke-width", strokeWidth * 2);
                 g.appendChild(rect);
 
                 const dimOffset = fontSize * 2.5;
-                g.appendChild(createArrow(-w/2, h/2 + dimOffset, w/2, h/2 + dimOffset, `W=${w.toFixed(1)}`));
-                g.appendChild(createArrow(-w/2 - dimOffset, -h/2, -w/2 - dimOffset, h/2, `H=${h.toFixed(1)}`, true));
-                bbox.w += dimOffset*4; bbox.h += dimOffset*4;
+                g.appendChild(createArrow(-w / 2, h / 2 + dimOffset, w / 2, h / 2 + dimOffset, `W=${w.toFixed(1)}`));
+                g.appendChild(createArrow(-w / 2 - dimOffset, -h / 2, -w / 2 - dimOffset, h / 2, `H=${h.toFixed(1)}`, true));
+                bbox.w += dimOffset * 4; bbox.h += dimOffset * 4;
 
             } else {
                 const rOut = state.calc.rOut;
                 const rIn = state.calc.rIn;
-                const angle = state.calc.angle; 
+                const angle = state.calc.angle;
                 const rad = (deg) => (deg - 90) * Math.PI / 180;
                 const startAngle = -angle / 2;
                 const endAngle = angle / 2;
@@ -698,7 +750,7 @@
                 const y4 = Math.sin(rad(startAngle)) * rIn;
                 const largeArc = angle > 180 ? 1 : 0;
                 const d = [`M ${x1} ${y1}`, `A ${rOut} ${rOut} 0 ${largeArc} 1 ${x2} ${y2}`, `L ${x3} ${y3}`, `A ${rIn} ${rIn} 0 ${largeArc} 0 ${x4} ${y4}`, `Z`].join(" ");
-                
+
                 const path = document.createElementNS(ns, "path");
                 path.setAttribute("d", d);
                 path.setAttribute("fill", "#2b2930"); path.setAttribute("stroke", "#d0bcff"); path.setAttribute("stroke-width", strokeWidth * 2);
@@ -707,7 +759,7 @@
                 // Cone Dimensions (BBox)
                 const cb = getConeBBox(rOut, rIn, angle);
                 const dimOffset = fontSize * 3;
-                
+
                 // Width Arrow (Bottom)
                 g.appendChild(createArrow(cb.minX, cb.maxY + dimOffset, cb.maxX, cb.maxY + dimOffset, `W=${cb.width.toFixed(1)}`));
                 // Height Arrow (Left)
@@ -717,13 +769,13 @@
                 const centerX = (cb.minX + cb.maxX) / 2;
                 const centerY = (cb.minY + cb.maxY) / 2;
                 g.setAttribute("transform", `translate(${-centerX}, ${-centerY})`);
-                
-                bbox.w = cb.width + dimOffset*5;
-                bbox.h = cb.height + dimOffset*5;
+
+                bbox.w = cb.width + dimOffset * 5;
+                bbox.h = cb.height + dimOffset * 5;
             }
 
             const padding = fontSize * 4;
-            svg.setAttribute("viewBox", `${-bbox.w/2} ${-bbox.h/2} ${bbox.w} ${bbox.h}`);
+            svg.setAttribute("viewBox", `${-bbox.w / 2} ${-bbox.h / 2} ${bbox.w} ${bbox.h}`);
             container.appendChild(svg);
         }
 
@@ -732,7 +784,7 @@
             if (!state.isValid) return;
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            
+
             try {
                 const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
                 const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
@@ -743,8 +795,8 @@
 
             const pageWidth = 297, pageHeight = 210, margin = 10;
             doc.setFillColor(255, 255, 255); doc.rect(0, 0, pageWidth, pageHeight, 'F');
-            doc.setDrawColor(0); doc.setLineWidth(0.5); doc.rect(margin, margin, pageWidth - 2*margin, pageHeight - 2*margin);
-            
+            doc.setDrawColor(0); doc.setLineWidth(0.5); doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+
             // Title Block
             const tbWidth = 100, tbHeight = 40;
             const tbX = pageWidth - margin - tbWidth, tbY = pageHeight - margin - tbHeight;
@@ -759,7 +811,7 @@
             const startX = margin + 10;
             doc.setFontSize(14); doc.text("Rolling Parameters", startX, margin + 10);
             doc.setFontSize(10);
-            
+
             const params = [
                 ["Material (Thickness)", `${state.thickness} mm`],
                 ["K-Factor", `${state.kFactor}`],
@@ -776,7 +828,7 @@
                 params.push(["Sector Angle", `${state.calc.angle.toFixed(2)} deg`]);
                 params.push(["Outer Radius", `${state.calc.rOut.toFixed(2)} mm`]);
                 params.push(["Inner Radius", `${state.calc.rIn.toFixed(2)} mm`]);
-                
+
                 // Add BBox info to text
                 const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle);
                 params.push(["Total Width", `${cb.width.toFixed(1)} mm`]);
@@ -797,37 +849,37 @@
             doc.setLineWidth(0.3);
 
             const drawArrowPDF = (x1, y1, x2, y2, txt) => {
-                 doc.line(x1, y1, x2, y2);
-                 const ang = Math.atan2(y2-y1, x2-x1);
-                 const len = 2;
-                 doc.line(x1, y1, x1+len*Math.cos(ang+0.5), y1+len*Math.sin(ang+0.5));
-                 doc.line(x1, y1, x1+len*Math.cos(ang-0.5), y1+len*Math.sin(ang-0.5));
-                 doc.line(x2, y2, x2+len*Math.cos(ang+2.6), y2+len*Math.sin(ang+2.6)); // reversed head
-                 doc.line(x2, y2, x2+len*Math.cos(ang-2.6), y2+len*Math.sin(ang-2.6));
-                 doc.text(txt, (x1+x2)/2, (y1+y2)/2 - 1, { align: 'center' });
+                doc.line(x1, y1, x2, y2);
+                const ang = Math.atan2(y2 - y1, x2 - x1);
+                const len = 2;
+                doc.line(x1, y1, x1 + len * Math.cos(ang + 0.5), y1 + len * Math.sin(ang + 0.5));
+                doc.line(x1, y1, x1 + len * Math.cos(ang - 0.5), y1 + len * Math.sin(ang - 0.5));
+                doc.line(x2, y2, x2 + len * Math.cos(ang + 2.6), y2 + len * Math.sin(ang + 2.6)); // reversed head
+                doc.line(x2, y2, x2 + len * Math.cos(ang - 2.6), y2 + len * Math.sin(ang - 2.6));
+                doc.text(txt, (x1 + x2) / 2, (y1 + y2) / 2 - 1, { align: 'center' });
             };
 
             if (state.mode === 'cylinder') {
                 const w = state.calc.flatLength, h = state.calc.flatWidth;
                 const scale = Math.min(drawAreaW / w, drawAreaH / h) * 0.8;
                 const dw = w * scale, dh = h * scale;
-                const dx = cx - dw/2, dy = cy - dh/2;
-                
+                const dx = cx - dw / 2, dy = cy - dh / 2;
+
                 doc.rect(dx, dy, dw, dh);
-                drawArrowPDF(dx, dy+dh+5, dx+dw, dy+dh+5, `W=${w.toFixed(1)}`);
-                
+                drawArrowPDF(dx, dy + dh + 5, dx + dw, dy + dh + 5, `W=${w.toFixed(1)}`);
+
                 // Vertical
-                doc.text(`H=${h.toFixed(1)}`, dx-5, cy, { align: 'center', angle: 90 });
-                doc.line(dx-3, dy, dx-3, dy+dh);
-                doc.line(dx-4, dy, dx-2, dy); doc.line(dx-4, dy+dh, dx-2, dy+dh); // ticks
+                doc.text(`H=${h.toFixed(1)}`, dx - 5, cy, { align: 'center', angle: 90 });
+                doc.line(dx - 3, dy, dx - 3, dy + dh);
+                doc.line(dx - 4, dy, dx - 2, dy); doc.line(dx - 4, dy + dh, dx - 2, dy + dh); // ticks
             } else {
                 const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
                 const cb = getConeBBox(rOut, rIn, angle);
                 const scale = Math.min(drawAreaW / cb.width, drawAreaH / cb.height) * 0.8;
-                
+
                 const sROut = rOut * scale;
                 const sRIn = rIn * scale;
-                
+
                 // Map center of bbox to center of draw area
                 const shapeCenterX = (cb.minX + cb.maxX) / 2 * scale;
                 const shapeCenterY = (cb.minY + cb.maxY) / 2 * scale;
@@ -837,15 +889,15 @@
                 const rad = (deg) => (deg - 90) * Math.PI / 180;
                 const getP = (r, aDeg) => ({ x: ox + r * Math.cos(rad(aDeg)), y: oy + r * Math.sin(rad(aDeg)) });
 
-                const startA = -angle/2, endA = angle/2, steps=40, dAng=angle/steps;
-                for(let i=0; i<=steps; i++) {
-                    const p = getP(sROut, startA + i*dAng);
-                    i===0 ? doc.moveTo(p.x, p.y) : doc.lineTo(p.x, p.y);
+                const startA = -angle / 2, endA = angle / 2, steps = 40, dAng = angle / steps;
+                for (let i = 0; i <= steps; i++) {
+                    const p = getP(sROut, startA + i * dAng);
+                    i === 0 ? doc.moveTo(p.x, p.y) : doc.lineTo(p.x, p.y);
                 }
                 const pInEnd = getP(sRIn, endA);
                 doc.lineTo(pInEnd.x, pInEnd.y);
-                for(let i=steps; i>=0; i--) {
-                    const p = getP(sRIn, startA + i*dAng);
+                for (let i = steps; i >= 0; i--) {
+                    const p = getP(sRIn, startA + i * dAng);
                     doc.lineTo(p.x, p.y);
                 }
                 const pOutStart = getP(sROut, startA);
@@ -857,17 +909,23 @@
                 const scaledMaxX = ox + cb.maxX * scale;
                 const scaledMinY = oy + cb.minY * scale;
                 const scaledMaxY = oy + cb.maxY * scale;
-                
+
                 // Width
-                drawArrowPDF(scaledMinX, scaledMaxY+5, scaledMaxX, scaledMaxY+5, `W=${cb.width.toFixed(1)}`);
-                
+                drawArrowPDF(scaledMinX, scaledMaxY + 5, scaledMaxX, scaledMaxY + 5, `W=${cb.width.toFixed(1)}`);
+
                 // Height
                 const leftX = scaledMinX - 5;
-                doc.text(`H=${cb.height.toFixed(1)}`, leftX-2, (scaledMinY+scaledMaxY)/2, { align: 'center', angle: 90 });
+                doc.text(`H=${cb.height.toFixed(1)}`, leftX - 2, (scaledMinY + scaledMaxY) / 2, { align: 'center', angle: 90 });
                 doc.line(leftX, scaledMinY, leftX, scaledMaxY);
-                doc.line(leftX-1, scaledMinY, leftX+1, scaledMinY); // ticks
-                doc.line(leftX-1, scaledMaxY, leftX+1, scaledMaxY);
+                doc.line(leftX - 1, scaledMinY, leftX + 1, scaledMinY); // ticks
+                doc.line(leftX - 1, scaledMaxY, leftX + 1, scaledMaxY);
             }
+
+            // Footer Link
+            doc.setFontSize(10);
+            doc.setTextColor(30, 64, 175);
+            doc.textWithLink("cadautoscript.com", pageWidth - margin, pageHeight - 8, { url: "https://cadautoscript.com", align: "right" });
+            doc.setTextColor(0, 0, 0);
 
             doc.save('shell_rolling_report.pdf');
         }
@@ -881,26 +939,26 @@
 
         // Keep DXF and listeners same as before...
         function generateDXF() {
-             if (!state.isValid) return;
-             let content = "0\nSECTION\n2\nENTITIES\n";
-             if (state.mode === 'cylinder') {
-                 const w = state.calc.flatLength, h = state.calc.flatWidth;
-                 content += dxfPoly([[0,0], [w,0], [w,h], [0,h], [0,0]]);
-             } else {
-                 const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
-                 const points = [], steps = 72, rad = (deg) => deg * Math.PI / 180;
-                 for(let i=0; i<=steps; i++) points.push([Math.cos(rad(i*angle/steps))*rOut, Math.sin(rad(i*angle/steps))*rOut]);
-                 for(let i=steps; i>=0; i--) points.push([Math.cos(rad(i*angle/steps))*rIn, Math.sin(rad(i*angle/steps))*rIn]);
-                 points.push(points[0]);
-                 content += dxfPoly(points);
-             }
-             content += "0\nENDSEC\n0\nEOF\n";
-             const a = document.createElement('a');
-             a.href = URL.createObjectURL(new Blob([content], { type: 'application/dxf' }));
-             a.download = 'pattern.dxf'; a.click();
+            if (!state.isValid) return;
+            let content = "0\nSECTION\n2\nENTITIES\n";
+            if (state.mode === 'cylinder') {
+                const w = state.calc.flatLength, h = state.calc.flatWidth;
+                content += dxfPoly([[0, 0], [w, 0], [w, h], [0, h], [0, 0]]);
+            } else {
+                const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
+                const points = [], steps = 72, rad = (deg) => deg * Math.PI / 180;
+                for (let i = 0; i <= steps; i++) points.push([Math.cos(rad(i * angle / steps)) * rOut, Math.sin(rad(i * angle / steps)) * rOut]);
+                for (let i = steps; i >= 0; i--) points.push([Math.cos(rad(i * angle / steps)) * rIn, Math.sin(rad(i * angle / steps)) * rIn]);
+                points.push(points[0]);
+                content += dxfPoly(points);
+            }
+            content += "0\nENDSEC\n0\nEOF\n";
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type: 'application/dxf' }));
+            a.download = 'pattern.dxf'; a.click();
         }
         function dxfPoly(points) {
-            let s = "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n"; 
+            let s = "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n";
             points.forEach(p => s += `0\nVERTEX\n8\n0\n10\n${p[0].toFixed(4)}\n20\n${p[1].toFixed(4)}\n30\n0.0\n`);
             s += "0\nSEQEND\n"; return s;
         }
@@ -911,7 +969,7 @@
             // Toggle styles for buttons
             const active = ['bg-md-primary', 'text-md-onPrimary', 'shadow-md'];
             const inactive = ['text-[#ccc2dc]', 'hover:bg-[#36343b]'];
-            
+
             if (m === 'cylinder') {
                 els.modes.cyl.classList.add(...active); els.modes.cyl.classList.remove(...inactive);
                 els.modes.cone.classList.add(...inactive); els.modes.cone.classList.remove(...active);
@@ -922,14 +980,14 @@
             calculate();
         }
         function switchTab(t) {
-            els.tabs.t3d.classList.toggle('tab-active', t==='3d'); els.tabs.t3d.classList.toggle('tab-inactive', t!=='3d');
-            els.tabs.t2d.classList.toggle('tab-active', t==='2d'); els.tabs.t2d.classList.toggle('tab-inactive', t!=='2d');
-            els.tabs.v3d.classList.toggle('hidden', t!=='3d');
-            els.tabs.v2d.classList.toggle('hidden', t!=='2d');
-            if(t==='2d') update2D();
+            els.tabs.t3d.classList.toggle('tab-active', t === '3d'); els.tabs.t3d.classList.toggle('tab-inactive', t !== '3d');
+            els.tabs.t2d.classList.toggle('tab-active', t === '2d'); els.tabs.t2d.classList.toggle('tab-inactive', t !== '2d');
+            els.tabs.v3d.classList.toggle('hidden', t !== '3d');
+            els.tabs.v2d.classList.toggle('hidden', t !== '2d');
+            if (t === '2d') update2D();
         }
 
-        Object.values(els.inputs).forEach(i => i.length ? i.forEach(r=>r.addEventListener('change', calculate)) : i.addEventListener('input', calculate));
+        Object.values(els.inputs).forEach(i => i.length ? i.forEach(r => r.addEventListener('change', calculate)) : i.addEventListener('input', calculate));
         els.modes.cyl.addEventListener('click', () => setMode('cylinder'));
         els.modes.cone.addEventListener('click', () => setMode('cone'));
         els.tabs.t3d.addEventListener('click', () => switchTab('3d'));
@@ -940,4 +998,5 @@
         initThree(); calculate();
     </script>
 </body>
+
 </html>

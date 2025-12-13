@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../vendor/tailwindcss.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Совместимость трубных резьб</title>
     <!-- 1. Подключение Tailwind CSS -->
-    
+
     <!-- 2. Подключение Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="../../vendor/lucide.js"></script>
     <style>
         /* Дополнительные стили для имитации shadcn/ui и prose */
         body {
-            background-color: #f8fafc; /* bg-slate-50 */
-            color: #0f172a; /* bg-slate-900 */
+            background-color: #f8fafc;
+            /* bg-slate-50 */
+            color: #0f172a;
+            /* bg-slate-900 */
         }
+
         .card {
             background-color: white;
             border-radius: 0.5rem;
-            border: 1px solid #e2e8f0; /* border-slate-200 */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05); /* shadow-sm */
+            border: 1px solid #e2e8f0;
+            /* border-slate-200 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            /* shadow-sm */
         }
+
         .select-trigger {
             width: 100%;
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
             line-height: 1.25rem;
-            border: 1px solid #cbd5e1; /* border-slate-300 */
+            border: 1px solid #cbd5e1;
+            /* border-slate-300 */
             border-radius: 0.375rem;
             background-color: white;
             cursor: pointer;
@@ -39,6 +47,7 @@
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
         }
+
         .alert {
             position: relative;
             padding: 1rem;
@@ -46,6 +55,7 @@
             border-radius: 0.375rem;
             border: 1px solid;
         }
+
         .alert-icon {
             position: absolute;
             left: 1rem;
@@ -53,6 +63,7 @@
             width: 1.25rem;
             height: 1.25rem;
         }
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -63,15 +74,18 @@
             line-height: 1rem;
             border-width: 1px;
         }
+
         .tabs-list {
             display: inline-flex;
             height: 2.5rem;
             align-items: center;
             justify-content: center;
             border-radius: 0.375rem;
-            background-color: #f1f5f9; /* bg-slate-200 */
+            background-color: #f1f5f9;
+            /* bg-slate-200 */
             padding: 0.25rem;
         }
+
         .tab-trigger {
             display: inline-flex;
             align-items: center;
@@ -85,62 +99,80 @@
             cursor: pointer;
             border: none;
             background-color: transparent;
-            color: #475569; /* text-slate-600 */
+            color: #475569;
+            /* text-slate-600 */
         }
+
         .tab-trigger[data-state="active"] {
             background-color: white;
-            color: #0f172a; /* text-slate-900 */
+            color: #0f172a;
+            /* text-slate-900 */
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
+
         .tab-content {
             display: none;
             padding-top: 1rem;
         }
+
         .tab-content[data-state="active"] {
             display: block;
         }
+
         .prose {
-            color: #334155; /* text-slate-700 */
+            color: #334155;
+            /* text-slate-700 */
             line-height: 1.6;
         }
+
         .prose h3 {
             font-size: 1.25rem;
             line-height: 1.75rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
+
         .prose p {
             margin-bottom: 1rem;
         }
+
         .prose ul {
             list-style-type: disc;
             padding-left: 1.5rem;
             margin-bottom: 1rem;
         }
+
         .prose li {
             margin-bottom: 0.25rem;
         }
+
         .prose b {
             font-weight: 600;
         }
+
         /* Стили для переключателя языка */
         .lang-switcher {
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
             font-weight: 500;
             border-radius: 0.375rem;
-            border: 1px solid #cbd5e1; /* border-slate-300 */
+            border: 1px solid #cbd5e1;
+            /* border-slate-300 */
             background-color: white;
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
         }
+
         .lang-switcher[data-state="active"] {
-            background-color: #0f172a; /* bg-slate-900 */
+            background-color: #0f172a;
+            /* bg-slate-900 */
             color: white;
             border-color: #0f172a;
         }
+
         .lang-switcher:hover:not([data-state="active"]) {
-            background-color: #f1f5f9; /* bg-slate-100 */
+            background-color: #f1f5f9;
+            /* bg-slate-100 */
         }
 
         /* Стили для визуализации резьбы */
@@ -149,18 +181,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8fafc; /* bg-slate-50 */
+            background: #f8fafc;
+            /* bg-slate-50 */
             border-radius: 0.25rem;
-            border: 1px solid #e2e8f0; /* border-slate-200 */
+            border: 1px solid #e2e8f0;
+            /* border-slate-200 */
             padding: 0.5rem;
             overflow: hidden;
         }
+
         .thread-visual-container svg {
             max-height: 100%;
             width: auto;
         }
     </style>
 </head>
+
 <body class="p-4 md:p-6 lg:p-8">
 
     <div class="max-w-5xl mx-auto space-y-6">
@@ -235,7 +271,7 @@
                             <ul class="list-disc ml-4 space-y-1 text-sm" id="result-seal-list"></ul>
                         </div>
                     </div>
-                    
+
                     <div id="result-adapters" class="card border-dashed" style="display: none;">
                         <div class="p-4 space-y-2">
                             <div id="adapters-title" class="text-sm font-medium"></div>
@@ -257,14 +293,15 @@
                 <button id="tab-matrix" class="tab-trigger" data-tab="matrix" data-state="active"></button>
                 <button id="tab-help" class="tab-trigger" data-tab="help" data-state="inactive"></button>
             </div>
-            
+
             <!-- Контент таба 1: Матрица -->
             <div id="content-matrix" class="tab-content" data-state="active">
                 <div class="overflow-auto card p-4">
                     <table class="w-full border text-sm min-w-[600px]">
                         <thead>
                             <tr class="bg-slate-100">
-                                <th id="matrix-header" class="px-2 py-1 border text-left font-medium text-slate-800"></th>
+                                <th id="matrix-header" class="px-2 py-1 border text-left font-medium text-slate-800">
+                                </th>
                                 <th class="px-2 py-1 border font-medium text-slate-800">R</th>
                                 <th class="px-2 py-1 border font-medium text-slate-800">Rp</th>
                                 <th class="px-2 py-1 border font-medium text-slate-800">Rc</th>
@@ -291,7 +328,7 @@
     <!-- 3. JavaScript-логика -->
     <script>
         // --- 1. Глобальные данные ---
-        
+
         // Размеры не переводятся
         const SIZES = [
             "1/8", "1/4", "3/8", "1/2", "3/4", "1", "1-1/4", "1-1/2", "2",
@@ -307,7 +344,7 @@
             'R_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 L 65 30 H 30 M 30 35 H 66.5 M 30 40 H 68 M 30 45 H 69.5 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (R)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° /\\</text></svg>`,
             'Rp_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 V 80 M 40 25 H 60 M 40 30 H 60 M 40 35 H 60 M 40 40 H 60 M 40 45 H 60 M 40 50 H 60 M 40 55 H 60 M 40 60 H 60 M 40 65 H 60 M 40 70 H 60 M 40 75 H 60"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (Rp)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° ||</text></svg>`,
             'Rc_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 L 65 80 M 40 25 H 60.5 M 40 30 H 61 M 40 35 H 61.5 M 40 40 H 62 M 40 45 H 62.5 M 40 50 H 63 M 40 55 H 63.5 M 40 60 H 64 M 40 65 H 64.5 M 40 70 H 65 M 40 75 H 65"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (Rc)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">55° /\\</text></svg>`,
-            
+
             // --- NPT (60°) ---
             'NPT_male': `<svg viewBox="0 0 100 100" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 30 V 70 H 70 L 65 30 H 30 M 30 35 H 66.5 M 30 40 H 68 M 30 45 H 69.5 M 30 50 H 70 M 30 55 H 70 M 30 60 H 70 M 30 65 H 70"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Male (NPT)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
             'NPT_female': `<svg viewBox="0 0 100 100" class="text-red-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 20 H 75 V 80 H 25 V 20 M 40 20 V 80 M 60 20 L 65 80 M 40 25 H 60.5 M 40 30 H 61 M 40 35 H 61.5 M 40 40 H 62 M 40 45 H 62.5 M 40 50 H 63 M 40 55 H 63.5 M 40 60 H 64 M 40 65 H 64.5 M 40 70 H 65 M 40 75 H 65"></path><text x="5" y="15" font-size="10" fill="#333" class="font-sans">Female (NPT)</text><text x="65" y="15" font-size="10" fill="#333" class="font-sans">60° /\\</text></svg>`,
@@ -323,7 +360,7 @@
 
 
         // --- 3. Объект переводов ---
-        
+
         const translations = {
             // --- АНГЛИЙСКИЙ (EN) ---
             en: {
@@ -395,7 +432,7 @@
                 femaleShort: "female",
                 matrixLabel: (label) => label.split(" ")[0].replace("Compatible", "Comp.").replace("Incompatible", "Incomp."),
                 // Логика правил
-                evaluateCompatibility: function(male, female) {
+                evaluateCompatibility: function (male, female) {
                     const { standard: mStd, gender: mGen, size: mSize } = male;
                     const { standard: fStd, gender: fGen, size: fSize } = female;
 
@@ -410,23 +447,23 @@
 
                     if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Internal error: Invalid gender specified."], seal: [], adapters: [], standards: [] }; }
                     const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
-                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Standard BSPT taper pair: R (male) → Rc (female)"], ["Seal on thread: hemp/paste, PTFE tape, or sealant."], [], ["ISO 7-1"] ); }
-                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Allowed by ISO 7-1: R (taper) → Rp (parallel) with sealing on thread."], ["Seal on thread: PTFE/paste/tape."], [], ["ISO 7-1"] ); }
-                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Parallel BSPP: thread centers, sealing is not on the thread.", "Requires a flat gasket, bonded seal, or face seal/O-ring on the male part."], ["Flat gasket, copper/alum. washer, bonded seal, integrated O-ring (BSPP swivel/banjo, etc.)."], ["If no sealing surface – use adapter G→R/Rp."], ["ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Thread engagement is possible, but sealing is not on the thread.", "Requires a face seal/gasket on the port face (if provided)."], ["Flat gasket/washer, bonded seal, O-ring in port chamfer."], ["If no seat is present – use G male → R male adapter."], ["ISO 228-1", "ISO 7-1 (limited)"] ); }
-                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Mechanically engages (55°), but G (ISO 228) is not intended for sealing on the thread.", "Sealing is only possible if a face and gasket/seal are present."], ["Gasket/washer, bonded seal, if port has a flat face and chamfer."], ["Preferable to use Rp instead of G, or use an adapter."], ["ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Standard NPT taper pair."], ["Seal on thread: PTFE tape/paste/sealant."], [], ["ASME B1.20.1"] ); }
-                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["NPTF (Dryseal) pair – metal-to-metal seal without sealant when correctly machined."], ["No sealant per standard; minimal lubricant for assembly is allowed."], [], ["SAE J476", "ASME B1.20.3"] ); }
-                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Engages. Dry seal not guaranteed; use sealant."], ["PTFE tape/sealant."], [], ["SAE Practice"] ); }
-                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Engages. Sealant is recommended; dry seal is not achieved."], ["PTFE tape/sealant."], [], ["SAE Practice"] ); }
+                    if (mStd === "R" && fStd === "Rc") { return res("ok", ["Standard BSPT taper pair: R (male) → Rc (female)"], ["Seal on thread: hemp/paste, PTFE tape, or sealant."], [], ["ISO 7-1"]); }
+                    if (mStd === "R" && fStd === "Rp") { return res("ok", ["Allowed by ISO 7-1: R (taper) → Rp (parallel) with sealing on thread."], ["Seal on thread: PTFE/paste/tape."], [], ["ISO 7-1"]); }
+                    if (mStd === "G" && fStd === "G") { return res("caution", ["Parallel BSPP: thread centers, sealing is not on the thread.", "Requires a flat gasket, bonded seal, or face seal/O-ring on the male part."], ["Flat gasket, copper/alum. washer, bonded seal, integrated O-ring (BSPP swivel/banjo, etc.)."], ["If no sealing surface – use adapter G→R/Rp."], ["ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rp") { return res("caution", ["Thread engagement is possible, but sealing is not on the thread.", "Requires a face seal/gasket on the port face (if provided)."], ["Flat gasket/washer, bonded seal, O-ring in port chamfer."], ["If no seat is present – use G male → R male adapter."], ["ISO 228-1", "ISO 7-1 (limited)"]); }
+                    if (mStd === "R" && fStd === "G") { return res("caution", ["Mechanically engages (55°), but G (ISO 228) is not intended for sealing on the thread.", "Sealing is only possible if a face and gasket/seal are present."], ["Gasket/washer, bonded seal, if port has a flat face and chamfer."], ["Preferable to use Rp instead of G, or use an adapter."], ["ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res("ok", ["Standard NPT taper pair."], ["Seal on thread: PTFE tape/paste/sealant."], [], ["ASME B1.20.1"]); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res("ok", ["NPTF (Dryseal) pair – metal-to-metal seal without sealant when correctly machined."], ["No sealant per standard; minimal lubricant for assembly is allowed."], [], ["SAE J476", "ASME B1.20.3"]); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res("caution", ["Engages. Dry seal not guaranteed; use sealant."], ["PTFE tape/sealant."], [], ["SAE Practice"]); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res("caution", ["Engages. Sealant is recommended; dry seal is not achieved."], ["PTFE tape/sealant."], [], ["SAE Practice"]); }
                     const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
-                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) and BSP(55°) have different thread angles and pitches; partial engagement is possible, but seal and strength are not to standard."], ["Use an NPT ↔ BSP adapter (converter)."], ["Adapter NPT male ↔ R/Rp/G female or vice versa."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) and NPT(60°) are incompatible by standard; partial engagement without a seal is possible."], ["Use a BSP ↔ NPT adapter."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-parallel male with Rc-taper female: non-standard pair – does not provide a seal."], ["Use adapter G→R or an insert with a face seal."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"] ); }
-                    return res( "no", ["No standard pair for the selected combination or case not described."], ["Consider an adapter or changing the pair."], [], [] );
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res("no", ["NPT(60°) and BSP(55°) have different thread angles and pitches; partial engagement is possible, but seal and strength are not to standard."], ["Use an NPT ↔ BSP adapter (converter)."], ["Adapter NPT male ↔ R/Rp/G female or vice versa."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res("no", ["BSP(55°) and NPT(60°) are incompatible by standard; partial engagement without a seal is possible."], ["Use a BSP ↔ NPT adapter."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rc") { return res("no", ["G-parallel male with Rc-taper female: non-standard pair – does not provide a seal."], ["Use adapter G→R or an insert with a face seal."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"]); }
+                    return res("no", ["No standard pair for the selected combination or case not described."], ["Consider an adapter or changing the pair."], [], []);
                 }
             },
-            
+
             // --- РУССКИЙ (RU) ---
             ru: {
                 // Статический UI
@@ -497,7 +534,7 @@
                 femaleShort: "внутр.",
                 matrixLabel: (label) => label.split(" ")[0].replace("Совместимо", "Совм."),
                 // Логика правил (Оригинальная)
-                evaluateCompatibility: function(male, female) {
+                evaluateCompatibility: function (male, female) {
                     const { standard: mStd, gender: mGen, size: mSize } = male;
                     const { standard: fStd, gender: fGen, size: fSize } = female;
 
@@ -512,20 +549,20 @@
 
                     if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Внутренняя ошибка: указан неверный тип (gender)."], seal: [], adapters: [], standards: [] }; }
                     const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
-                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Стандартная коническая пара BSPT: R (наруж.) → Rc (внутр.)"], ["Герметизация по резьбе: лен/паста, PTFE-лента или герметик."], [], ["ISO 7-1"] ); }
-                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Допускается по ISO 7-1: R (коническая) → Rp (параллельная) с герметизацией по резьбе."], ["Герметизация по резьбе: PTFE/паста/лен."], [], ["ISO 7-1"] ); }
-                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Параллельная BSPP: резьба центрирует, герметизация не по резьбе.", "Нужна плоская прокладка, шайба с уплотнением (bonded seal) или торцевое уплотнение/O-ring на штуцере."], ["Плоская прокладка, медное/алюм. кольцо, bonded seal, встроенный O-ring (BSPP swivel/banjo и т.п.)."], ["Если нет уплотнительной поверхности – использовать переходник G→R/Rp."], ["ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Резьбовое сопряжение возможно, но герметизация не по резьбе.", "Требуется торцевое уплотнение/прокладка на плоскости корпуса (если предусмотрено)."], ["Плоская прокладка/washer, bonded seal, O-ring в фаске корпуса."], ["При отсутствии посадочного места – переходник G male → R male."], ["ISO 228-1", "ISO 7-1 (огранич.)"] ); }
-                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Механически свинчивается (55°), но G (ISO 228) сама по себе не предназначена для герметизации по резьбе.", "Возможна герметизация только при наличии плоскости и прокладки/уплотнения."], ["Прокладка/washer, bonded seal, если корпус имеет плоскость и фаску."], ["Предпочтительно использовать Rp вместо G или переходник."], ["ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Стандартная коническая пара NPT."], ["Герметизация по резьбе: PTFE-лента/паста/герметик."], [], ["ASME B1.20.1"] ); }
-                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["Пара NPTF (Dryseal) – металл-металл без герметика при корректном исполнении."], ["Без герметика по стандарту; допускается минимальная смазка для сборки."], [], ["SAE J476", "ASME B1.20.3"] ); }
-                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Свинчивается. Сухое уплотнение не гарантируется; использовать герметик."], ["PTFE-лента/герметик."], [], ["Практика SAE"] ); }
-                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Свинчивается. Рекомендуется герметик; сухое уплотнение не обеспечивается."], ["PTFE-лента/герметик."], [], ["Практика SAE"] ); }
+                    if (mStd === "R" && fStd === "Rc") { return res("ok", ["Стандартная коническая пара BSPT: R (наруж.) → Rc (внутр.)"], ["Герметизация по резьбе: лен/паста, PTFE-лента или герметик."], [], ["ISO 7-1"]); }
+                    if (mStd === "R" && fStd === "Rp") { return res("ok", ["Допускается по ISO 7-1: R (коническая) → Rp (параллельная) с герметизацией по резьбе."], ["Герметизация по резьбе: PTFE/паста/лен."], [], ["ISO 7-1"]); }
+                    if (mStd === "G" && fStd === "G") { return res("caution", ["Параллельная BSPP: резьба центрирует, герметизация не по резьбе.", "Нужна плоская прокладка, шайба с уплотнением (bonded seal) или торцевое уплотнение/O-ring на штуцере."], ["Плоская прокладка, медное/алюм. кольцо, bonded seal, встроенный O-ring (BSPP swivel/banjo и т.п.)."], ["Если нет уплотнительной поверхности – использовать переходник G→R/Rp."], ["ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rp") { return res("caution", ["Резьбовое сопряжение возможно, но герметизация не по резьбе.", "Требуется торцевое уплотнение/прокладка на плоскости корпуса (если предусмотрено)."], ["Плоская прокладка/washer, bonded seal, O-ring в фаске корпуса."], ["При отсутствии посадочного места – переходник G male → R male."], ["ISO 228-1", "ISO 7-1 (огранич.)"]); }
+                    if (mStd === "R" && fStd === "G") { return res("caution", ["Механически свинчивается (55°), но G (ISO 228) сама по себе не предназначена для герметизации по резьбе.", "Возможна герметизация только при наличии плоскости и прокладки/уплотнения."], ["Прокладка/washer, bonded seal, если корпус имеет плоскость и фаску."], ["Предпочтительно использовать Rp вместо G или переходник."], ["ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res("ok", ["Стандартная коническая пара NPT."], ["Герметизация по резьбе: PTFE-лента/паста/герметик."], [], ["ASME B1.20.1"]); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res("ok", ["Пара NPTF (Dryseal) – металл-металл без герметика при корректном исполнении."], ["Без герметика по стандарту; допускается минимальная смазка для сборки."], [], ["SAE J476", "ASME B1.20.3"]); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res("caution", ["Свинчивается. Сухое уплотнение не гарантируется; использовать герметик."], ["PTFE-лента/герметик."], [], ["Практика SAE"]); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res("caution", ["Свинчивается. Рекомендуется герметик; сухое уплотнение не обеспечивается."], ["PTFE-лента/герметик."], [], ["Практика SAE"]); }
                     const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
-                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) и BSP(55°) различаются по углу профиля и шагам; возможна частичная посадка, но герметичность и прочность не по стандарту."], ["Используйте переходник NPT ↔ BSP (конвертер)."], ["Переходник NPT male ↔ R/Rp/G female или наоборот."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) и NPT(60°) несовместимы по стандарту; возможна частичная посадка без герметичности."], ["Переходник BSP ↔ NPT."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-параллельная наружная с Rc-конусной внутренней: нестандартная пара – не обеспечивает герметизацию."], ["Переходник G→R или вставка с уплотнением по торцу."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"] ); }
-                    return res( "no", ["Нет стандартной пары для выбранной комбинации или случай не описан."], ["Рассмотрите переходник или изменение пары."], [], [] );
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res("no", ["NPT(60°) и BSP(55°) различаются по углу профиля и шагам; возможна частичная посадка, но герметичность и прочность не по стандарту."], ["Используйте переходник NPT ↔ BSP (конвертер)."], ["Переходник NPT male ↔ R/Rp/G female или наоборот."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res("no", ["BSP(55°) и NPT(60°) несовместимы по стандарту; возможна частичная посадка без герметичности."], ["Переходник BSP ↔ NPT."], ["BSP↔NPT adapter/union."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rc") { return res("no", ["G-параллельная наружная с Rc-конусной внутренней: нестандартная пара – не обеспечивает герметизацию."], ["Переходник G→R или вставка с уплотнением по торцу."], ["G male → R male + Rc female"], ["ISO 7-1", "ISO 228-1"]); }
+                    return res("no", ["Нет стандартной пары для выбранной комбинации или случай не описан."], ["Рассмотрите переходник или изменение пары."], [], []);
                 }
             },
 
@@ -599,7 +636,7 @@
                 femaleShort: "emane",
                 matrixLabel: (label) => label.split(" ")[0].replace("Ühilduv", "Ühil.").replace("piirangutega", "(piir.)").replace("Ei ühildu", "Ei üh."),
                 // Логика правил
-                evaluateCompatibility: function(male, female) {
+                evaluateCompatibility: function (male, female) {
                     const { standard: mStd, gender: mGen, size: mSize } = male;
                     const { standard: fStd, gender: fGen, size: fSize } = female;
 
@@ -614,20 +651,20 @@
 
                     if (mGen !== "male" || fGen !== "female") { return { level: "no", notes: ["Sisemine viga: määratud vale sugu (gender)."], seal: [], adapters: [], standards: [] }; }
                     const res = (level, notes, seal = [], adapters = [], standards = []) => ({ level, notes, seal, adapters, standards });
-                    if (mStd === "R" && fStd === "Rc") { return res( "ok", ["Standardne BSPT kooniline paar: R (isane) → Rc (emane)"], ["Tihendamine keermel: lina/pasta, PTFE-teip või hermeetik."], [], ["ISO 7-1"] ); }
-                    if (mStd === "R" && fStd === "Rp") { return res( "ok", ["Lubatud vastavalt ISO 7-1: R (kooniline) → Rp (paralleelne) tihendamisega keermel."], ["Tihendamine keermel: PTFE/pasta/teip."], [], ["ISO 7-1"] ); }
-                    if (mStd === "G" && fStd === "G") { return res( "caution", ["Paralleelne BSPP: keere tsentreerib, tihendamine ei toimu keermel.", "Vajalik on lame tihend, tihendiga seib (bonded seal) või otsatihend/O-rõngas liitmikul."], ["Lame tihend, vask/alumiiniumrõngas, bonded seal, integreeritud O-rõngas (BSPP pöörlev/banjo jne)."], ["Kui tihenduspinda pole – kasutage adapterit G→R/Rp."], ["ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rp") { return res( "caution", ["Keermestatud ühendus on võimalik, kuid tihendamine ei toimu keermel.", "Vajalik on otsatihend/tihend korpuse pinnal (kui see on ette nähtud)."], ["Lame tihend/seib, bonded seal, O-rõngas korpuse faasis."], ["Istme puudumisel – adapter G isane → R isane."], ["ISO 228-1", "ISO 7-1 (piiratud)"] ); }
-                    if (mStd === "R" && fStd === "G") { return res( "caution", ["Mehaaniliselt keeratav (55°), kuid G (ISO 228) ise pole mõeldud keermel tihendamiseks.", "Tihendamine on võimalik ainult pinna ja tihendi/rõnga olemasolul."], ["Tihend/seib, bonded seal, kui korpusel on pind ja faas."], ["Eelistatult kasutada G asemel Rp-d või adapterit."], ["ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "NPT" && fStd === "NPT") { return res( "ok", ["Standardne NPT kooniline paar."], ["Tihendamine keermel: PTFE-teip/pasta/hermeetik."], [], ["ASME B1.20.1"] ); }
-                    if (mStd === "NPTF" && fStd === "NPTF") { return res( "ok", ["NPTF (Dryseal) paar – metall-metall ilma hermeetikuta korrektse teostuse korral."], ["Standardi järgi ilma hermeetikuta; kokkupanekuks on lubatud minimaalne määrimine."], [], ["SAE J476", "ASME B1.20.3"] ); }
-                    if (mStd === "NPTF" && fStd === "NPT") { return res( "caution", ["Keeratav. Kuivtihendus pole tagatud; kasutage hermeetikut."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"] ); }
-                    if (mStd === "NPT" && fStd === "NPTF") { return res( "caution", ["Keeratav. Soovitatav on hermeetik; kuivtihendust ei tagata."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"] ); }
+                    if (mStd === "R" && fStd === "Rc") { return res("ok", ["Standardne BSPT kooniline paar: R (isane) → Rc (emane)"], ["Tihendamine keermel: lina/pasta, PTFE-teip või hermeetik."], [], ["ISO 7-1"]); }
+                    if (mStd === "R" && fStd === "Rp") { return res("ok", ["Lubatud vastavalt ISO 7-1: R (kooniline) → Rp (paralleelne) tihendamisega keermel."], ["Tihendamine keermel: PTFE/pasta/teip."], [], ["ISO 7-1"]); }
+                    if (mStd === "G" && fStd === "G") { return res("caution", ["Paralleelne BSPP: keere tsentreerib, tihendamine ei toimu keermel.", "Vajalik on lame tihend, tihendiga seib (bonded seal) või otsatihend/O-rõngas liitmikul."], ["Lame tihend, vask/alumiiniumrõngas, bonded seal, integreeritud O-rõngas (BSPP pöörlev/banjo jne)."], ["Kui tihenduspinda pole – kasutage adapterit G→R/Rp."], ["ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rp") { return res("caution", ["Keermestatud ühendus on võimalik, kuid tihendamine ei toimu keermel.", "Vajalik on otsatihend/tihend korpuse pinnal (kui see on ette nähtud)."], ["Lame tihend/seib, bonded seal, O-rõngas korpuse faasis."], ["Istme puudumisel – adapter G isane → R isane."], ["ISO 228-1", "ISO 7-1 (piiratud)"]); }
+                    if (mStd === "R" && fStd === "G") { return res("caution", ["Mehaaniliselt keeratav (55°), kuid G (ISO 228) ise pole mõeldud keermel tihendamiseks.", "Tihendamine on võimalik ainult pinna ja tihendi/rõnga olemasolul."], ["Tihend/seib, bonded seal, kui korpusel on pind ja faas."], ["Eelistatult kasutada G asemel Rp-d või adapterit."], ["ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "NPT" && fStd === "NPT") { return res("ok", ["Standardne NPT kooniline paar."], ["Tihendamine keermel: PTFE-teip/pasta/hermeetik."], [], ["ASME B1.20.1"]); }
+                    if (mStd === "NPTF" && fStd === "NPTF") { return res("ok", ["NPTF (Dryseal) paar – metall-metall ilma hermeetikuta korrektse teostuse korral."], ["Standardi järgi ilma hermeetikuta; kokkupanekuks on lubatud minimaalne määrimine."], [], ["SAE J476", "ASME B1.20.3"]); }
+                    if (mStd === "NPTF" && fStd === "NPT") { return res("caution", ["Keeratav. Kuivtihendus pole tagatud; kasutage hermeetikut."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"]); }
+                    if (mStd === "NPT" && fStd === "NPTF") { return res("caution", ["Keeratav. Soovitatav on hermeetik; kuivtihendust ei tagata."], ["PTFE-teip/hermeetik."], [], ["SAE praktika"]); }
                     const isBSP_family = (x) => ["R", "Rc", "Rp", "G"].includes(x);
-                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res( "no", ["NPT(60°) ja BSP(55°) erinevad profiilinurga ja sammude poolest; osaline sobivus on võimalik, kuid tihedus ja tugevus pole standardile vastavad."], ["Kasutage adapterit NPT ↔ BSP (konverter)."], ["Adapter NPT isane ↔ R/Rp/G emane või vastupidi."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res( "no", ["BSP(55°) ja NPT(60°) pole standardi järgi ühilduvad; osaline sobivus on võimalik ilma tiheduseta."], ["Adapter BSP ↔ NPT."], ["BSP↔NPT adapter/liitmik."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"] ); }
-                    if (mStd === "G" && fStd === "Rc") { return res( "no", ["G-paralleelne väline Rc-koonilise sisemisega: mittestandardne paar – ei taga tihendamist."], ["Adapter G→R või siseosa otsatihendiga."], ["G isane → R isane + Rc emane"], ["ISO 7-1", "ISO 228-1"] ); }
-                    return res( "no", ["Valitud kombinatsioonile pole standardset paari või juhtumit pole kirjeldatud."], ["Kaaluge adapterit või paari vahetamist."], [], [] );
+                    if ((mStd === "NPT" || mStd === "NPTF") && isBSP_family(fStd)) { return res("no", ["NPT(60°) ja BSP(55°) erinevad profiilinurga ja sammude poolest; osaline sobivus on võimalik, kuid tihedus ja tugevus pole standardile vastavad."], ["Kasutage adapterit NPT ↔ BSP (konverter)."], ["Adapter NPT isane ↔ R/Rp/G emane või vastupidi."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (isBSP_family(mStd) && (fStd === "NPT" || fStd === "NPTF")) { return res("no", ["BSP(55°) ja NPT(60°) pole standardi järgi ühilduvad; osaline sobivus on võimalik ilma tiheduseta."], ["Adapter BSP ↔ NPT."], ["BSP↔NPT adapter/liitmik."], ["ASME B1.20.1", "ISO 7-1", "ISO 228-1"]); }
+                    if (mStd === "G" && fStd === "Rc") { return res("no", ["G-paralleelne väline Rc-koonilise sisemisega: mittestandardne paar – ei taga tihendamist."], ["Adapter G→R või siseosa otsatihendiga."], ["G isane → R isane + Rc emane"], ["ISO 7-1", "ISO 228-1"]); }
+                    return res("no", ["Valitud kombinatsioonile pole standardset paari või juhtumit pole kirjeldatud."], ["Kaaluge adapterit või paari vahetamist."], [], []);
                 }
             },
         };
@@ -686,7 +723,7 @@
             triggers: [document.getElementById('tab-matrix'), document.getElementById('tab-help')],
             content: [document.getElementById('content-matrix'), document.getElementById('content-help')]
         };
-        
+
         const matrixBody = document.getElementById('matrix-body');
 
         // Функция-помощник: создание бейджа
@@ -734,7 +771,7 @@
             // Восстанавливаем значения
             selects.left.standard.value = l_std || "R";
             selects.left.size.value = l_sz || "1/2";
-            
+
             selects.right.standard.value = r_std || "Rc";
             selects.right.size.value = r_sz || "1/2";
         }
@@ -779,7 +816,7 @@
             // 5. Обновить нормативы
             if (result.standards.length > 0) {
                 results.standards.style.display = 'flex';
-                results.standardsList.innerHTML = result.standards.map(s => 
+                results.standardsList.innerHTML = result.standards.map(s =>
                     `<span class="badge bg-slate-100 text-slate-800 border-slate-300">${s}</span>`
                 ).join('');
             } else {
@@ -814,7 +851,7 @@
                 });
             });
         }
-        
+
         // Функция: Заполнение легенды
         function populateLegend() {
             const tr = translations[currentLang];
@@ -842,7 +879,7 @@
                     if (level === 'ok') toneClass = 'bg-green-50 text-green-900';
                     else if (level === 'caution') toneClass = 'bg-yellow-50 text-yellow-900';
                     else toneClass = 'bg-red-50 text-red-900';
-                    
+
                     html += `<td class="px-2 py-1 text-xs text-center border ${toneClass}">${label}</td>`;
                 }
                 html += '</tr>';
@@ -888,7 +925,7 @@
 
 
         // --- 5. Запуск при загрузке страницы ---
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Настроить табы (не зависит от языка)
             initTabs();
@@ -896,7 +933,7 @@
             // 2. Назначить слушателей событий
             Object.values(selects.left).forEach(sel => sel.addEventListener('change', updateResult));
             Object.values(selects.right).forEach(sel => sel.addEventListener('change', updateResult));
-            
+
             document.querySelectorAll('.lang-switcher').forEach(button => {
                 button.addEventListener('click', () => {
                     updateLanguage(button.dataset.lang);
@@ -904,7 +941,7 @@
             });
 
             // 3. Установить язык по умолчанию (Английский)
-            updateLanguage('en'); 
+            updateLanguage('en');
 
             // 4. Инициализировать все иконки (один раз при первой загрузке)
             lucide.createIcons();
@@ -912,7 +949,5 @@
 
     </script>
 </body>
+
 </html>
-
-
-
