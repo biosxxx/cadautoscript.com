@@ -559,7 +559,7 @@ export default function MdxPostEditor() {
       try {
         const compiled = await compile(source, {
           outputFormat: 'function-body',
-          development: true,
+          development: false,
           providerImportSource: '@mdx-js/react',
           remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkGfm],
           rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, {behavior: 'wrap'}]],
