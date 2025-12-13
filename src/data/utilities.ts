@@ -133,6 +133,14 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Regex or literal find/replace', 'Prefix/suffix + numbering', 'ZIP download with conflicts handled'],
     href: '/utilities/file-renamer/',
   },
+  {
+    id: 'folder-structure-builder',
+    name: 'Folder Structure Builder',
+    description: 'Design folder trees, import JSON or ZIP, and export bash/PowerShell scaffold scripts.',
+    tech: 'React + JSZip',
+    standards: 'Client-side',
+    features: ['JSON/ZIP import', 'Bash/PowerShell scripts', 'ZIP + JSON export'],
+    href: '/utilities/folder-structure-builder/',
+  },
 ];
-
 

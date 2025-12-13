@@ -12,7 +12,8 @@ export type UtilityPageSlug =
   | 'pdf-master'
   | 'qr-master'
   | 'pdf-bom-extractor'
-  | 'file-renamer';
+  | 'file-renamer'
+  | 'folder-structure-builder';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -196,12 +197,25 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
     title: 'Batch File Renamer',
     subtitle: 'Web utility - Bulk rename and export as ZIP',
     description:
-      'Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download—all locally.',
+      'Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download-all locally.',
     about:
       'Upload multiple files, preview automatic renames with regex or literal find/replace, add prefixes/suffixes, change casing, apply numbering, and download the renamed set as a ZIP without sending files anywhere.',
     tags: ['Files', 'Rename', 'Offline'],
     note: 'Runs fully client-side. ZIP creation and name conflict handling stay in your browser.',
     features: ['Regex or literal find/replace', 'Prefix/suffix + numbering', 'ZIP download with conflict handling'],
+    scriptType: 'module',
+  },
+  'folder-structure-builder': {
+    slug: 'folder-structure-builder',
+    title: 'Folder Structure Builder',
+    subtitle: 'Web utility - Plan a scaffold, export scripts, and download ZIPs',
+    description:
+      'Design folder trees from scratch or imports, then export ready-to-run bash/PowerShell scripts, JSON presets, or a ZIP scaffold.',
+    about:
+      'Map out project folder structures quickly, import an existing layout from JSON or ZIP, and export bash or PowerShell scripts that recreate the same scaffold on any machine. Everything runs locally in the browser.',
+    tags: ['Folders', 'Scaffold', 'Offline'],
+    note: 'Imports stay on your device. Download JSON or ZIP outputs to share presets with your team.',
+    features: ['Add folders/files inline', 'Import JSON or ZIP trees', 'Export bash/PowerShell scripts', 'Download ZIP scaffold or JSON preset'],
     scriptType: 'module',
   },
 };
