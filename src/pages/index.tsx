@@ -139,9 +139,9 @@ export default function Home(): ReactNode {
             <Link className="button button--primary" href="/docs/utilities/embed-calculators">
               Embed utilities
             </Link>
-            <a className="button button--secondary" href="/utilities/pdf-number-extractor/" data-nobrokenlinkcheck>
+            <Link className="button button--secondary" to="/doc-parser">
               Launch Doc Parser
-            </a>
+            </Link>
           </div>
         </section>
       </main>
