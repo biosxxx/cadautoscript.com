@@ -8,8 +8,6 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--shell-bg);
-  color: #0f172a;
 }
 
 a {
