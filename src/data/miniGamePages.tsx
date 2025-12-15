@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-export type MiniGameSlug = 'engineering-blueprint-ncr';
+export type MiniGameSlug = 'engineering-blueprint-ncr' | 'pressure-vessel-tycoon';
 
 export type MiniGamePageConfig = {
   slug: MiniGameSlug;
@@ -43,5 +43,28 @@ export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
       'Instant fail on defect contact',
     ],
     scriptType: 'defer',
+  },
+  'pressure-vessel-tycoon': {
+    slug: 'pressure-vessel-tycoon',
+    title: 'Pressure Vessel Tycoon',
+    subtitle: 'Mini game - Factory builder for pressure-vessel production',
+    description:
+      'Lay out conveyors, cutters, welders, and export bays to automate a pressure-vessel line. Avoid jams/decay, upgrade to Mk IV, and use blueprints for fast expansion.',
+    about: (
+      <>
+        Build a compact factory that turns raw steel and parts into finished pressure vessels. Balance two feeder lines
+        (plates and flanges), route them with conveyors, and chain Cutter → Assembler → Welder → Painter → Export.
+        Machines can overheat if outputs clog or decay if starved, so keep throughput healthy and cash flowing.
+      </>
+    ),
+    tags: ['Mini game', 'Factory sim', 'Automation'],
+    note: 'Runs in-browser with Phaser + React. No sign-in required.',
+    features: [
+      'Dual-line logistics: steel plates plus flange parts',
+      'Overheat/decay hazards if buffers clog or starve',
+      'Upgrades (Mk I–IV) and blueprint copy/paste',
+    ],
+    scriptType: 'module',
+    reactionSlug: 'mini-pressure-vessel-tycoon',
   },
 };
