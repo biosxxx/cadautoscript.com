@@ -13,7 +13,8 @@ export type UtilityPageSlug =
   | 'qr-master'
   | 'pdf-bom-extractor'
   | 'file-renamer'
-  | 'folder-structure-builder';
+  | 'folder-structure-builder'
+  | 'magnetic-level-gauge-configurator';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -216,6 +217,23 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
     tags: ['Folders', 'Scaffold', 'Offline'],
     note: 'Imports stay on your device. Download JSON or ZIP outputs to share presets with your team.',
     features: ['Add folders/files inline', 'Import JSON or ZIP trees', 'Export bash/PowerShell scripts', 'Download ZIP scaffold or JSON preset'],
+    scriptType: 'module',
+  },
+  'magnetic-level-gauge-configurator': {
+    slug: 'magnetic-level-gauge-configurator',
+    title: 'Magnetic Level Gauge Configurator',
+    subtitle: 'Web utility - Configure MLG specs and export datasheets',
+    description:
+      'Configure magnetic level gauge dimensions, connections, and options with a live sketch and PDF datasheet export.',
+    about:
+      'Set process connections, vent/drain options, materials, and project data, then export a PDF technical datasheet with a preliminary sketch.',
+    tags: ['Instrumentation', 'Datasheets', 'Piping'],
+    note: 'Runs entirely in the browser. The PDF is generated locally when you export the data sheet.',
+    features: [
+      'Process connection presets (DIN, ANSI, weld/thread)',
+      'Live SVG preview for key dimensions',
+      'PDF export with specs and sketch',
+    ],
     scriptType: 'module',
   },
 };

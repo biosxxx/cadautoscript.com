@@ -142,5 +142,14 @@ export const utilities: UtilityDescriptor[] = [
     features: ['JSON/ZIP import', 'Bash/PowerShell scripts', 'ZIP + JSON export'],
     href: '/utilities/folder-structure-builder/',
   },
+  {
+    id: 'magnetic-level-gauge-configurator',
+    name: 'Magnetic Level Gauge Configurator',
+    description:
+      'Configure magnetic level gauge connections, dimensions, and options, then export a PDF datasheet.',
+    tech: 'React + SVG',
+    standards: 'DIN / EN + ASME / ANSI',
+    features: ['Process connection presets', 'Live SVG sketch', 'PDF datasheet export'],
+    href: '/utilities/magnetic-level-gauge-configurator/',
+  },
 ];
-
