@@ -35,7 +35,7 @@
   <script type="text/babel">
 const { useState, useMemo, useEffect, useRef } = React;
 
-// --- ICON DEFINITIONS (Expanded set) ---
+// --- ICON DEFINITIONS ---
 const ICONS = {
   "activity": [["path",{"d":"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2","key":"169zse"}]],
   "download": [["path",{"d":"M12 15V3","key":"m9g1x1"}],["path",{"d":"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4","key":"ih7n3h"}],["path",{"d":"m7 10 5 5 5-5","key":"brsn70"}]],
@@ -79,7 +79,6 @@ const Icon = ({ name, size = 16, className = '' }) => {
   );
 };
 
-// Component definitions using the Icon wrapper
 const Activity = (props) => <Icon name="activity" {...props} />;
 const Download = (props) => <Icon name="download" {...props} />;
 const Layers = (props) => <Icon name="layers" {...props} />;
@@ -119,32 +118,16 @@ const App = () => {
     pipeSize: '60.3 x 2.77 mm (2" sch. 10)',
     ctoc: 500,
     specificGravity: 1.0,
-    
-    // Process Side Connection - Unified State
     processConn: {
-      category: 'DIN', // DIN, ANSI, Weld/Thread
+      category: 'DIN',
       size: 'DN 25',
       rating: 'PN 40',
       facing: 'RF',
       detail: 'Butt Weld' 
     },
-    
-    topConn: {
-      category: 'Plug',
-      size: '1/2"',
-      standard: 'NPT'
-    },
-    bottomConn: {
-      category: 'Plug',
-      size: '1/2"',
-      standard: 'NPT'
-    },
-
-    valves: {
-      side: false,
-      top: false,
-      bottom: false
-    },
+    topConn: { category: 'Plug', size: '1/2"', standard: 'NPT' },
+    bottomConn: { category: 'Plug', size: '1/2"', standard: 'NPT' },
+    valves: { side: false, top: false, bottom: false },
     options: {
       switches: false,
       sensorTop: true,
@@ -171,17 +154,13 @@ const App = () => {
 
   const materials = ['Stainless steel 316L (1.4404)', 'Stainless steel 304', 'PP', 'PVC', 'PVDF', 'PE', 'Monel', 'Titanium', 'Hastelloy', '254SMO/6Mo'];
   const pipeSizes = ['88.9 x 2 mm', '88.9 x 2.9 mm', '88.9 x 3.05 mm', '88.9 x 5.49 mm', '60.3 x 2 mm', '60.3 x 2.77 mm (2" sch. 10)'];
-  
   const dinSizes = ['DN 15', 'DN 20', 'DN 25', 'DN 32', 'DN 40', 'DN 50'];
   const dinRatings = ['PN 16', 'PN 40', 'PN 63', 'PN 100', 'PN 160'];
-  
   const ansiSizes = ['1/4"', '1/2"', '3/4"', '1"', '1-1/4"', '1-1/2"', '2"'];
   const ansiRatings = ['300#', '600#', '900#', '1500#', '2500#'];
   const ansiFacings = ['RF', 'RTJ'];
-
   const wtTypes = ['Socket Weld', 'Butt Weld', 'Male Thread', 'Female Thread'];
   const wtSizes = ['1/4"', '1/2"', '3/4"', '1"'];
-
   const ventDrainCategories = ['Plug', 'Valve', 'Flange', 'None'];
 
   const dim = useMemo(() => {
@@ -194,24 +173,13 @@ const App = () => {
     const centerY = svgHeight / 2;
     const upperY = centerY - (ctocPx / 2);
     const lowerY = centerY + (ctocPx / 2);
-    
     const scaleFactor = ctocPx / displayCtoc;
     const aDist = Math.max(80 * scaleFactor, 50); 
     const bDist = Math.max(120 * scaleFactor, 70);
-
-    const isBigPipe = config.pipeSize && config.pipeSize.includes('88.9');
+    const isBigPipe = config.pipeSize.includes('88.9');
     const chamberWidth = isBigPipe ? 38 : 28;
 
-    return {
-      upperY,
-      lowerY,
-      chamberTop: upperY - aDist,
-      chamberBottom: lowerY + bDist,
-      ctocPx,
-      scaleFactor,
-      svgHeight,
-      chamberWidth
-    };
+    return { upperY, lowerY, chamberTop: upperY - aDist, chamberBottom: lowerY + bDist, ctocPx, scaleFactor, svgHeight, chamberWidth };
   }, [config.ctoc, config.pipeSize]);
 
   const updateConfig = (field, value) => setConfig(prev => ({ ...prev, [field]: value }));
@@ -319,12 +287,15 @@ const App = () => {
       { label: 'Operating Conditions', value: `${config.project.temperature} °C / ${config.project.pressure} bar` }
     ]);
 
-    // Updated Section 3 to include Add-ons details
+    // Updated Section 3 to include Add-ons details properly formatted
     const activeAddons = [];
-    if (config.options.switches) activeAddons.push(`Sensors (${config.options.sensorTop ? 'Top' : ''}${config.options.sensorTop && config.options.sensorBottom ? ' & ' : ''}${config.options.sensorBottom ? 'Bottom' : ''})`);
-    if (config.options.heatingJacket) activeAddons.push('Heating Jacket');
-    if (config.options.remoteMST) activeAddons.push('Remote MST Transmitter');
-    if (config.options.calibratedScale) activeAddons.push(`Calibrated Scale (${config.options.scaleUnit})`);
+    if (config.options.switches) {
+        if (config.options.sensorTop) activeAddons.push("Sensor: Top Switch");
+        if (config.options.sensorBottom) activeAddons.push("Sensor: Bottom Switch");
+    }
+    if (config.options.heatingJacket) activeAddons.push("Accessory: Heating Jacket");
+    if (config.options.remoteMST) activeAddons.push("Accessory: Remote MST Transmitter (4-20mA)");
+    if (config.options.calibratedScale) activeAddons.push(`Accessory: Calibrated Scale (${config.options.scaleUnit})`);
 
     section('3. Connections & Accessories', [
       { label: 'Vent (Top)', value: `${config.topConn?.category} ${config.topConn?.size} ${config.topConn?.standard || ''}` },
@@ -353,15 +324,12 @@ const App = () => {
     doc.save(`MLG_Spec_${config.project.orderNumber || 'Datasheet'}.pdf`);
   };
 
-  // Improved SVG Helper for Connections
-  // Now handles both visually distinct flanges/threads and text labels
   const ConnectionGraphic = ({ x, y, data, hasValve, side = 'left', chamberWidth }) => {
     const isLeft = side === 'left';
     const offset = chamberWidth / 2;
     const cat = data?.category || 'DIN';
     const isWeldThread = cat.includes('Weld') || cat.includes('Thread');
     
-    // Label Generation
     let label = '';
     if (isWeldThread) {
       label = `${data?.detail} ${data?.size}`;
@@ -371,10 +339,7 @@ const App = () => {
 
     return (
       <g transform={`translate(${x}, ${y})`}>
-        {/* Main Stub */}
         <rect x={isLeft ? -40 - offset : offset} y="-6" width="40" height="12" fill="#555" />
-        
-        {/* Valve Icon */}
         {hasValve && (
           <g transform={`translate(${isLeft ? -25 - offset : 25 + offset}, 0)`}>
             <path d="M -8 -8 L 8 8 L 8 -8 L -8 8 Z" fill="#444" stroke="#888" strokeWidth="1" />
@@ -382,37 +347,15 @@ const App = () => {
             <rect x="-6" y="-14" width="12" height="3" rx="1" fill="#cc3333" />
           </g>
         )}
-
-        {/* Connection End Graphic */}
-        {!isWeldThread && (
-          // Flange (DIN/ANSI)
-          <rect x={isLeft ? -55 - offset : 40 + offset} y="-18" width="15" height="36" rx="2" fill="#333" stroke="#666" strokeWidth="1" />
-        )}
-        
+        {!isWeldThread && <rect x={isLeft ? -55 - offset : 40 + offset} y="-18" width="15" height="36" rx="2" fill="#333" stroke="#666" strokeWidth="1" />}
         {data?.detail?.includes('Thread') && (
-          // Threaded Visual
           <g transform={`translate(${isLeft ? -48 - offset : 40 + offset}, -8)`}>
              {[0, 4, 8, 12].map(i => <line key={i} x1="0" y1={i} x2="8" y2={i} stroke="#888" strokeWidth="1" />)}
              <rect x="0" y="0" width="8" height="16" fill="rgba(255,255,255,0.1)" stroke="none" />
           </g>
         )}
-
-        {data?.detail?.includes('Weld') && (
-          // Weld Visual (V-shape)
-          <path d={`M ${isLeft ? -40 - offset : 40 + offset} -6 L ${isLeft ? -48 - offset : 48 + offset} 0 L ${isLeft ? -40 - offset : 40 + offset} 6`} fill="none" stroke="#555" strokeWidth="2" />
-        )}
-
-        {/* Text Label */}
-        <text 
-          x={isLeft ? -60 - offset : 60 + offset} 
-          y="4" 
-          fill="#444" 
-          fontSize="10" 
-          fontWeight="bold" 
-          textAnchor={isLeft ? 'end' : 'start'}
-        >
-          {label}
-        </text>
+        {data?.detail?.includes('Weld') && <path d={`M ${isLeft ? -40 - offset : 40 + offset} -6 L ${isLeft ? -48 - offset : 48 + offset} 0 L ${isLeft ? -40 - offset : 40 + offset} 6`} fill="none" stroke="#555" strokeWidth="2" />}
+        <text x={isLeft ? -60 - offset : 60 + offset} y="4" fill="#444" fontSize="10" fontWeight="bold" textAnchor={isLeft ? 'end' : 'start'}>{label}</text>
       </g>
     );
   };
@@ -446,20 +389,15 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-gray-200 font-sans p-4 md:p-8 selection:bg-blue-500/30">
-      {/* Header Bar */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 border-b border-white/5 pb-8">
         <div className="flex items-center gap-6">
           <div className="bg-blue-600/10 p-4 rounded-2xl border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
             <Activity className="text-blue-500 w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic leading-none">
-              Magnetic Level Gauge
-            </h1>
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic leading-none">Magnetic Level Gauge</h1>
             <div className="flex items-center gap-2 text-gray-500 text-sm mt-2 uppercase tracking-widest font-bold font-mono">
-              <span>Technical Configurator</span>
-              <ChevronRight size={14} />
-              <span className="text-blue-500/80">Rev 0.3.4 beta</span>
+              <span>Technical Configurator</span><ChevronRight size={14} /><span className="text-blue-500/80">Rev 0.3.4 beta</span>
             </div>
           </div>
         </div>
@@ -469,15 +407,10 @@ const App = () => {
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Extensive Inputs */}
         <div className="lg:col-span-5 space-y-8 h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
           
-          {/* Project Info */}
           <section className="bg-[#16161a] p-8 rounded-3xl shadow-xl border border-white/5">
-            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-blue-400 flex items-center gap-2">
-              <ClipboardList size={18} /> Project & Order Data
-            </h2>
+            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-blue-400 flex items-center gap-2"><ClipboardList size={18} /> Project & Order Data</h2>
             <div className="grid grid-cols-1 gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -492,152 +425,81 @@ const App = () => {
                   </div>
                 </div>
               </div>
-
               <div className="space-y-2 pt-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Design Standard & Certs</label>
                 <div className="flex gap-2">
-                   <select 
-                     value={config.project.standard} 
-                     onChange={(e) => {
-                       const val = e.target.value;
-                       updateProject('standard', val);
-                       if (val === 'ASME / ANSI') {
-                         updateProject('certificates', 'ASME B31.3 / ASTM MTR');
-                         updateConfig('pipeSize', '60.3 x 2.77 mm (2" sch. 10)');
-                         handleProcessCategoryChange('ANSI');
-                       } else {
-                         updateProject('certificates', 'EN 10204 3.1');
-                         updateConfig('pipeSize', '60.3 x 2 mm');
-                         handleProcessCategoryChange('DIN');
-                       }
-                     }}
-                     className="flex-1 bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50 font-bold appearance-none"
-                   >
-                     <option>DIN / EN</option>
-                     <option>ASME / ANSI</option>
+                   <select value={config.project.standard} onChange={(e) => { const val = e.target.value; updateProject('standard', val); if (val === 'ASME / ANSI') { updateProject('certificates', 'ASME B31.3 / ASTM MTR'); updateConfig('pipeSize', '60.3 x 2.77 mm (2" sch. 10)'); handleProcessCategoryChange('ANSI'); } else { updateProject('certificates', 'EN 10204 3.1'); updateConfig('pipeSize', '60.3 x 2 mm'); handleProcessCategoryChange('DIN'); } }} className="flex-1 bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50 font-bold appearance-none">
+                     <option>DIN / EN</option><option>ASME / ANSI</option>
                    </select>
-                   <input 
-                    type="text" 
-                    value={config.project.certificates} 
-                    onChange={(e) => updateProject('certificates', e.target.value)}
-                    className="flex-1 bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
+                   <input type="text" value={config.project.certificates} onChange={(e) => updateProject('certificates', e.target.value)} className="flex-1 bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50" />
                 </div>
               </div>
-
               <div className="space-y-1 pt-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Notes / Comments</label>
-                <textarea 
-                  value={config.project.comments} 
-                  onChange={(e) => updateProject('comments', e.target.value)}
-                  placeholder="Additional requirements, tag numbers, or special instructions..."
-                  className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm"
-                />
+                <textarea value={config.project.comments} onChange={(e) => updateProject('comments', e.target.value)} placeholder="Additional requirements..." className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm" />
               </div>
             </div>
           </section>
 
-          {/* Process Connection Detail */}
           <section className="bg-[#16161a] p-8 rounded-3xl shadow-xl border border-white/5">
-            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-indigo-400 flex items-center gap-2">
-              <Layers size={18} /> Process Connections (Side)
-            </h2>
+            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-indigo-400 flex items-center gap-2"><Layers size={18} /> Process Connections (Side)</h2>
             <div className="space-y-4">
               <div className="flex gap-1 bg-[#1c1c21] p-1 rounded-xl">
                 {['DIN', 'ANSI', 'Weld/Thread'].map(cat => (
-                  <button 
-                    key={cat}
-                    onClick={() => handleProcessCategoryChange(cat)}
-                    className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${config.processConn?.category === cat ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                  >
-                    {cat}
-                  </button>
+                  <button key={cat} onClick={() => handleProcessCategoryChange(cat)} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${config.processConn?.category === cat ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}>{cat}</button>
                 ))}
               </div>
-
               {config.processConn?.category === 'DIN' && (
                 <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
-                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
-                    {dinSizes.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                  <select value={config.processConn.rating} onChange={(e) => updateSubConfig('processConn', 'rating', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
-                    {dinRatings.map(r => <option key={r}>{r}</option>)}
-                  </select>
+                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">{dinSizes.map(s => <option key={s}>{s}</option>)}</select>
+                  <select value={config.processConn.rating} onChange={(e) => updateSubConfig('processConn', 'rating', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">{dinRatings.map(r => <option key={r}>{r}</option>)}</select>
                 </div>
               )}
-
               {config.processConn?.category === 'ANSI' && (
                 <div className="grid grid-cols-3 gap-3 animate-in fade-in duration-300">
-                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
-                    {ansiSizes.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                  <select value={config.processConn.rating} onChange={(e) => updateSubConfig('processConn', 'rating', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
-                    {ansiRatings.map(r => <option key={r}>{r}</option>)}
-                  </select>
-                  <select value={config.processConn.facing} onChange={(e) => updateSubConfig('processConn', 'facing', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
-                    {ansiFacings.map(f => <option key={f}>{f}</option>)}
-                  </select>
+                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">{ansiSizes.map(s => <option key={s}>{s}</option>)}</select>
+                  <select value={config.processConn.rating} onChange={(e) => updateSubConfig('processConn', 'rating', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">{ansiRatings.map(r => <option key={r}>{r}</option>)}</select>
+                  <select value={config.processConn.facing} onChange={(e) => updateSubConfig('processConn', 'facing', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">{ansiFacings.map(f => <option key={f}>{f}</option>)}</select>
                 </div>
               )}
-
               {config.processConn?.category === 'Weld/Thread' && (
                 <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
-                  <select value={config.processConn.detail} onChange={(e) => updateSubConfig('processConn', 'detail', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
-                    {wtTypes.map(t => <option key={t}>{t}</option>)}
-                  </select>
-                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
-                    {wtSizes.map(s => <option key={s}>{s}</option>)}
-                  </select>
+                  <select value={config.processConn.detail} onChange={(e) => updateSubConfig('processConn', 'detail', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">{wtTypes.map(t => <option key={t}>{t}</option>)}</select>
+                  <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">{wtSizes.map(s => <option key={s}>{s}</option>)}</select>
                 </div>
               )}
-
               <div className="pt-2">
                  <button onClick={() => updateConfig('valves', {...config.valves, side: !config.valves.side})} className={`w-full py-3 rounded-xl border text-[10px] font-black uppercase transition-all ${config.valves.side ? 'bg-red-500/20 border-red-500 text-red-500 shadow-md' : 'bg-[#1c1c21] border-white/5 text-gray-500 hover:text-white'}`}>
-                    {config.valves.side ? <Lock className="inline mr-2" size={14}/> : <Unlock className="inline mr-2" size={14}/>}
-                    {config.valves.side ? 'Isolation Valves Included' : 'No Isolation Valves'}
+                    {config.valves.side ? <Lock className="inline mr-2" size={14}/> : <Unlock className="inline mr-2" size={14}/>} {config.valves.side ? 'Isolation Valves Included' : 'No Isolation Valves'}
                  </button>
               </div>
             </div>
           </section>
 
-          {/* Vent & Drain */}
           <section className="bg-[#16161a] p-8 rounded-3xl shadow-xl border border-white/5">
-            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-green-500 flex items-center gap-2">
-              <Hash size={18} /> Vent & Drain Configuration
-            </h2>
+            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-green-500 flex items-center gap-2"><Hash size={18} /> Vent & Drain Configuration</h2>
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Vent (Top)</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={config.topConn?.category} onChange={(e) => updateSubConfig('topConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
-                    {ventDrainCategories.map(c => <option key={c}>{c}</option>)}
-                  </select>
+                  <select value={config.topConn?.category} onChange={(e) => updateSubConfig('topConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">{ventDrainCategories.map(c => <option key={c}>{c}</option>)}</select>
                   {config.topConn?.category !== 'None' && (
-                    <select value={config.topConn?.size} onChange={(e) => updateSubConfig('topConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
-                      {['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}
-                    </select>
+                    <select value={config.topConn?.size} onChange={(e) => updateSubConfig('topConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">{['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}</select>
                   )}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Drain (Bottom)</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={config.bottomConn?.category} onChange={(e) => updateSubConfig('bottomConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
-                    {ventDrainCategories.filter(c => c !== 'None').map(c => <option key={c}>{c}</option>)}
-                  </select>
-                  <select value={config.bottomConn?.size} onChange={(e) => updateSubConfig('bottomConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
-                    {['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}
-                  </select>
+                  <select value={config.bottomConn?.category} onChange={(e) => updateSubConfig('bottomConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">{ventDrainCategories.filter(c => c !== 'None').map(c => <option key={c}>{c}</option>)}</select>
+                  <select value={config.bottomConn?.size} onChange={(e) => updateSubConfig('bottomConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">{['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}</select>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Geometry & Material */}
           <section className="bg-[#16161a] p-8 rounded-3xl shadow-xl border border-white/5">
-            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-amber-500 flex items-center gap-2">
-              <Box size={18} /> Geometry & Materials
-            </h2>
+            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-amber-500 flex items-center gap-2"><Box size={18} /> Geometry & Materials</h2>
             <div className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -649,21 +511,31 @@ const App = () => {
                     <input type="number" step="0.01" value={config.specificGravity} onChange={(e) => updateConfig('specificGravity', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-4 outline-none font-mono text-green-400" />
                   </div>
                </div>
-               <select value={config.material} onChange={(e) => updateConfig('material', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-4 outline-none text-sm font-bold appearance-none">
-                {materials.map(m => <option key={m}>{m}</option>)}
-              </select>
-              <select value={config.pipeSize} onChange={(e) => updateConfig('pipeSize', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-4 outline-none text-sm font-bold appearance-none">
-                {pipeSizes.map(s => <option key={s}>{s}</option>)}
-              </select>
+               <select value={config.material} onChange={(e) => updateConfig('material', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-4 outline-none text-sm font-bold appearance-none">{materials.map(m => <option key={m}>{m}</option>)}</select>
+               <select value={config.pipeSize} onChange={(e) => updateConfig('pipeSize', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-4 outline-none text-sm font-bold appearance-none">{pipeSizes.map(s => <option key={s}>{s}</option>)}</select>
+            </div>
+          </section>
+
+          <section className="bg-[#16161a] p-8 rounded-3xl border border-white/5">
+            <h2 className="text-sm font-black mb-6 uppercase tracking-widest text-amber-500">Add-ons</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {id: 'switches', label: 'Sensors', Icon: CheckCircle2},
+                {id: 'heatingJacket', label: 'Heating', Icon: Thermometer},
+                {id: 'remoteMST', label: 'Transmitter', Icon: Activity},
+                {id: 'calibratedScale', label: 'Scale', Icon: Ruler}
+              ].map(opt => (
+                <button key={opt.id} onClick={() => toggleOption(opt.id)} className={`flex items-center gap-3 p-4 rounded-2xl border text-[11px] font-bold uppercase transition-all ${config.options[opt.id] ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-[#1c1c21] border-white/5 text-gray-600 hover:border-white/10'}`}>
+                  <opt.Icon size={16} /> {opt.label}
+                </button>
+              ))}
             </div>
           </section>
         </div>
 
-        {/* Right Column: Blueprint */}
         <div className="lg:col-span-7 space-y-6">
           <div id="blueprint-capture-area" ref={previewRef} className="bg-white p-12 rounded-[48px] shadow-2xl flex flex-col items-center justify-center min-h-[750px] relative overflow-hidden border border-gray-100">
             <div className="absolute top-10 left-12 text-[10px] text-gray-400 uppercase tracking-[0.4em] font-black">Blueprint - Preliminary sketch</div>
-            
             <svg width="100%" height="600" viewBox="0 0 500 600" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="0">
@@ -671,81 +543,37 @@ const App = () => {
                   <stop offset="50%" stopColor="#cfcfcf" />
                   <stop offset="100%" stopColor="#e5e5e5" />
                 </linearGradient>
-                <pattern id="jacketPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-                   <line x1="0" y1="10" x2="10" y2="0" stroke="#fca5a5" strokeWidth="1" />
-                </pattern>
+                <pattern id="jacketPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><line x1="0" y1="10" x2="10" y2="0" stroke="#fca5a5" strokeWidth="1" /></pattern>
               </defs>
 
-              {/* Heating Jacket Visual */}
               {config.options.heatingJacket && (
-                <rect 
-                  x={250 - dim.chamberWidth/2 - 10} 
-                  y={dim.chamberTop - 10} 
-                  width={dim.chamberWidth + 20} 
-                  height={dim.chamberBottom - dim.chamberTop + 20} 
-                  rx="6" 
-                  fill="url(#jacketPattern)" 
-                  stroke="#ef4444" 
-                  strokeWidth="1" 
-                  strokeDasharray="4 2"
-                  opacity="0.5"
-                />
+                <rect x={250 - dim.chamberWidth/2 - 10} y={dim.chamberTop - 10} width={dim.chamberWidth + 20} height={dim.chamberBottom - dim.chamberTop + 20} rx="6" fill="url(#jacketPattern)" stroke="#ef4444" strokeWidth="1" strokeDasharray="4 2" opacity="0.5" />
               )}
 
-              {/* Central Chamber */}
               <rect x={250 - dim.chamberWidth/2} y={dim.chamberTop} width={dim.chamberWidth} height={dim.chamberBottom - dim.chamberTop} rx="3" fill="url(#metalGrad)" stroke="#999" strokeWidth="0.5" />
-              
-              {/* Pipe Label */}
               <text x={250} y={dim.chamberTop - 25} fill="#222" fontSize="11" fontWeight="900" textAnchor="middle">PIPE: {config.pipeSize}</text>
 
-              {/* Side Connections Logic */}
               <ConnectionGraphic x={250} y={dim.upperY} data={config.processConn} hasValve={config.valves.side} side="left" chamberWidth={dim.chamberWidth} />
               <ConnectionGraphic x={250} y={dim.lowerY} data={config.processConn} hasValve={config.valves.side} side="left" chamberWidth={dim.chamberWidth} />
 
-              {/* Vent & Drain Logic */}
               <g transform="translate(250, 0)">
-                {/* Vent */}
                 <rect x="-4" y={dim.chamberTop - 30} width="8" height="30" fill="#555" />
                 <text x="25" y={dim.chamberTop - 15} fill="#222" fontSize="9" fontWeight="900">VENT: {config.topConn?.category} {config.topConn?.size}</text>
-                
-                {/* Top components centered on stub */}
                 {config.topConn?.category === 'Plug' && <rect x="-8" y={dim.chamberTop - 34} width="16" height="6" fill="#222" />}
                 {config.topConn?.category === 'Flange' && <rect x="-15" y={dim.chamberTop - 36} width="30" height="8" rx="1" fill="#333" />}
-                {config.topConn?.category === 'Valve' && (
-                  <path 
-                    d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" 
-                    transform={`translate(0, ${dim.chamberTop - 15})`} 
-                    fill="#444" 
-                    stroke="#000"
-                  />
-                )}
+                {config.topConn?.category === 'Valve' && <path d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" transform={`translate(0, ${dim.chamberTop - 15})`} fill="#444" stroke="#000" />}
 
-                {/* Drain */}
                 <rect x="-4" y={dim.chamberBottom} width="8" height="30" fill="#555" />
                 <text x="25" y={dim.chamberBottom + 20} fill="#222" fontSize="9" fontWeight="900">DRAIN: {config.bottomConn?.category} {config.bottomConn?.size}</text>
-                
-                {/* Bottom components centered on stub */}
                 {config.bottomConn?.category === 'Plug' && <rect x="-8" y={dim.chamberBottom + 28} width="16" height="6" fill="#222" />}
                 {config.bottomConn?.category === 'Flange' && <rect x="-15" y={dim.bottomConn?.category === 'Valve' ? dim.chamberBottom + 35 : dim.chamberBottom + 28} width="30" height="8" rx="1" fill="#333" />}
-                {config.bottomConn?.category === 'Valve' && (
-                   <path 
-                    d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" 
-                    transform={`translate(0, ${dim.chamberBottom + 15})`} 
-                    fill="#444" 
-                    stroke="#000"
-                  />
-                )}
+                {config.bottomConn?.category === 'Valve' && <path d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" transform={`translate(0, ${dim.chamberBottom + 15})`} fill="#444" stroke="#000" />}
               </g>
 
-              {/* Indication Scale & Add-ons Visuals */}
               <g transform={`translate(${250 + dim.chamberWidth/2 + 2}, 0)`}>
-                {/* Scale Body */}
                 <rect y={dim.chamberTop + 30} width="16" height={dim.chamberBottom - dim.chamberTop - 60} rx="2" fill="#333" />
-                
-                {/* Scale Ticks */}
                 {[...Array(6)].map((_, i) => (
                   <g key={i} transform={`translate(20, ${(1 - i/5) * (dim.chamberBottom - dim.chamberTop - 60)})`}>
-                    {/* Only show ticks if Calibrated Scale is ON */}
                     {config.options.calibratedScale && (
                       <>
                         <line x1="-2" y1={dim.chamberTop + 30} x2="4" y2={dim.chamberTop + 30} stroke="#999" strokeWidth="0.5" />
@@ -754,8 +582,6 @@ const App = () => {
                     )}
                   </g>
                 ))}
-
-                {/* MST Transmitter Visual */}
                 {config.options.remoteMST && (
                   <g transform={`translate(35, ${dim.chamberTop + 30})`}>
                     <rect x="0" y="0" width="6" height={dim.chamberBottom - dim.chamberTop - 60} fill="#3b82f6" rx="2" />
@@ -765,7 +591,6 @@ const App = () => {
                 )}
               </g>
 
-              {/* Sensors Visual */}
               {config.options.switches && (
                 <g transform={`translate(${250 - dim.chamberWidth/2 - 10}, 0)`}>
                    {config.options.sensorTop && (
@@ -783,7 +608,6 @@ const App = () => {
                 </g>
               )}
 
-              {/* Dimensions */}
               <g stroke="#2196f3" strokeWidth="1.5">
                 <line x1="80" y1={dim.upperY} x2="80" y2={dim.lowerY} />
                 <line x1="75" y1={dim.upperY} x2="85" y2={dim.upperY} />
