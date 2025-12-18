@@ -35,250 +35,24 @@
   <script type="text/babel">
 const { useState, useMemo, useEffect, useRef } = React;
 
+// --- ICON DEFINITIONS (Expanded set) ---
 const ICONS = {
-  "activity": [
-    [
-      "path",
-      {
-        "d": "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2",
-        "key": "169zse"
-      }
-    ]
-  ],
-  "download": [
-    [
-      "path",
-      {
-        "d": "M12 15V3",
-        "key": "m9g1x1"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
-        "key": "ih7n3h"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "m7 10 5 5 5-5",
-        "key": "brsn70"
-      }
-    ]
-  ],
-  "layers": [
-    [
-      "path",
-      {
-        "d": "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z",
-        "key": "zw3jo"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12",
-        "key": "1wduqc"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17",
-        "key": "kqbvx6"
-      }
-    ]
-  ],
-  "clipboard-list": [
-    [
-      "rect",
-      {
-        "width": "8",
-        "height": "4",
-        "x": "8",
-        "y": "2",
-        "rx": "1",
-        "ry": "1",
-        "key": "tgr4d6"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
-        "key": "116196"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M12 11h4",
-        "key": "1jrz19"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M12 16h4",
-        "key": "n85exb"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M8 11h.01",
-        "key": "1dfujw"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M8 16h.01",
-        "key": "18s6g9"
-      }
-    ]
-  ],
-  "chevron-right": [
-    [
-      "path",
-      {
-        "d": "m9 18 6-6-6-6",
-        "key": "mthhwq"
-      }
-    ]
-  ],
-  "lock": [
-    [
-      "rect",
-      {
-        "width": "18",
-        "height": "11",
-        "x": "3",
-        "y": "11",
-        "rx": "2",
-        "ry": "2",
-        "key": "1w4ew1"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M7 11V7a5 5 0 0 1 10 0v4",
-        "key": "fwvmzm"
-      }
-    ]
-  ],
-  "unlock": [
-    [
-      "rect",
-      {
-        "width": "18",
-        "height": "11",
-        "x": "3",
-        "y": "11",
-        "rx": "2",
-        "ry": "2",
-        "key": "1w4ew1"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M7 11V7a5 5 0 0 1 9.9-1",
-        "key": "1mm8w8"
-      }
-    ]
-  ],
-  "hash": [
-    [
-      "line",
-      {
-        "x1": "4",
-        "x2": "20",
-        "y1": "9",
-        "y2": "9",
-        "key": "4lhtct"
-      }
-    ],
-    [
-      "line",
-      {
-        "x1": "4",
-        "x2": "20",
-        "y1": "15",
-        "y2": "15",
-        "key": "vyu0kd"
-      }
-    ],
-    [
-      "line",
-      {
-        "x1": "10",
-        "x2": "8",
-        "y1": "3",
-        "y2": "21",
-        "key": "1ggp8o"
-      }
-    ],
-    [
-      "line",
-      {
-        "x1": "16",
-        "x2": "14",
-        "y1": "3",
-        "y2": "21",
-        "key": "weycgp"
-      }
-    ]
-  ],
-  "box": [
-    [
-      "path",
-      {
-        "d": "M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z",
-        "key": "hh9hay"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "m3.3 7 8.7 5 8.7-5",
-        "key": "g66t2b"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M12 22V12",
-        "key": "d0xqtd"
-      }
-    ]
-  ],
-  "external-link": [
-    [
-      "path",
-      {
-        "d": "M15 3h6v6",
-        "key": "1q9fwt"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M10 14 21 3",
-        "key": "gplh6r"
-      }
-    ],
-    [
-      "path",
-      {
-        "d": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
-        "key": "a6xqqp"
-      }
-    ]
-  ]
+  "activity": [["path",{"d":"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2","key":"169zse"}]],
+  "download": [["path",{"d":"M12 15V3","key":"m9g1x1"}],["path",{"d":"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4","key":"ih7n3h"}],["path",{"d":"m7 10 5 5 5-5","key":"brsn70"}]],
+  "layers": [["path",{"d":"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z","key":"zw3jo"}],["path",{"d":"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12","key":"1wduqc"}],["path",{"d":"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17","key":"kqbvx6"}]],
+  "clipboard-list": [["rect",{"width":"8","height":"4","x":"8","y":"2","rx":"1","ry":"1","key":"tgr4d6"}],["path",{"d":"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2","key":"116196"}],["path",{"d":"M12 11h4","key":"1jrz19"}],["path",{"d":"M12 16h4","key":"n85exb"}],["path",{"d":"M8 11h.01","key":"1dfujw"}],["path",{"d":"M8 16h.01","key":"18s6g9"}]],
+  "chevron-right": [["path",{"d":"m9 18 6-6-6-6","key":"mthhwq"}]],
+  "lock": [["rect",{"width":"18","height":"11","x":"3","y":"11","rx":"2","ry":"2","key":"1w4ew1"}],["path",{"d":"M7 11V7a5 5 0 0 1 10 0v4","key":"fwvmzm"}]],
+  "unlock": [["rect",{"width":"18","height":"11","x":"3","y":"11","rx":"2","ry":"2","key":"1w4ew1"}],["path",{"d":"M7 11V7a5 5 0 0 1 9.9-1","key":"1mm8w8"}]],
+  "hash": [["line",{"x1":"4","x2":"20","y1":"9","y2":"9","key":"4lhtct"}],["line",{"x1":"4","x2":"20","y1":"15","y2":"15","key":"vyu0kd"}],["line",{"x1":"10","x2":"8","y1":"3","y2":"21","key":"1ggp8o"}],["line",{"x1":"16","x2":"14","y1":"3","y2":"21","key":"weycgp"}]],
+  "box": [["path",{"d":"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z","key":"hh9hay"}],["path",{"d":"m3.3 7 8.7 5 8.7-5","key":"g66t2b"}],["path",{"d":"M12 22V12","key":"d0xqtd"}]],
+  "external-link": [["path",{"d":"M15 3h6v6","key":"1q9fwt"}],["path",{"d":"M10 14 21 3","key":"gplh6r"}],["path",{"d":"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6","key":"a6xqqp"}]],
+  "user": [["path",{"d":"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2","key":"975nyw"}],["circle",{"cx":"12","cy":"7","r":"4","key":"17ys0d"}]],
+  "thermometer": [["path",{"d":"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z","key":"17j559"}]],
+  "check-circle-2": [["circle",{"cx":"12","cy":"12","r":"10","key":"1mglay"}],["path",{"d":"m9 12 2 2 4-4","key":"1f71p5"}]],
+  "ruler": [["path",{"d":"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z","key":"17j559"}],["path",{"d":"m14.5 12.5 2-2","key":"17j559"}],["path",{"d":"m11.5 9.5 2-2","key":"17j559"}],["path",{"d":"m8.5 6.5 2-2","key":"17j559"}],["path",{"d":"m17.5 15.5 2-2","key":"17j559"}]],
+  "info": [["circle",{"cx":"12","cy":"12","r":"10","key":"1mglay"}],["path",{"d":"M12 16v-4","key":"1f71p5"}],["path",{"d":"M12 8h.01","key":"1f71p5"}]],
+  "droplets": [["path",{"d":"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z","key":"17j559"}],["path",{"d":"M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.35","key":"17j559"}]]
 };
 
 const Icon = ({ name, size = 16, className = '' }) => {
@@ -296,7 +70,6 @@ const Icon = ({ name, size = 16, className = '' }) => {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      aria-hidden="true"
     >
       {nodes.map(([tag, attrs], index) => {
         const { key, ...rest } = attrs;
@@ -306,6 +79,7 @@ const Icon = ({ name, size = 16, className = '' }) => {
   );
 };
 
+// Component definitions using the Icon wrapper
 const Activity = (props) => <Icon name="activity" {...props} />;
 const Download = (props) => <Icon name="download" {...props} />;
 const Layers = (props) => <Icon name="layers" {...props} />;
@@ -316,8 +90,13 @@ const Unlock = (props) => <Icon name="unlock" {...props} />;
 const Hash = (props) => <Icon name="hash" {...props} />;
 const Box = (props) => <Icon name="box" {...props} />;
 const ExternalLink = (props) => <Icon name="external-link" {...props} />;
+const User = (props) => <Icon name="user" {...props} />;
+const Thermometer = (props) => <Icon name="thermometer" {...props} />;
+const CheckCircle2 = (props) => <Icon name="check-circle-2" {...props} />;
+const Ruler = (props) => <Icon name="ruler" {...props} />;
+const Info = (props) => <Icon name="info" {...props} />;
+const Droplets = (props) => <Icon name="droplets" {...props} />;
 
-// Load external libraries for PDF generation and screenshotting
 const loadScripts = () => {
   if (!window.jspdf) {
     const jspdfScript = document.createElement('script');
@@ -334,7 +113,6 @@ const loadScripts = () => {
 const App = () => {
   const previewRef = useRef(null);
   
-  // State Management
   const [config, setConfig] = useState({
     model: 'MAG/MNP',
     material: 'Stainless steel 316L (1.4404)',
@@ -342,7 +120,7 @@ const App = () => {
     ctoc: 500,
     specificGravity: 1.0,
     
-    // Process Side Connection
+    // Process Side Connection - Unified State
     processConn: {
       category: 'DIN', // DIN, ANSI, Weld/Thread
       size: 'DN 25',
@@ -351,9 +129,8 @@ const App = () => {
       detail: 'Butt Weld' 
     },
     
-    // Top & Bottom
     topConn: {
-      category: 'Plug', // Plug, Valve, Flange, None
+      category: 'Plug',
       size: '1/2"',
       standard: 'NPT'
     },
@@ -383,7 +160,8 @@ const App = () => {
       standard: 'DIN / EN',
       certificates: 'EN 10204 3.1',
       orderNumber: '',
-      operatorName: ''
+      operatorName: '',
+      comments: ''
     }
   });
 
@@ -391,7 +169,6 @@ const App = () => {
     loadScripts();
   }, []);
 
-  // Constants
   const materials = ['Stainless steel 316L (1.4404)', 'Stainless steel 304', 'PP', 'PVC', 'PVDF', 'PE', 'Monel', 'Titanium', 'Hastelloy', '254SMO/6Mo'];
   const pipeSizes = ['88.9 x 2 mm', '88.9 x 2.9 mm', '88.9 x 3.05 mm', '88.9 x 5.49 mm', '60.3 x 2 mm', '60.3 x 2.77 mm (2" sch. 10)'];
   
@@ -407,7 +184,6 @@ const App = () => {
 
   const ventDrainCategories = ['Plug', 'Valve', 'Flange', 'None'];
 
-  // Calculations
   const dim = useMemo(() => {
     const svgHeight = 600;
     const displayCtoc = Math.max(200, Math.min(6000, config.ctoc || 200));
@@ -423,7 +199,7 @@ const App = () => {
     const aDist = Math.max(80 * scaleFactor, 50); 
     const bDist = Math.max(120 * scaleFactor, 70);
 
-    const isBigPipe = config.pipeSize.includes('88.9');
+    const isBigPipe = config.pipeSize && config.pipeSize.includes('88.9');
     const chamberWidth = isBigPipe ? 38 : 28;
 
     return {
@@ -438,7 +214,6 @@ const App = () => {
     };
   }, [config.ctoc, config.pipeSize]);
 
-  // Handlers
   const updateConfig = (field, value) => setConfig(prev => ({ ...prev, [field]: value }));
   const updateProject = (field, value) => setConfig(prev => ({ ...prev, project: { ...prev.project, [field]: value } }));
   const updateSubConfig = (parent, field, value) => setConfig(prev => ({ ...prev, [parent]: { ...prev[parent], [field]: value } }));
@@ -460,7 +235,7 @@ const App = () => {
     }
     setConfig(prev => ({ 
       ...prev, 
-      processConn: { ...prev.processConn, ...updates }
+      processConn: { ...(prev.processConn || {}), ...updates }
     }));
   };
 
@@ -469,7 +244,6 @@ const App = () => {
     const html2canvas = window.html2canvas;
     if (!jspdf || !html2canvas) return;
 
-    // Capture sketch image with optimization
     const canvas = await html2canvas(previewRef.current, {
       backgroundColor: '#ffffff',
       scale: 1.8, 
@@ -494,7 +268,6 @@ const App = () => {
       doc.text(`Page ${num} of ${total}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
     };
 
-    // PAGE 1: Data Sheet
     let y = 20;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(33, 150, 243);
     doc.text('TECHNICAL DATA SHEET', margin, y);
@@ -508,7 +281,24 @@ const App = () => {
       y += 12; doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
       data.forEach(item => {
         doc.setTextColor(120); doc.text(item.label + ':', margin + 5, y);
-        doc.setTextColor(0); doc.text(String(item.value || '-'), margin + 75, y); y += 7;
+        doc.setTextColor(0); 
+        
+        // Handle array values for new lines
+        const val = item.value;
+        if (Array.isArray(val)) {
+            if (val.length === 0) {
+                 doc.text('None', margin + 75, y);
+                 y += 7;
+            } else {
+                val.forEach((line) => {
+                    doc.text(String(line), margin + 75, y);
+                    y += 7;
+                });
+            }
+        } else {
+            doc.text(String(val || '-'), margin + 75, y); 
+            y += 7;
+        }
       });
       y += 5;
     };
@@ -519,27 +309,40 @@ const App = () => {
       { label: 'Date of Issue', value: new Date().toLocaleDateString() }
     ]);
 
-    const procLabel = config.processConn.category === 'Weld/Thread' 
-      ? `${config.processConn.detail} ${config.processConn.size}`
-      : `${config.processConn.category} ${config.processConn.size} ${config.processConn.rating} ${config.processConn.category === 'ANSI' ? config.processConn.facing : ''}`;
+    const procLabel = getProcessLabel();
 
     section('2. Process & Instrument Specs', [
       { label: 'Design Std / Certs', value: `${config.project.standard} / ${config.project.certificates}` },
       { label: 'Process Connection', value: procLabel },
       { label: 'Pipe Specification', value: config.pipeSize },
       { label: 'Chamber Material', value: config.material },
-      { label: 'Operating Conditions', value: `${config.project.temperature} C / ${config.project.pressure} bar` }
+      { label: 'Operating Conditions', value: `${config.project.temperature} °C / ${config.project.pressure} bar` }
     ]);
 
-    section('3. Connections Detail', [
-      { label: 'Vent (Top)', value: `${config.topConn.category} ${config.topConn.size} ${config.topConn.standard || ''}` },
-      { label: 'Drain (Bottom)', value: `${config.bottomConn.category} ${config.bottomConn.size} ${config.bottomConn.standard || ''}` },
-      { label: 'Isolation Valves', value: config.valves.side ? 'Included on P1/P2' : 'None' }
+    // Updated Section 3 to include Add-ons details
+    const activeAddons = [];
+    if (config.options.switches) activeAddons.push(`Sensors (${config.options.sensorTop ? 'Top' : ''}${config.options.sensorTop && config.options.sensorBottom ? ' & ' : ''}${config.options.sensorBottom ? 'Bottom' : ''})`);
+    if (config.options.heatingJacket) activeAddons.push('Heating Jacket');
+    if (config.options.remoteMST) activeAddons.push('Remote MST Transmitter');
+    if (config.options.calibratedScale) activeAddons.push(`Calibrated Scale (${config.options.scaleUnit})`);
+
+    section('3. Connections & Accessories', [
+      { label: 'Vent (Top)', value: `${config.topConn?.category} ${config.topConn?.size} ${config.topConn?.standard || ''}` },
+      { label: 'Drain (Bottom)', value: `${config.bottomConn?.category} ${config.bottomConn?.size} ${config.bottomConn?.standard || ''}` },
+      { label: 'Isolation Valves', value: config.valves.side ? 'Included on P1/P2' : 'None' },
+      { label: 'Selected Add-ons', value: activeAddons.length > 0 ? activeAddons : 'None' }
     ]);
+
+    if (config.project.comments) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setFillColor(245);
+      doc.rect(margin, y, 170, 7, 'F'); doc.setTextColor(40); doc.text('4. NOTES / COMMENTS', margin + 2, y + 5);
+      y += 12; doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(0);
+      const splitComments = doc.splitTextToSize(config.project.comments, 170);
+      doc.text(splitComments, margin + 5, y);
+    }
 
     drawFooter(1, 2);
 
-    // PAGE 2: Sketch
     doc.addPage();
     y = 20; doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(33, 150, 243);
     doc.text('PRELIMINARY SKETCH', pageWidth / 2, y, { align: 'center' });
@@ -550,25 +353,96 @@ const App = () => {
     doc.save(`MLG_Spec_${config.project.orderNumber || 'Datasheet'}.pdf`);
   };
 
-  // SVG Helper
-  const ConnectionLabel = ({ x, y, text, side = 'left' }) => (
-    <text 
-      x={side === 'left' ? x - 15 : x + 15} 
-      y={y + 4} 
-      fill="#222" 
-      fontSize="10" 
-      fontWeight="900" 
-      textAnchor={side === 'left' ? 'end' : 'start'}
-    >
-      {text}
-    </text>
-  );
+  // Improved SVG Helper for Connections
+  // Now handles both visually distinct flanges/threads and text labels
+  const ConnectionGraphic = ({ x, y, data, hasValve, side = 'left', chamberWidth }) => {
+    const isLeft = side === 'left';
+    const offset = chamberWidth / 2;
+    const cat = data?.category || 'DIN';
+    const isWeldThread = cat.includes('Weld') || cat.includes('Thread');
+    
+    // Label Generation
+    let label = '';
+    if (isWeldThread) {
+      label = `${data?.detail} ${data?.size}`;
+    } else {
+      label = `${data?.category} ${data?.size} ${data?.rating} ${cat === 'ANSI' ? (data?.facing || '') : ''}`;
+    }
+
+    return (
+      <g transform={`translate(${x}, ${y})`}>
+        {/* Main Stub */}
+        <rect x={isLeft ? -40 - offset : offset} y="-6" width="40" height="12" fill="#555" />
+        
+        {/* Valve Icon */}
+        {hasValve && (
+          <g transform={`translate(${isLeft ? -25 - offset : 25 + offset}, 0)`}>
+            <path d="M -8 -8 L 8 8 L 8 -8 L -8 8 Z" fill="#444" stroke="#888" strokeWidth="1" />
+            <rect x="-1" y="-12" width="2" height="12" fill="#888" />
+            <rect x="-6" y="-14" width="12" height="3" rx="1" fill="#cc3333" />
+          </g>
+        )}
+
+        {/* Connection End Graphic */}
+        {!isWeldThread && (
+          // Flange (DIN/ANSI)
+          <rect x={isLeft ? -55 - offset : 40 + offset} y="-18" width="15" height="36" rx="2" fill="#333" stroke="#666" strokeWidth="1" />
+        )}
+        
+        {data?.detail?.includes('Thread') && (
+          // Threaded Visual
+          <g transform={`translate(${isLeft ? -48 - offset : 40 + offset}, -8)`}>
+             {[0, 4, 8, 12].map(i => <line key={i} x1="0" y1={i} x2="8" y2={i} stroke="#888" strokeWidth="1" />)}
+             <rect x="0" y="0" width="8" height="16" fill="rgba(255,255,255,0.1)" stroke="none" />
+          </g>
+        )}
+
+        {data?.detail?.includes('Weld') && (
+          // Weld Visual (V-shape)
+          <path d={`M ${isLeft ? -40 - offset : 40 + offset} -6 L ${isLeft ? -48 - offset : 48 + offset} 0 L ${isLeft ? -40 - offset : 40 + offset} 6`} fill="none" stroke="#555" strokeWidth="2" />
+        )}
+
+        {/* Text Label */}
+        <text 
+          x={isLeft ? -60 - offset : 60 + offset} 
+          y="4" 
+          fill="#444" 
+          fontSize="10" 
+          fontWeight="bold" 
+          textAnchor={isLeft ? 'end' : 'start'}
+        >
+          {label}
+        </text>
+      </g>
+    );
+  };
+
+  const EndConnectionGraphic = ({ x, y, type, hasValve, isTop }) => {
+    const dir = isTop ? -1 : 1;
+    return (
+      <g transform={`translate(${x}, ${y})`}>
+        <rect x="-6" y={isTop ? -30 : 0} width="12" height="30" fill="#555" />
+        {hasValve && (
+          <g transform={`translate(0, ${dir * 20})`}>
+            <path d="M -8 -8 L 8 8 L 8 -8 L -8 8 Z" fill="#444" stroke="#888" strokeWidth="1" transform="rotate(90)" />
+            <rect x="5" y="-1" width="12" height="2" fill="#888" />
+            <rect x="15" y="-6" width="3" height="12" rx="1" fill="#cc3333" />
+          </g>
+        )}
+        {type === 'Flange' && <rect x="-18" y={dir * (hasValve ? 45 : 30) - (isTop ? 10 : 0)} width="36" height="10" rx="2" fill="#333" stroke="#666" />}
+        {type === 'Plug' && !hasValve && <rect x="-8" y={dir * 30 - (isTop ? 4 : 0)} width="16" height="6" rx="1" fill="#222" />}
+      </g>
+    );
+  };
 
   const getProcessLabel = () => {
     const pc = config.processConn;
+    if (!pc) return '';
     if (pc.category === 'Weld/Thread') return `${pc.detail} ${pc.size}`;
     return `${pc.category} ${pc.size} ${pc.rating} ${pc.category === 'ANSI' ? pc.facing : ''}`;
   };
+
+  if (!config || !config.processConn) return <div className="text-white p-10">Loading Configurator...</div>;
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-gray-200 font-sans p-4 md:p-8 selection:bg-blue-500/30">
@@ -612,7 +486,10 @@ const App = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] text-gray-500 uppercase font-bold">Operator</label>
-                  <input type="text" value={config.project.operatorName} onChange={(e) => updateProject('operatorName', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  <div className="relative">
+                    <input type="text" value={config.project.operatorName} onChange={(e) => updateProject('operatorName', e.target.value)} className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-3 pl-9 outline-none focus:ring-2 focus:ring-blue-500/50" />
+                    <User size={14} className="absolute left-3 top-3.5 text-gray-500"/>
+                  </div>
                 </div>
               </div>
 
@@ -647,6 +524,16 @@ const App = () => {
                   />
                 </div>
               </div>
+
+              <div className="space-y-1 pt-2">
+                <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Notes / Comments</label>
+                <textarea 
+                  value={config.project.comments} 
+                  onChange={(e) => updateProject('comments', e.target.value)}
+                  placeholder="Additional requirements, tag numbers, or special instructions..."
+                  className="w-full bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm"
+                />
+              </div>
             </div>
           </section>
 
@@ -661,14 +548,14 @@ const App = () => {
                   <button 
                     key={cat}
                     onClick={() => handleProcessCategoryChange(cat)}
-                    className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${config.processConn.category === cat ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                    className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${config.processConn?.category === cat ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                   >
                     {cat}
                   </button>
                 ))}
               </div>
 
-              {config.processConn.category === 'DIN' && (
+              {config.processConn?.category === 'DIN' && (
                 <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
                   <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
                     {dinSizes.map(s => <option key={s}>{s}</option>)}
@@ -679,7 +566,7 @@ const App = () => {
                 </div>
               )}
 
-              {config.processConn.category === 'ANSI' && (
+              {config.processConn?.category === 'ANSI' && (
                 <div className="grid grid-cols-3 gap-3 animate-in fade-in duration-300">
                   <select value={config.processConn.size} onChange={(e) => updateSubConfig('processConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
                     {ansiSizes.map(s => <option key={s}>{s}</option>)}
@@ -693,7 +580,7 @@ const App = () => {
                 </div>
               )}
 
-              {config.processConn.category === 'Weld/Thread' && (
+              {config.processConn?.category === 'Weld/Thread' && (
                 <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
                   <select value={config.processConn.detail} onChange={(e) => updateSubConfig('processConn', 'detail', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-xs font-bold appearance-none">
                     {wtTypes.map(t => <option key={t}>{t}</option>)}
@@ -722,11 +609,11 @@ const App = () => {
               <div className="space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Vent (Top)</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={config.topConn.category} onChange={(e) => updateSubConfig('topConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
+                  <select value={config.topConn?.category} onChange={(e) => updateSubConfig('topConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
                     {ventDrainCategories.map(c => <option key={c}>{c}</option>)}
                   </select>
-                  {config.topConn.category !== 'None' && (
-                    <select value={config.topConn.size} onChange={(e) => updateSubConfig('topConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
+                  {config.topConn?.category !== 'None' && (
+                    <select value={config.topConn?.size} onChange={(e) => updateSubConfig('topConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
                       {['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}
                     </select>
                   )}
@@ -735,10 +622,10 @@ const App = () => {
               <div className="space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Drain (Bottom)</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={config.bottomConn.category} onChange={(e) => updateSubConfig('bottomConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
+                  <select value={config.bottomConn?.category} onChange={(e) => updateSubConfig('bottomConn', 'category', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none">
                     {ventDrainCategories.filter(c => c !== 'None').map(c => <option key={c}>{c}</option>)}
                   </select>
-                  <select value={config.bottomConn.size} onChange={(e) => updateSubConfig('bottomConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
+                  <select value={config.bottomConn?.size} onChange={(e) => updateSubConfig('bottomConn', 'size', e.target.value)} className="bg-[#1c1c21] border border-white/5 rounded-xl p-3 outline-none text-sm font-bold appearance-none animate-in zoom-in-95">
                     {['1/4"', '1/2"', '3/4"', '1"'].map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
@@ -784,7 +671,26 @@ const App = () => {
                   <stop offset="50%" stopColor="#cfcfcf" />
                   <stop offset="100%" stopColor="#e5e5e5" />
                 </linearGradient>
+                <pattern id="jacketPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                   <line x1="0" y1="10" x2="10" y2="0" stroke="#fca5a5" strokeWidth="1" />
+                </pattern>
               </defs>
+
+              {/* Heating Jacket Visual */}
+              {config.options.heatingJacket && (
+                <rect 
+                  x={250 - dim.chamberWidth/2 - 10} 
+                  y={dim.chamberTop - 10} 
+                  width={dim.chamberWidth + 20} 
+                  height={dim.chamberBottom - dim.chamberTop + 20} 
+                  rx="6" 
+                  fill="url(#jacketPattern)" 
+                  stroke="#ef4444" 
+                  strokeWidth="1" 
+                  strokeDasharray="4 2"
+                  opacity="0.5"
+                />
+              )}
 
               {/* Central Chamber */}
               <rect x={250 - dim.chamberWidth/2} y={dim.chamberTop} width={dim.chamberWidth} height={dim.chamberBottom - dim.chamberTop} rx="3" fill="url(#metalGrad)" stroke="#999" strokeWidth="0.5" />
@@ -793,56 +699,19 @@ const App = () => {
               <text x={250} y={dim.chamberTop - 25} fill="#222" fontSize="11" fontWeight="900" textAnchor="middle">PIPE: {config.pipeSize}</text>
 
               {/* Side Connections Logic */}
-              <g transform="translate(250, 0)">
-                {/* Upper P1 stub */}
-                <rect x={-dim.chamberWidth/2 - 40} y={dim.upperY - 4} width="40" height="8" fill="#555" />
-                <ConnectionLabel x={-dim.chamberWidth/2 - 45} y={dim.upperY} side="left" text={getProcessLabel()} />
-                
-                {config.processConn.category.includes('Weld/Thread') ? (
-                   <circle cx={-dim.chamberWidth/2 - 40} cy={dim.upperY} r="6" fill="#444" />
-                ) : <rect x={-dim.chamberWidth/2 - 50} y={dim.upperY - 15} width="10" height="30" rx="1" fill="#333" />}
-                
-                {/* Lower P2 stub */}
-                <rect x={-dim.chamberWidth/2 - 40} y={dim.lowerY - 4} width="40" height="8" fill="#555" />
-                <ConnectionLabel x={-dim.chamberWidth/2 - 45} y={dim.lowerY} side="left" text={getProcessLabel()} />
-                
-                {config.processConn.category.includes('Weld/Thread') ? (
-                   <circle cx={-dim.chamberWidth/2 - 40} cy={dim.lowerY} r="6" fill="#444" />
-                ) : <rect x={-dim.chamberWidth/2 - 50} y={dim.lowerY - 15} width="10" height="30" rx="1" fill="#333" />}
-
-                {/* SIDE VALVES - Correctly centered on stubs (20mm from chamber edge) */}
-                {config.valves.side && (
-                  <g>
-                    {/* Upper Valve */}
-                    <path 
-                      d="M -5 -8 L 5 8 L 5 -8 L -5 8 Z" 
-                      transform={`translate(${-dim.chamberWidth/2 - 20}, ${dim.upperY})`} 
-                      fill="#444" 
-                      stroke="#000" 
-                      strokeWidth="1"
-                    />
-                    {/* Lower Valve */}
-                    <path 
-                      d="M -5 -8 L 5 8 L 5 -8 L -5 8 Z" 
-                      transform={`translate(${-dim.chamberWidth/2 - 20}, ${dim.lowerY})`} 
-                      fill="#444" 
-                      stroke="#000" 
-                      strokeWidth="1"
-                    />
-                  </g>
-                )}
-              </g>
+              <ConnectionGraphic x={250} y={dim.upperY} data={config.processConn} hasValve={config.valves.side} side="left" chamberWidth={dim.chamberWidth} />
+              <ConnectionGraphic x={250} y={dim.lowerY} data={config.processConn} hasValve={config.valves.side} side="left" chamberWidth={dim.chamberWidth} />
 
               {/* Vent & Drain Logic */}
               <g transform="translate(250, 0)">
                 {/* Vent */}
                 <rect x="-4" y={dim.chamberTop - 30} width="8" height="30" fill="#555" />
-                <text x="25" y={dim.chamberTop - 15} fill="#222" fontSize="9" fontWeight="900">VENT: {config.topConn.category} {config.topConn.size}</text>
+                <text x="25" y={dim.chamberTop - 15} fill="#222" fontSize="9" fontWeight="900">VENT: {config.topConn?.category} {config.topConn?.size}</text>
                 
                 {/* Top components centered on stub */}
-                {config.topConn.category === 'Plug' && <rect x="-8" y={dim.chamberTop - 34} width="16" height="6" fill="#222" />}
-                {config.topConn.category === 'Flange' && <rect x="-15" y={dim.chamberTop - 36} width="30" height="8" rx="1" fill="#333" />}
-                {config.topConn.category === 'Valve' && (
+                {config.topConn?.category === 'Plug' && <rect x="-8" y={dim.chamberTop - 34} width="16" height="6" fill="#222" />}
+                {config.topConn?.category === 'Flange' && <rect x="-15" y={dim.chamberTop - 36} width="30" height="8" rx="1" fill="#333" />}
+                {config.topConn?.category === 'Valve' && (
                   <path 
                     d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" 
                     transform={`translate(0, ${dim.chamberTop - 15})`} 
@@ -853,12 +722,12 @@ const App = () => {
 
                 {/* Drain */}
                 <rect x="-4" y={dim.chamberBottom} width="8" height="30" fill="#555" />
-                <text x="25" y={dim.chamberBottom + 20} fill="#222" fontSize="9" fontWeight="900">DRAIN: {config.bottomConn.category} {config.bottomConn.size}</text>
+                <text x="25" y={dim.chamberBottom + 20} fill="#222" fontSize="9" fontWeight="900">DRAIN: {config.bottomConn?.category} {config.bottomConn?.size}</text>
                 
                 {/* Bottom components centered on stub */}
-                {config.bottomConn.category === 'Plug' && <rect x="-8" y={dim.chamberBottom + 28} width="16" height="6" fill="#222" />}
-                {config.bottomConn.category === 'Flange' && <rect x="-15" y={dim.bottomConn.category === 'Valve' ? dim.chamberBottom + 35 : dim.chamberBottom + 28} width="30" height="8" rx="1" fill="#333" />}
-                {config.bottomConn.category === 'Valve' && (
+                {config.bottomConn?.category === 'Plug' && <rect x="-8" y={dim.chamberBottom + 28} width="16" height="6" fill="#222" />}
+                {config.bottomConn?.category === 'Flange' && <rect x="-15" y={dim.bottomConn?.category === 'Valve' ? dim.chamberBottom + 35 : dim.chamberBottom + 28} width="30" height="8" rx="1" fill="#333" />}
+                {config.bottomConn?.category === 'Valve' && (
                    <path 
                     d="M -8 -5 L 8 5 L 8 -5 L -8 5 Z" 
                     transform={`translate(0, ${dim.chamberBottom + 15})`} 
@@ -868,16 +737,51 @@ const App = () => {
                 )}
               </g>
 
-              {/* Indication Scale */}
+              {/* Indication Scale & Add-ons Visuals */}
               <g transform={`translate(${250 + dim.chamberWidth/2 + 2}, 0)`}>
+                {/* Scale Body */}
                 <rect y={dim.chamberTop + 30} width="16" height={dim.chamberBottom - dim.chamberTop - 60} rx="2" fill="#333" />
+                
+                {/* Scale Ticks */}
                 {[...Array(6)].map((_, i) => (
                   <g key={i} transform={`translate(20, ${(1 - i/5) * (dim.chamberBottom - dim.chamberTop - 60)})`}>
-                    <line x1="-2" y1={dim.chamberTop + 30} x2="4" y2={dim.chamberTop + 30} stroke="#999" strokeWidth="0.5" />
-                    <text x="6" y={dim.chamberTop + 33} fill="#999" fontSize="8" fontWeight="bold">{Math.round((i/5) * config.ctoc)}</text>
+                    {/* Only show ticks if Calibrated Scale is ON */}
+                    {config.options.calibratedScale && (
+                      <>
+                        <line x1="-2" y1={dim.chamberTop + 30} x2="4" y2={dim.chamberTop + 30} stroke="#999" strokeWidth="0.5" />
+                        <text x="6" y={dim.chamberTop + 33} fill="#999" fontSize="8" fontWeight="bold">{Math.round((i/5) * config.ctoc)}</text>
+                      </>
+                    )}
                   </g>
                 ))}
+
+                {/* MST Transmitter Visual */}
+                {config.options.remoteMST && (
+                  <g transform={`translate(35, ${dim.chamberTop + 30})`}>
+                    <rect x="0" y="0" width="6" height={dim.chamberBottom - dim.chamberTop - 60} fill="#3b82f6" rx="2" />
+                    <rect x="-4" y="-10" width="14" height="10" fill="#2563eb" rx="2" />
+                    <text x="12" y="0" fill="#2563eb" fontSize="8" fontWeight="bold" transform="rotate(90, 12, 0)">MST TRANSMITTER</text>
+                  </g>
+                )}
               </g>
+
+              {/* Sensors Visual */}
+              {config.options.switches && (
+                <g transform={`translate(${250 - dim.chamberWidth/2 - 10}, 0)`}>
+                   {config.options.sensorTop && (
+                     <g transform={`translate(0, ${dim.upperY + 20})`}>
+                       <rect x="-15" y="-10" width="15" height="20" fill="#f59e0b" rx="2" stroke="#b45309" />
+                       <text x="-18" y="4" fill="#b45309" fontSize="8" fontWeight="bold" textAnchor="end">HI</text>
+                     </g>
+                   )}
+                   {config.options.sensorBottom && (
+                     <g transform={`translate(0, ${dim.lowerY - 20})`}>
+                       <rect x="-15" y="-10" width="15" height="20" fill="#f59e0b" rx="2" stroke="#b45309" />
+                       <text x="-18" y="4" fill="#b45309" fontSize="8" fontWeight="bold" textAnchor="end">LO</text>
+                     </g>
+                   )}
+                </g>
+              )}
 
               {/* Dimensions */}
               <g stroke="#2196f3" strokeWidth="1.5">
