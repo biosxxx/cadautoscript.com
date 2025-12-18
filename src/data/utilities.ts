@@ -152,4 +152,14 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Process connection presets', 'Live SVG sketch', 'PDF datasheet export'],
     href: '/utilities/magnetic-level-gauge-configurator/',
   },
+  {
+    id: 'bourdon-gauge-configurator',
+    name: 'Bourdon Gauge Configurator',
+    description:
+      'Configure Bourdon tube pressure gauges with ranges, connections, accessories, and export a PDF spec sheet.',
+    tech: 'React + SVG',
+    standards: 'EN 837-1 / 837-2',
+    features: ['Range presets + custom span', 'Connection/accessory options', 'Live gauge preview', 'PDF export'],
+    href: '/utilities/bourdon-gauge-configurator/',
+  },
 ];

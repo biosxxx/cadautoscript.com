@@ -14,7 +14,8 @@ export type UtilityPageSlug =
   | 'pdf-bom-extractor'
   | 'file-renamer'
   | 'folder-structure-builder'
-  | 'magnetic-level-gauge-configurator';
+  | 'magnetic-level-gauge-configurator'
+  | 'bourdon-gauge-configurator';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -233,6 +234,25 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Process connection presets (DIN, ANSI, weld/thread)',
       'Live SVG preview for key dimensions',
       'PDF export with specs and sketch',
+    ],
+    scriptType: 'module',
+  },
+  'bourdon-gauge-configurator': {
+    slug: 'bourdon-gauge-configurator',
+    title: 'Bourdon Gauge Configurator',
+    subtitle: 'Web utility - Configure pressure gauges and export specs',
+    description:
+      'Pick nominal sizes, ranges, connections, and accessories for Bourdon tube gauges, view the preview, and export a PDF datasheet.',
+    about:
+      'Set gauge range and units, choose connection standards, case fill, siphon/valve accessories, and project metadata, then export a PDF sheet with a sketch and selections.',
+    tags: ['Instrumentation', 'Pressure gauges', 'Datasheets'],
+    note: 'Runs fully in the browser. Datasheet export uses local PDF generation.',
+    features: [
+      'Range presets with custom span option',
+      'Connection + case fill presets',
+      'Accessory toggles (siphon, valve, flange)',
+      'Live gauge drawing with stem adjustments',
+      'PDF datasheet export',
     ],
     scriptType: 'module',
   },
