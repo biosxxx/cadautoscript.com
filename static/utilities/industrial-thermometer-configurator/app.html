@@ -614,9 +614,6 @@ const RefreshCw = (props) => <Icon name="refresh-cw" {...props} />;
 const Component = (props) => <Icon name="component" {...props} />;
 const RepeatIcon = (props) => <Icon name="repeat" {...props} />;
 
-Settings, 
-  Download, 
-  Thermometer, 
 // Load libraries for PDF generation
 const loadScripts = () => {
   if (!window.jspdf) {
@@ -1283,7 +1280,7 @@ Zero adjustment: External adjustment on case back`
                     onClick={() => updateSubConfig('connection', 'location', 'Adjustable')}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-2 ${config.connection.location === 'Adjustable' ? 'bg-green-600/20 border-green-500 text-green-400' : 'bg-[#1c1c21] border-white/5 text-gray-500'}`}
                  >
-                    <Repeat size={20} className="rotate-90" />
+                    <RepeatIcon size={20} className="rotate-90" />
                     <span>Adjustable</span>
                  </button>
               </div>
