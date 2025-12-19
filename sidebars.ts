@@ -17,6 +17,14 @@ const sidebars: SidebarsConfig = {
     'intro',
     {
       type: 'category',
+      label: 'Guides',
+      collapsed: false,
+      items: [
+        'guides/vercel-web-analytics',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Utilities',
       collapsed: false,
       items: [
