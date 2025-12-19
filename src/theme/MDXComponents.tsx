@@ -7,6 +7,8 @@ import Comments from '@site/src/components/Comments';
 
 export default {
   ...MDXComponents,
+  // Provide uppercase alias for code blocks in case MDX emits <Code>
+  Code: MDXComponents.code,
   AuthTest,
   ReactionsBar,
   Comments,
