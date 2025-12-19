@@ -15,7 +15,8 @@ export type UtilityPageSlug =
   | 'file-renamer'
   | 'folder-structure-builder'
   | 'magnetic-level-gauge-configurator'
-  | 'bourdon-gauge-configurator';
+  | 'bourdon-gauge-configurator'
+  | 'industrial-thermometer-configurator';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -252,6 +253,25 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Connection + case fill presets',
       'Accessory toggles (siphon, valve, flange)',
       'Live gauge drawing with stem adjustments',
+      'PDF datasheet export',
+    ],
+    scriptType: 'module',
+  },
+  'industrial-thermometer-configurator': {
+    slug: 'industrial-thermometer-configurator',
+    title: 'Industrial Thermometer Configurator',
+    subtitle: 'Web utility - Configure bimetal thermometers and export datasheets',
+    description:
+      'Select ranges, stems, thermowells, and connections for industrial thermometers, preview the build, and export a PDF datasheet.',
+    about:
+      'Adjust range units, stem length/diameter, case fill, mounting design, and thermowell options. Review the live SVG preview and generate a datasheet PDF with your selections and project metadata.',
+    tags: ['Instrumentation', 'Thermometer', 'Datasheets'],
+    note: 'Runs fully in the browser. PDF export is generated locally.',
+    features: [
+      'Range presets plus custom span',
+      'Stem length/diameter + thermowell options',
+      'Lower/back/adjustable mounting preview',
+      'Project metadata and accessory toggles',
       'PDF datasheet export',
     ],
     scriptType: 'module',

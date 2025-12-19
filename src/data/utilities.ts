@@ -162,4 +162,14 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Range presets + custom span', 'Connection/accessory options', 'Live gauge preview', 'PDF export'],
     href: '/utilities/bourdon-gauge-configurator/',
   },
+  {
+    id: 'industrial-thermometer-configurator',
+    name: 'Industrial Thermometer Configurator',
+    description:
+      'Configure bimetal thermometers: ranges, stems, thermowells, connections, and export a PDF datasheet.',
+    tech: 'React + SVG',
+    standards: 'EN 13190',
+    features: ['Range presets + custom', 'Stem + thermowell options', 'Adjustable mounting preview', 'PDF export'],
+    href: '/utilities/industrial-thermometer-configurator/',
+  },
 ];
