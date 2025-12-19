@@ -1,0 +1,167 @@
+---
+title: Folder Structure Builder
+description: Design folder trees from scratch or imports, then export ready-to-run bash/PowerShell scripts, JSON presets, or a ZIP scaffold.
+slug: /utilities/folder-structure-builder
+image: /img/og/utilities/folder-structure-builder.png
+keywords:
+  - folder structure
+  - project scaffold
+  - bash script
+  - powershell script
+  - zip scaffold
+  - offline generator
+  - json preset
+  - tree builder
+---
+
+import Head from '@docusaurus/Head';
+
+# Folder Structure Builder
+
+Design folder trees, import JSON or ZIP, and export bash/PowerShell scripts or a ZIP scaffold.
+
+<a className="button button--primary" href="/utilities/folder-structure-builder/" data-nobrokenlinkcheck>Open utility</a>
+
+![folder-structure-builder utility screenshot](/img/og/utilities/folder-structure-builder.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/folder-structure-builder" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Folder Structure Builder",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Design folder trees from scratch or imports, then export ready-to-run bash/PowerShell scripts, JSON presets, or a ZIP scaffold.",
+  "url": "https://cadautoscript.com/utilities/folder-structure-builder/",
+  "image": "https://cadautoscript.com/img/og/utilities/folder-structure-builder.png",
+  "featureList": [
+"Add folders/files inline",
+"Import JSON or ZIP trees",
+"Export bash/PowerShell scripts",
+"Download ZIP scaffold or JSON preset"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/folder-structure-builder",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Does it modify my drive automatically?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. It only creates scripts or ZIPs; you run them where you want the tree."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I share presets?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Export JSON and commit or email it to your team."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it run offline?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Everything happens in the browser."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How are special characters handled?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Scripts quote common characters, but review paths if you use unusual naming."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I import an existing tree?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Import from JSON or a ZIP scaffold to start from a prior template."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Lay out a project folder tree, import an existing JSON or ZIP, and export bash or PowerShell scripts that recreate the scaffold. Download a ZIP or JSON preset so teammates can build the same structure without manual clicking.
+
+## When to use it (and when not to)
+**Use it when:**
+- You are standardizing a project scaffold for your team.
+- You need a quick ZIP scaffold for onboarding without running CLI tools.
+- You want to share a folder preset across machines or teams.
+
+**Avoid it when:**
+- You need to provision servers or complex permissions; this focuses on folder trees.
+- Your tree contains thousands of nodes; consider templating with code instead.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Folder and file nodes | Add folders or files inline to design the tree. |
+| JSON or ZIP import | Load an existing structure to modify or reuse. |
+| Script options | Choose bash or PowerShell export depending on your environment. |
+| Preset metadata | Optional labels or notes for the scaffold. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Bash script | .sh | Script to recreate the tree on Unix-like systems. |
+| PowerShell script | .ps1 | Script to recreate the tree on Windows. |
+| ZIP scaffold | ZIP | Empty folders/files zipped for quick handoff. |
+| JSON preset | JSON | Reusable preset to import later. |
+
+## How to use
+1. Start a new tree or import an existing JSON/ZIP.
+2. Add folders and files until the scaffold matches your project template.
+3. Pick bash or PowerShell export (or both).
+4. Download the script, ZIP, or JSON preset.
+5. Run the script in a safe directory to build the structure.
+
+**Example dataset:** Create a scaffold with src/, docs/, tests/, and README.md placeholders; export a PowerShell script and ZIP for the team.
+- Expected output: Provides a .ps1 script, a shell script, a ZIP scaffold, and a JSON preset representing the same tree.
+
+## Accuracy and verification
+- Scripts create directories when you run them; review paths before executing.
+- Special characters may need quoting on different shells; adjust if your environment is strict.
+- Large trees are limited by browser memory when exporting a ZIP.
+- All generation runs locally; keep presets under version control if needed.
+
+## FAQ
+- **Does it modify my drive automatically?** No. It only creates scripts or ZIPs; you run them where you want the tree.
+- **Can I share presets?** Yes. Export JSON and commit or email it to your team.
+- **Does it run offline?** Yes. Everything happens in the browser.
+- **How are special characters handled?** Scripts quote common characters, but review paths if you use unusual naming.
+- **Can I import an existing tree?** Yes. Import from JSON or a ZIP scaffold to start from a prior template.
+
+## Related tools
+- [Batch File Renamer](./file-renamer)
+- [PDF Master](./pdf-master)
+- [PDF Batch Signer](./pdf-batch-signer)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `folder-structure-builder` so we can reproduce the issue
+

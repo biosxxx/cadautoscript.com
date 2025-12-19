@@ -1,0 +1,164 @@
+---
+title: WebDXF Editor
+description: Trim geometry, annotate lengths, and resave DXF files directly in the browser for quick QA or macro testing.
+slug: /utilities/dxf-editor
+image: /img/og/utilities/dxf-editor.png
+keywords:
+  - dxf editor
+  - browser CAD
+  - trim dxf
+  - measure dxf
+  - offline cad
+  - dxf r12
+  - geometry cleanup
+  - cad QA
+---
+
+import Head from '@docusaurus/Head';
+
+# WebDXF Editor
+
+Trim geometry, annotate lengths, and resave DXF files directly in the browser for quick QA or macro testing.
+
+<a className="button button--primary" href="/utilities/dxf-editor/" data-nobrokenlinkcheck>Open utility</a>
+
+![dxf-editor utility screenshot](/img/og/utilities/dxf-editor.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/dxf-editor" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "WebDXF Editor",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Trim geometry, annotate lengths, and resave DXF files directly in the browser for quick QA or macro testing.",
+  "url": "https://cadautoscript.com/utilities/dxf-editor/",
+  "image": "https://cadautoscript.com/img/og/utilities/dxf-editor.png",
+  "featureList": [
+"Crossing selection",
+"Trim and measure",
+"Offline DXF I/O"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/dxf-editor",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Which DXF versions are supported?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Works with common R12+ DXF geometry."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it support blocks and hatches?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Simple blocks work; heavy hatches may be slower and should be checked after export."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Are edits stored online?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Files never leave your browser."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I change units?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Use the scale reference in your DXF; the tool respects the source geometry."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Will it keep layer names?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Layer data is preserved when you resave."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Open DXF files in the browser, trim or measure entities, and save changes back to DXF without round-tripping through heavy CAD. Ideal for quick QA, macro testing, or touch-ups before sending geometry downstream.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need to trim stray lines or add quick measurements without launching desktop CAD.
+- You are testing CAD macros and want to verify DXF output.
+- You want an offline DXF sanity check before sharing with vendors.
+
+**Avoid it when:**
+- You need 3D modeling, constraints, or advanced drafting features.
+- Your file is extremely large or hatch-heavy and would benefit from a full CAD workstation.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| DXF file | Upload the drawing you want to inspect or edit. |
+| Layer visibility or colors | Toggle layers to focus on critical geometry. |
+| Selection and snap mode | Pick how you select and measure lines. |
+| Units reference | Use the source DXF units or your own reference scale. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Edited DXF | DXF | Save the updated geometry locally. |
+| Measurement readouts | On-screen | Lengths and distances for quick QA. |
+
+## How to use
+1. Load your DXF file into the editor.
+2. Toggle layers or snaps to isolate the geometry you need.
+3. Trim, annotate, or measure as required.
+4. Review the drawing on-screen for accuracy.
+5. Download the updated DXF.
+
+**Example dataset:** Open flange.dxf, trim stray construction lines, measure the bolt circle, and save the cleaned DXF.
+- Expected output: Returns a cleaned DXF plus on-screen measurements you can reference in QA notes.
+
+## Accuracy and verification
+- Designed for DXF workflows; keep a backup of the original before overwriting.
+- Large files may feel slower in-browser than on a workstation.
+- Units follow the source DXF; verify scale if you import from mixed-unit sources.
+- All edits stay local; export to keep your changes.
+
+## FAQ
+- **Which DXF versions are supported?** Works with common R12+ DXF geometry.
+- **Does it support blocks and hatches?** Simple blocks work; heavy hatches may be slower and should be checked after export.
+- **Are edits stored online?** No. Files never leave your browser.
+- **Can I change units?** Use the scale reference in your DXF; the tool respects the source geometry.
+- **Will it keep layer names?** Layer data is preserved when you resave.
+
+## Related tools
+- [Pipe Cutter Visualizer](./pipe-cutter)
+- [PDF Master](./pdf-master)
+- [PDF BOM Extractor](./pdf-bom-extractor)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `dxf-editor` so we can reproduce the issue
+

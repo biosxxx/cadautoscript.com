@@ -1,0 +1,166 @@
+---
+title: Interactive Thread Cheat Sheet
+description: Filter ISO, UNC, and UNF series, reference drill diameters, and copy callouts for drawings directly from the browser.
+slug: /utilities/interactive-thread
+image: /img/og/utilities/interactive-thread.png
+keywords:
+  - thread chart
+  - ISO metric thread
+  - UNC
+  - UNF
+  - tap drill size
+  - thread callout
+  - fastener reference
+  - drill lookup
+---
+
+import Head from '@docusaurus/Head';
+
+# Interactive Thread Cheat Sheet
+
+Filter ISO, UNC, and UNF series, reference drill diameters, and copy callouts for drawings without opening a handbook.
+
+<a className="button button--primary" href="/utilities/interactive-thread/" data-nobrokenlinkcheck>Open utility</a>
+
+![interactive-thread utility screenshot](/img/og/utilities/interactive-thread.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/interactive-thread" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Interactive Thread Cheat Sheet",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Filter ISO, UNC, and UNF series, reference drill diameters, and copy callouts for drawings directly from the browser.",
+  "url": "https://cadautoscript.com/utilities/interactive-thread/",
+  "image": "https://cadautoscript.com/img/og/utilities/interactive-thread.png",
+  "featureList": [
+"Filterable tables",
+"Drill lookup",
+"Copy-ready callouts"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/interactive-thread",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Can I add custom rows?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Not yet. Use the provided series; paste results where needed."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Are pipe threads included?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. The current set covers ISO, UNC, and UNF only."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it run offline?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. The tables load locally in your browser."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I copy values into CAD?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Copy the callout or drill size directly from the table."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it show both metric and imperial?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Switch series to move between ISO and UNC/UNF lists."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Search ISO, UNC, and UNF threads, then copy callouts or drill diameters straight into your drawing. The tables stay filterable in-browser so you can bounce between coarse, fine, or custom pitch values without flipping through a PDF handbook.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need a fast tap drill or clearance drill reference for a drawing or setup sheet.
+- You want to copy a properly formatted callout into CAD without retyping.
+- You are comparing metric and imperial series to pick a substitute size.
+
+**Avoid it when:**
+- You need tapered pipe threads, trapezoidal threads, or non-standard forms.
+- You require tolerance class calculations beyond the provided reference values.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Thread series | Pick ISO, UNC, or UNF to filter the table. |
+| Nominal size | Select the diameter or gauge you need to drill or tap. |
+| Pitch or TPI | Choose coarse, fine, or a specific pitch within the series. |
+| Tolerance class | Reference fit such as 6H/6g or class 2; use to mirror drawing intent. |
+| Drill preference | Toggle between tap drill and clearance drill references. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Tap drill diameter | Numeric | Recommended drill size for the selected thread. |
+| Major/minor/pitch diameters | Numeric | Reference dimensions for QA and callouts. |
+| Formatted callout | Text | Copy-ready string to paste into CAD or travelers. |
+
+## How to use
+1. Pick the thread series and filter for the nominal size you need.
+2. Select the pitch and tolerance class.
+3. Switch to tap or clearance drill to see the right diameter.
+4. Copy the callout or drill size straight into your drawing.
+5. Optional: flip between metric and imperial lists to compare substitutes.
+
+**Example dataset:** Thread: M12 x 1.75, Tolerance: 6H, Drill: tap drill.
+- Expected output: Returns a tap drill recommendation (10.2 mm) and a callout string formatted as M12x1.75-6H.
+
+## Accuracy and verification
+- Values follow common ISO and UNC/UNF reference tables; verify against your governing standard.
+- Does not cover tapered pipe threads or specialty forms.
+- Always validate drill sizes against tool availability and material before cutting.
+- For critical fits, confirm tolerances with the official standard or gauge blocks.
+
+## FAQ
+- **Can I add custom rows?** Not yet. Use the provided series; paste results where needed.
+- **Are pipe threads included?** No. The current set covers ISO, UNC, and UNF only.
+- **Does it run offline?** Yes. The tables load locally in your browser.
+- **Can I copy values into CAD?** Yes. Copy the callout or drill size directly from the table.
+- **Does it show both metric and imperial?** Yes. Switch series to move between ISO and UNC/UNF lists.
+
+## Related tools
+- [Metal Bending Prototype](./metal-bending)
+- [PDF Number Extractor](./pdf-number-extractor)
+- [PDF BOM Extractor](./pdf-bom-extractor)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `interactive-thread` so we can reproduce the issue
+

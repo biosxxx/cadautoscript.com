@@ -1,0 +1,165 @@
+---
+title: PDF Batch Signer
+description: Upload drawings, design one signature, drag its placement, and export a ZIP of signed PDFs without leaving the browser.
+slug: /utilities/pdf-batch-signer
+image: /img/og/utilities/pdf-batch-signer.png
+keywords:
+  - pdf signature
+  - batch signing
+  - zip export
+  - pdf-lib
+  - offline signing
+  - title block
+  - drawing stamp
+  - placement preview
+---
+
+import Head from '@docusaurus/Head';
+
+# PDF Batch Signer
+
+Upload drawings, design one signature, place it once, and export a ZIP of signed PDFs without leaving the browser.
+
+<a className="button button--primary" href="/utilities/pdf-batch-signer/" data-nobrokenlinkcheck>Open utility</a>
+
+![pdf-batch-signer utility screenshot](/img/og/utilities/pdf-batch-signer.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/pdf-batch-signer" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF Batch Signer",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Upload drawings, design one signature, drag its placement, and export a ZIP of signed PDFs without leaving the browser.",
+  "url": "https://cadautoscript.com/utilities/pdf-batch-signer/",
+  "image": "https://cadautoscript.com/img/og/utilities/pdf-batch-signer.png",
+  "featureList": [
+"Multi-file upload",
+"Unified placement preview",
+"ZIP export",
+"Optional Gemini title-block extraction"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/pdf-batch-signer",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Is this a digital certificate?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. It is a graphic signature applied locally."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Will my files upload anywhere?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Signing runs with pdf-lib and JSZip in your browser."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I handle mixed page sizes?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes, but confirm placement on a sample page before exporting the full set."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How do I change the stamp later?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Load the files again, adjust the signature, and re-export."
+  }
+},
+{
+  "@type": "Question",
+  "name": "What about timestamps?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Add date text inside your signature image or re-run with an updated label."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Create a reusable signature by drawing, typing, or uploading a scan, place it on a live preview, and apply it across every page in your PDF stack. Optional Gemini analysis can read title blocks when you provide your own API key; otherwise everything stays local.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need to stamp multiple drawings or reports in one pass without a cloud service.
+- You want a consistent placement for every page in a package.
+- You need a quick ZIP of signed PDFs to send to vendors or QA.
+
+**Avoid it when:**
+- You require cryptographic or certificate-based signatures.
+- Your pages use widely different sizes that need unique placements per page.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| PDF stack | One or more PDFs to stamp in a single run. |
+| Signature source | Draw, type, or upload a signature image to reuse. |
+| Placement and scale | Position and size the signature on the preview before applying. |
+| Optional Gemini API key | If you want title block extraction; otherwise everything stays offline. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Signed PDFs | ZIP | All input files stamped with the same placement. |
+| Preview confirmation | On-screen | Visual check of the applied signature. |
+
+## How to use
+1. Load the PDFs you need to sign.
+2. Create or upload a signature and set its placement and size.
+3. Optionally add a Gemini API key if you want title block metadata extraction.
+4. Apply the signature across all pages.
+5. Download the ZIP of signed PDFs.
+
+**Example dataset:** Upload ten drawing PDFs, draw a signature, place it 20 mm from the bottom-right corner, leave Gemini off, and export the ZIP.
+- Expected output: Downloads a ZIP containing all drawings with the same visible signature placement on every page.
+
+## Accuracy and verification
+- Applies a graphic stamp, not a digital certificate; verify acceptance for regulated documents.
+- Mixed page sizes may need a quick visual check after signing.
+- Optional Gemini extraction uses your key client-side; leave it empty to keep everything offline.
+- Retain originals if you need an audit trail; the tool overwrites only the downloaded copies.
+
+## FAQ
+- **Is this a digital certificate?** No. It is a graphic signature applied locally.
+- **Will my files upload anywhere?** No. Signing runs with pdf-lib and JSZip in your browser.
+- **Can I handle mixed page sizes?** Yes, but confirm placement on a sample page before exporting the full set.
+- **How do I change the stamp later?** Load the files again, adjust the signature, and re-export.
+- **What about timestamps?** Add date text inside your signature image or re-run with an updated label.
+
+## Related tools
+- [PDF Master](./pdf-master)
+- [PDF BOM Extractor](./pdf-bom-extractor)
+- [PDF Number Extractor](./pdf-number-extractor)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `pdf-batch-signer` so we can reproduce the issue
+

@@ -1,0 +1,165 @@
+---
+title: Batch File Renamer
+description: Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download-all locally.
+slug: /utilities/file-renamer
+image: /img/og/utilities/file-renamer.png
+keywords:
+  - batch rename
+  - regex rename
+  - zip download
+  - offline rename
+  - find replace
+  - numbering
+  - file naming
+  - local processing
+---
+
+import Head from '@docusaurus/Head';
+
+# Batch File Renamer
+
+Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download—all locally.
+
+<a className="button button--primary" href="/utilities/file-renamer/" data-nobrokenlinkcheck>Open utility</a>
+
+![file-renamer utility screenshot](/img/og/utilities/file-renamer.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/file-renamer" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Batch File Renamer",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Rename files in bulk with find/replace, prefixes, casing, numbering, and instant ZIP download-all locally.",
+  "url": "https://cadautoscript.com/utilities/file-renamer/",
+  "image": "https://cadautoscript.com/img/og/utilities/file-renamer.png",
+  "featureList": [
+"Regex or literal find/replace",
+"Prefix/suffix and numbering",
+"ZIP download with conflict handling"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/file-renamer",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Do regex patterns work?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Use standard JavaScript regex for advanced renames."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Is folder structure preserved?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Files are flattened into a ZIP with new names."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Is data uploaded?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Everything runs locally."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How many files can I rename?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Depends on browser memory; split very large sets."
+  }
+},
+{
+  "@type": "Question",
+  "name": "What about file contents?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Contents stay unchanged; only names are updated."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Upload a stack of files, preview new names with regex or literal find/replace, add prefixes, suffixes, or numbering, and download the renamed set as a ZIP. Everything runs in the browser so your files stay local.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need to normalize drawing names or add job numbers before sending a package.
+- You want to bulk apply numbering or prefixes without scripting.
+- You prefer to keep renaming offline with a quick ZIP output.
+
+**Avoid it when:**
+- You need to rename thousands of files on disk; use a CLI script instead.
+- You must retain folder hierarchy from nested directories; flattening may not be desired.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Files to rename | Drop the files you want to process. |
+| Find/replace rules | Use literal or regex patterns to transform names. |
+| Prefix/suffix | Add job numbers, revs, or other tags. |
+| Numbering | Set start, increment, and padding for sequence numbers. |
+| Casing options | Optional upper/lower/kebab conversions. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Preview table | On-screen | See old vs. new names before exporting. |
+| Renamed files | ZIP | Downloadable archive with updated filenames. |
+
+## How to use
+1. Drop the files to rename.
+2. Apply find/replace, prefixes, suffixes, or numbering.
+3. Review the preview to confirm collisions are handled.
+4. Download the ZIP of renamed files.
+5. Share or archive the renamed package.
+
+**Example dataset:** Upload P-001.pdf, P-002.pdf; find 'P-' and replace with 'FAB-', add prefix 2025_, start numbering at 10.
+- Expected output: Downloads a ZIP with files named 2025_FAB-10.pdf and 2025_FAB-11.pdf.
+
+## Accuracy and verification
+- Renaming happens in the browser; keep originals until you verify the ZIP.
+- Regex patterns are powerful—test on a small set first.
+- Name collisions are handled in the preview; resolve them before export.
+- Large batches are limited by browser memory; split them if needed.
+
+## FAQ
+- **Do regex patterns work?** Yes. Use standard JavaScript regex for advanced renames.
+- **Is folder structure preserved?** Files are flattened into a ZIP with new names.
+- **Is data uploaded?** No. Everything runs locally.
+- **How many files can I rename?** Depends on browser memory; split very large sets.
+- **What about file contents?** Contents stay unchanged; only names are updated.
+
+## Related tools
+- [Folder Structure Builder](./folder-structure-builder)
+- [PDF Master](./pdf-master)
+- [PDF Batch Signer](./pdf-batch-signer)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `file-renamer` so we can reproduce the issue
+

@@ -1,0 +1,166 @@
+---
+title: PDF Number Extractor
+description: Highlight QA serials, BOM IDs, and inspection numbers locally with WASM-powered parsing. No uploads, no queues.
+slug: /utilities/pdf-number-extractor
+image: /img/og/utilities/pdf-number-extractor.png
+keywords:
+  - pdf number extraction
+  - regex filter
+  - csv export
+  - offline pdf
+  - serial capture
+  - inspection data
+  - wasm parser
+  - local processing
+---
+
+import Head from '@docusaurus/Head';
+
+# PDF Number Extractor
+
+Highlight QA serials, BOM IDs, and inspection numbers locally with WASM parsing and CSV export.
+
+<a className="button button--primary" href="/utilities/pdf-number-extractor/" data-nobrokenlinkcheck>Open utility</a>
+
+![pdf-number-extractor utility screenshot](/img/og/utilities/pdf-number-extractor.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/pdf-number-extractor" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF Number Extractor",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Highlight QA serials, BOM IDs, and inspection numbers locally with WASM-powered parsing. No uploads, no queues.",
+  "url": "https://cadautoscript.com/utilities/pdf-number-extractor/",
+  "image": "https://cadautoscript.com/img/og/utilities/pdf-number-extractor.png",
+  "featureList": [
+"WASM PDF parsing",
+"Regex filter controls",
+"CSV export",
+"Offline processing"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/pdf-number-extractor",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Does it OCR scanned PDFs?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. It reads existing text; use OCR first if the PDF is an image."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I process multiple files?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Drop a stack of PDFs and export combined results."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Is any data uploaded?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Parsing happens locally in your browser."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I tune the regex?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Standard JavaScript regex syntax is supported."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I save the highlights?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Export the CSV and keep the PDF copy; highlights are for on-screen review only."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Drop PDF files, filter the detected numbers with regex or length rules, and export a clean list of matches. Parsing happens in-browser with WASM so QA serials, BOM IDs, and inspection numbers never leave your machine.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need to pull serial numbers or IDs out of production PDFs for QA or traceability.
+- You want to pre-fill spreadsheets with inspection IDs without retyping.
+- You prefer an offline workflow with no uploads or queues.
+
+**Avoid it when:**
+- Your PDFs are scanned images that require OCR rather than text parsing.
+- You need full-text search across thousands of pages at once.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| PDF files | Single or multiple PDFs dropped into the browser. |
+| Regex or filter rules | Include or exclude patterns to isolate the numbers you need. |
+| Minimum/maximum length | Optional constraints to avoid noise such as page numbers. |
+| Export options | Choose CSV export or copy to clipboard. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Highlighted matches | On-screen | Visual overlay of matched numbers for quick QA. |
+| CSV export | CSV | List of extracted numbers per file ready for spreadsheets. |
+| Clipboard copy | Text | Quick copy of matches without downloading a file. |
+
+## How to use
+1. Drag and drop the PDF files into the utility.
+2. Add regex or length filters to target the IDs you need.
+3. Review the highlighted matches on-screen.
+4. Export the results as CSV or copy them to your clipboard.
+5. Clear the session when finished; nothing is uploaded.
+
+**Example dataset:** Upload an inspection report containing IDs like SN-2025-104; use a regex such as SN-\\d{4}-\\d{3} and export the CSV.
+- Expected output: Produces a CSV listing SN-2025-104 style matches plus an on-screen highlight for visual confirmation.
+
+## Accuracy and verification
+- Works on text-based PDFs; scanned images need OCR elsewhere.
+- Filters are case-sensitive only if you set them that way; double-check patterns before exporting.
+- No network calls are made, so keep a local copy of your results if you need an audit trail.
+- Spot-check a few lines against the PDF to ensure the regex did not over-filter.
+
+## FAQ
+- **Does it OCR scanned PDFs?** No. It reads existing text; use OCR first if the PDF is an image.
+- **Can I process multiple files?** Yes. Drop a stack of PDFs and export combined results.
+- **Is any data uploaded?** No. Parsing happens locally in your browser.
+- **Can I tune the regex?** Yes. Standard JavaScript regex syntax is supported.
+- **Can I save the highlights?** Export the CSV and keep the PDF copy; highlights are for on-screen review only.
+
+## Related tools
+- [PDF BOM Extractor](./pdf-bom-extractor)
+- [PDF Master](./pdf-master)
+- [PDF Batch Signer](./pdf-batch-signer)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `pdf-number-extractor` so we can reproduce the issue
+

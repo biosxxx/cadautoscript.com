@@ -1,0 +1,168 @@
+---
+title: Cylindrical Shell Rolling Calculator
+description: Estimate roll spacing, bending allowance, and developed length for cylindrical shells with EN 13445 / ASME VIII presets.
+slug: /utilities/cylindrical-shell-rolling
+image: /img/og/utilities/cylindrical-shell-rolling.png
+keywords:
+  - plate rolling
+  - developed length
+  - EN 13445
+  - ASME VIII
+  - roll spacing
+  - bending allowance
+  - shell calculator
+  - pressure vessel
+---
+
+import Head from '@docusaurus/Head';
+
+# Cylindrical Shell Rolling Calculator
+
+Estimate roll spacing, bending allowance, and developed length for cylindrical shells with EN 13445 / ASME VIII presets.
+
+<a className="button button--primary" href="/utilities/cylindrical-shell-rolling/" data-nobrokenlinkcheck>Open utility</a>
+
+![cylindrical-shell-rolling utility screenshot](/img/og/utilities/cylindrical-shell-rolling.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/cylindrical-shell-rolling" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Cylindrical Shell Rolling Calculator",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Estimate roll spacing, bending allowance, and developed length for cylindrical shells with EN 13445 / ASME VIII presets.",
+  "url": "https://cadautoscript.com/utilities/cylindrical-shell-rolling/",
+  "image": "https://cadautoscript.com/img/og/utilities/cylindrical-shell-rolling.png",
+  "featureList": [
+"Roll spacing hints",
+"Printable offsets",
+"Tolerance guidance"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/cylindrical-shell-rolling",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Does it support inch as well as metric?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Enter numbers in the unit system you use; calculations are unit-agnostic."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I export the results?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Use your browser print dialog or copy values into your own template; nothing is stored server-side."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it calculate cones or elbows?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. The current model assumes a constant cylinder."
+  }
+},
+{
+  "@type": "Question",
+  "name": "How is springback handled?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Presets include typical tolerances. Adjust overbend or allowances for your material batch."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Are my entries saved?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Close the page to clear everything; it stays in your browser memory only."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Calculate roll spacing, bending allowance, and developed length for cylindrical shells before the plate hits the rolls. Use EN 13445 or ASME VIII style presets, add seam gap or overbend allowances, and hand the spacing summary to the operator.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need roll spacing and developed length for a cylindrical shell before releasing a job to the shop.
+- You want to compare EN 13445 versus ASME VIII guidance or share offsets with an inspector.
+- You want a printable setup card for operators without opening spreadsheets.
+
+**Avoid it when:**
+- You are rolling cones, transitions, or non-cylindrical shapes.
+- You require finite element checks or machine capacity calculations beyond simple bending allowances.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Target shell diameter | Outside or inside diameter the shell must hit after rolling. |
+| Plate thickness | Material thickness that drives neutral axis and allowance. |
+| Shell length and seam gap | Finished length plus any tack/fit-up gap you want to leave. |
+| Standard preset | Choose EN 13445, ASME VIII, or custom allowances for your shop. |
+| Overbend or flat-tail allowance | How much extra roll you want at the ends to minimize flat spots. |
+| Roll spacing or machine geometry | Optional spacing inputs to sanity check capability and deflection. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Roll spacing guidance | On-screen | Suggested spacing to hit the target diameter with minimal flat tails. |
+| Developed flat length | Numeric | Length to cut the plate before rolling, accounting for seam gap. |
+| Bending allowance / deduction | Numeric | Allowance values you can copy into your router or traveler. |
+| Printable setup notes | Text | Copy or print directly from the page for the roll operator. |
+
+## How to use
+1. Enter the target shell diameter and finished length.
+2. Set plate thickness and pick the standard preset that matches your job.
+3. Add seam gap and any overbend or flat-tail adjustments.
+4. Review the roll spacing, developed length, and allowance numbers.
+5. Print or copy the values into the shop traveler.
+
+**Example dataset:** Shell OD: 1500 mm, Thickness: 12 mm, Length: 2500 mm, Seam gap: 3 mm, Preset: EN 13445, Overbend: small end bias to reduce flat tails.
+- Expected output: Outputs a developed length, roll spacing suggestions, and allowance values ready to share with the roll operator.
+
+## Accuracy and verification
+- Assumes a cylindrical shell with uniform thickness and moderate springback handled by the preset.
+- Does not replace machine capacity checks or detailed stress calculations.
+- Use mill test data to refine overbend for alloys that spring differently.
+- Spot-check against a test coupon before running full-length plates.
+
+## FAQ
+- **Does it support inch as well as metric?** Yes. Enter numbers in the unit system you use; calculations are unit-agnostic.
+- **Can I export the results?** Use your browser print dialog or copy values into your own template; nothing is stored server-side.
+- **Does it calculate cones or elbows?** No. The current model assumes a constant cylinder.
+- **How is springback handled?** Presets include typical tolerances. Adjust overbend or allowances for your material batch.
+- **Are my entries saved?** No. Close the page to clear everything; it stays in your browser memory only.
+
+## Related tools
+- [Pipe Cutter Visualizer](./pipe-cutter)
+- [Metal Bending Prototype](./metal-bending)
+- [Interactive Thread Cheat Sheet](./interactive-thread)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `cylindrical-shell-rolling` so we can reproduce the issue
+

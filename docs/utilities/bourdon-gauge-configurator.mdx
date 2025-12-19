@@ -1,0 +1,168 @@
+---
+title: Bourdon Gauge Configurator
+description: Pick nominal sizes, ranges, connections, and accessories for Bourdon tube gauges, view the preview, and export a PDF datasheet.
+slug: /utilities/bourdon-gauge-configurator
+image: /img/og/utilities/bourdon-gauge-configurator.png
+keywords:
+  - bourdon gauge
+  - pressure gauge
+  - gauge configurator
+  - pressure range
+  - process connection
+  - datasheet PDF
+  - instrument specification
+  - glycerin fill
+---
+
+import Head from '@docusaurus/Head';
+
+# Bourdon Gauge Configurator
+
+Pick nominal sizes, ranges, connections, and accessories for Bourdon tube gauges, then export a PDF datasheet.
+
+<a className="button button--primary" href="/utilities/bourdon-gauge-configurator/" data-nobrokenlinkcheck>Open utility</a>
+
+![bourdon-gauge-configurator utility screenshot](/img/og/utilities/bourdon-gauge-configurator.png)
+
+<Head>
+  <link rel="canonical" href="https://cadautoscript.com/docs/utilities/bourdon-gauge-configurator" />
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Bourdon Gauge Configurator",
+  "applicationCategory": "EngineeringApplication",
+  "operatingSystem": "Web",
+  "description": "Pick nominal sizes, ranges, connections, and accessories for Bourdon tube gauges, view the preview, and export a PDF datasheet.",
+  "url": "https://cadautoscript.com/utilities/bourdon-gauge-configurator/",
+  "image": "https://cadautoscript.com/img/og/utilities/bourdon-gauge-configurator.png",
+  "featureList": [
+"Range presets with custom span",
+"Connection and case fill presets",
+"Accessory toggles",
+"Live gauge drawing",
+"PDF datasheet export"
+  ],
+  "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/bourdon-gauge-configurator",
+  "offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "USD"
+  },
+  "author": {
+"@type": "Organization",
+"name": "CAD AutoScript"
+  }
+}`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+{
+  "@type": "Question",
+  "name": "Can I enter a custom range?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Use custom span when presets do not match your need."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it support imperial units?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Enter psi or bar as needed; the datasheet reports what you enter."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Can I add my company logo?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Use the exported PDF and add branding downstream if required."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Is the preview to scale?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "It is illustrative; request certified drawings for exact dimensions."
+  }
+},
+{
+  "@type": "Question",
+  "name": "Does it upload my data?",
+  "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Everything runs in the browser."
+  }
+}
+  ]
+}`}</script>
+</Head>
+
+## What it does
+Select dial size, pressure range, connection standard, case fill, and accessories for a Bourdon tube pressure gauge. Preview the gauge drawing, toggle siphon or valve options, and export a PDF datasheet with your selections.
+
+## When to use it (and when not to)
+**Use it when:**
+- You are preparing a pressure gauge spec for a quote or for internal approval.
+- You need to compare connection or fill options quickly with a live preview.
+- You want a PDF sheet to send to vendors without waiting on a CAD request.
+
+**Avoid it when:**
+- You need certified pressure ratings or approvals beyond a preliminary datasheet.
+- You are configuring electronic transmitters or diaphragm seals (not covered here).
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Dial size | Nominal diameter for the gauge face. |
+| Pressure range and units | Select preset spans or enter a custom range. |
+| Connection location and standard | Lower/back mount with DIN, ANSI, NPT, or other options. |
+| Case fill and window | Dry or filled cases plus window material. |
+| Accessories | Siphon, valve, flange, or other options to include. |
+| Project metadata | Tag, line number, and notes for the datasheet. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| PDF datasheet | PDF | Gauge summary with preview and selections. |
+| Gauge preview | On-screen | Live drawing that updates as you change options. |
+
+## How to use
+1. Choose dial size and pressure range (preset or custom).
+2. Pick connection location, standard, and case fill.
+3. Toggle accessories such as siphon, valve, or flange.
+4. Add project tags or notes.
+5. Export the PDF datasheet for review or submittal.
+
+**Example dataset:** Dial: 100 mm, Range: 0 to 10 bar, Connection: back mount G 1/2, Case fill: glycerin, Accessory: siphon, Tag: PG-204.
+- Expected output: Creates a PDF datasheet with the selected range, connection, fill, accessory, and preview image for PG-204.
+
+## Accuracy and verification
+- Datasheet is preliminary; verify pressure ratings and wetted materials with the manufacturer.
+- Ranges and units are user-entered; confirm they match your process limits.
+- Accessories are indicative; check thread engagement and mounting clearances before install.
+- All calculations stay local; save the PDF to archive your selections.
+
+## FAQ
+- **Can I enter a custom range?** Yes. Use custom span when presets do not match your need.
+- **Does it support imperial units?** Yes. Enter psi or bar as needed; the datasheet reports what you enter.
+- **Can I add my company logo?** Use the exported PDF and add branding downstream if required.
+- **Is the preview to scale?** It is illustrative; request certified drawings for exact dimensions.
+- **Does it upload my data?** No. Everything runs in the browser.
+
+## Related tools
+- [Magnetic Level Gauge Configurator](./magnetic-level-gauge-configurator)
+- [Industrial Thermometer Configurator](./industrial-thermometer-configurator)
+- [Pipe Cutter Visualizer](./pipe-cutter)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `bourdon-gauge-configurator` so we can reproduce the issue
+
