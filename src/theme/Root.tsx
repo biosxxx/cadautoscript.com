@@ -11,6 +11,13 @@ const SpeedInsights = lazy(() =>
   }))
 );
 
+// Lazy load Analytics component (client-side only)
+const Analytics = lazy(() =>
+  import('@vercel/analytics/react').then((module) => ({
+    default: module.Analytics,
+  }))
+);
+
 export default function RootWrapper(props: Props) {
   return (
     <AuthModalProvider>
@@ -18,6 +25,7 @@ export default function RootWrapper(props: Props) {
       <LoginModal />
       <Suspense fallback={null}>
         <SpeedInsights />
+        <Analytics />
       </Suspense>
     </AuthModalProvider>
   );
