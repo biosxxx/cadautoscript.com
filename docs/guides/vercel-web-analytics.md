@@ -3,9 +3,11 @@ sidebar_position: 1
 title: Getting started with Vercel Web Analytics
 ---
 
+import CodeBlock from '@theme/CodeBlock'
+
 # Getting started with Vercel Web Analytics
 
-This guide will help you get started with using Vercel Web Analytics on your project, showing you how to enable it, add the package to your project, deploy your app to Vercel, and view your data in the dashboard.
+This guide will help you get started with using Vercel Web Analytics on your project, showing you how to enable it, add the package to your project, deploy your app to Vercel, and view your data in th[...] 
 
 **Select your framework to view instructions on using the Vercel Web Analytics in your project**.
 
@@ -301,13 +303,13 @@ This guide will help you get started with using Vercel Web Analytics on your pro
   ---
 
   <html lang="en">
-  	<head>
+    	<head>
       <meta charset="utf-8" />
       <!-- ... -->
       <Analytics />
-  	</head>
-  	<body>
-  		<slot />
+    	</head>
+    	<body>
+    		<slot />
     </body>
   </html>
   ```
@@ -319,13 +321,13 @@ This guide will help you get started with using Vercel Web Analytics on your pro
   ---
 
   <html lang="en">
-  	<head>
+    	<head>
       <meta charset="utf-8" />
       <!-- ... -->
       <Analytics />
-  	</head>
-  	<body>
-  		<slot />
+    	</head>
+    	<body>
+    		<slot />
     </body>
   </html>
   ```
