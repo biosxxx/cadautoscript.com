@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'utilities/embed-calculators',
         'utilities/bourdon-gauge-configurator',
         'utilities/cylindrical-shell-rolling',
+        'utilities/pressure-vessel-dished-end-calc',
         'utilities/dxf-editor',
         'utilities/file-renamer',
         'utilities/folder-structure-builder',

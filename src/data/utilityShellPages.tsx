@@ -16,7 +16,8 @@ export type UtilityPageSlug =
   | 'folder-structure-builder'
   | 'magnetic-level-gauge-configurator'
   | 'bourdon-gauge-configurator'
-  | 'industrial-thermometer-configurator';
+  | 'industrial-thermometer-configurator'
+  | 'pressure-vessel-dished-end-calc';
 
 export type UtilityPageConfig = {
   slug: UtilityPageSlug;
@@ -274,6 +275,19 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Project metadata and accessory toggles',
       'PDF datasheet export',
     ],
+    scriptType: 'module',
+  },
+  'pressure-vessel-dished-end-calc': {
+    slug: 'pressure-vessel-dished-end-calc',
+    title: 'Dished End (Vessel Head) Calculator',
+    subtitle: 'Web utility - Dished end sizing + QC sheet',
+    description:
+      'Size DIN 28011 / 28013 dished heads, preview dimensions, add nozzle callouts, and print a QC worksheet.',
+    about:
+      'Configure common DIN dished end geometries, visualize the profile, add nozzle markers for planning, and generate a printable QC worksheet for shop inspection.',
+    tags: ['Pressure vessels', 'DIN', 'Fabrication'],
+    note: 'All calculations run in the browser. Use the QC report view to print or save as PDF.',
+    features: ['DIN 28011 / 28013 geometry presets', 'Nozzle offset callouts', 'Printable QC worksheet'],
     scriptType: 'module',
   },
 };

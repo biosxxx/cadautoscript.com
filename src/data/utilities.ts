@@ -172,4 +172,14 @@ export const utilities: UtilityDescriptor[] = [
     features: ['Range presets + custom', 'Stem + thermowell options', 'Adjustable mounting preview', 'PDF export'],
     href: '/utilities/industrial-thermometer-configurator/',
   },
+  {
+    id: 'pressure-vessel-dished-end-calc',
+    name: 'Dished End (Vessel Head) Calculator',
+    description:
+      'Size DIN 28011 / 28013 dished heads, preview dimensions, add nozzle callouts, and print a QC worksheet.',
+    tech: 'SVG + Calc',
+    standards: 'DIN 28011 / DIN 28013 / SS 895',
+    features: ['Instant geometry preview', 'Nozzle offset callouts', 'Printable QC report'],
+    href: '/utilities/pressure-vessel-dished-end-calc/',
+  },
 ];
