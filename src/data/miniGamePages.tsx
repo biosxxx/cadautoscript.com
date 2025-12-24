@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-export type MiniGameSlug = 'engineering-blueprint-ncr' | 'pressure-vessel-tycoon';
+export type MiniGameSlug = 'engineering-blueprint-ncr' | 'flanges-memory-matrix' | 'pressure-vessel-tycoon';
 
 export type MiniGamePageConfig = {
   slug: MiniGameSlug;
@@ -42,6 +42,23 @@ export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
       'HOLD markers (flags) and proximity counts',
       'Instant fail on defect contact',
     ],
+    scriptType: 'defer',
+  },
+  'flanges-memory-matrix': {
+    slug: 'flanges-memory-matrix',
+    title: 'Flanges Memory Matrix',
+    subtitle: 'Mini game - Pressure Vessel: Safety Release',
+    description:
+      'Memorize highlighted flange tiles and repeat the sequence as the grid scales up. Mistakes cost lives.',
+    about: (
+      <>
+        A fast memory drill wrapped in a safety/pressure-vessel theme: watch the highlighted tiles, then reproduce the
+        pattern. Each level increases the grid and complexity.
+      </>
+    ),
+    tags: ['Mini game', 'Memory', 'Flanges'],
+    note: 'Runs locally in your browser. No sign-in required.',
+    features: ['Pattern memory rounds', 'Scaling grid difficulty', 'Lives-based fail state'],
     scriptType: 'defer',
   },
   'pressure-vessel-tycoon': {

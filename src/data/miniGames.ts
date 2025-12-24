@@ -18,6 +18,14 @@ export const miniGames: MiniGameDescriptor[] = [
     href: '/mini-games/engineering-blueprint-ncr/',
   },
   {
+    id: 'flanges-memory-matrix',
+    name: 'Flanges Memory Matrix',
+    description: 'Safety-themed memory grid: remember the highlighted flange tiles, then reproduce the pattern under pressure.',
+    tech: 'Phaser',
+    tags: ['Memory', 'Flanges', 'Mini game'],
+    href: '/mini-games/flanges-memory-matrix/',
+  },
+  {
     id: 'pressure-vessel-tycoon',
     name: 'Pressure Vessel Tycoon',
     description: 'Factorio-inspired factory builder: craft pressure vessels with conveyors, cutters, welders, and upgrades.',
