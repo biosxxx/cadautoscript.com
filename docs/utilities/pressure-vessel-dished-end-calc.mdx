@@ -1,22 +1,23 @@
 ---
 title: Dished End (Vessel Head) Calculator
-description: Size DIN 28011 / 28013 dished heads, preview dimensions, add nozzle callouts, and print a QC worksheet.
+description: Calculate geometry, blank diameter, and weight for Torispherical and Ellipsoidal heads (DIN 28011, DIN 28013, SS 895) with nozzle configuration and QC reports.
 slug: /utilities/pressure-vessel-dished-end-calc
 image: /img/og/utilities/pressure-vessel-dished-end-calc.png
 keywords:
+  - dished end
+  - vessel head
   - DIN 28011
   - DIN 28013
-  - dished end
-  - pressure vessel head
-  - fabrication
-  - QC report
+  - torispherical
+  - blank diameter
+  - pressure vessel
 ---
 
 import Head from '@docusaurus/Head';
 
 # Dished End (Vessel Head) Calculator
 
-Configure common DIN dished end geometries, preview dimensions, and print a QC worksheet for shop inspection.
+Calculate geometry, blank diameter, and weight for Torispherical and Ellipsoidal heads (DIN 28011, DIN 28013, SS 895) with nozzle configuration and QC reports.
 
 <a className="button button--primary" href="/utilities/pressure-vessel-dished-end-calc/" data-nobrokenlinkcheck>Open utility</a>
 
@@ -30,14 +31,136 @@ Configure common DIN dished end geometries, preview dimensions, and print a QC w
   "name": "Dished End (Vessel Head) Calculator",
   "applicationCategory": "EngineeringApplication",
   "operatingSystem": "Web",
-  "description": "Size DIN 28011 / 28013 dished heads, preview dimensions, add nozzle callouts, and print a QC worksheet.",
+  "description": "Calculate geometry, blank diameter, and weight for Torispherical and Ellipsoidal heads (DIN 28011, DIN 28013, SS 895) with nozzle configuration and QC reports.",
   "url": "https://cadautoscript.com/utilities/pressure-vessel-dished-end-calc/",
   "image": "https://cadautoscript.com/img/og/utilities/pressure-vessel-dished-end-calc.png",
+  "featureList": [
+    "Automatic geometry calculation (R, r, h1, h2)",
+    "Blank diameter estimation",
+    "Nozzle positioning visualizer",
+    "Printable Manufacturing QC Report"
+  ],
   "mainEntityOfPage": "https://cadautoscript.com/docs/utilities/pressure-vessel-dished-end-calc",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
   "author": {
     "@type": "Organization",
     "name": "CAD AutoScript"
   }
 }`}</script>
+  <script type="application/ld+json">{`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which standards are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The calculator supports DIN 28011 (Torispherical), DIN 28013 (Ellipsoidal), and SS 895 standards."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it calculate the blank diameter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. It estimates blank diameter using standard factors (e.g., 1.09x or 1.14x Da) plus the straight flange."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I configure weld preparation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. You can select between a square cut (None) or a V-Bevel with configurable angle and root face."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the QC report customizable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The QC report is auto-generated based on your inputs and includes DIN 28005-1 tolerances. It prints directly from the browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are my entries saved?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Close the page to clear everything; it stays in your browser memory only."
+      }
+    }
+  ]
+}`}</script>
 </Head>
 
+## What it does
+Instant calculation of pressure vessel head geometry, weight, and volume. It generates a visual profile including nozzle positions and produces a printable "Manufacturing Report" with expected tolerances for quality control.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need to estimate the weight and blank diameter for material ordering.
+- You want to visualize nozzle positions relative to the head curvature.
+- You need a quick QC sheet with standard tolerances (DIN 28005-1) for the shop floor.
+
+**Avoid it when:**
+- You are designing ASME 2:1 Ellipsoidal heads (unless the geometry matches the provided DIN/SS presets manually).
+- You require ASME VIII Div 1 pressure ratings or stress analysis.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Standard | Choose between DIN 28011, DIN 28013, or SS 895. |
+| Geometry (Da, s, h1) | Outer diameter, wall thickness, and straight flange height. |
+| Material | Select from common grades (P265GH, Stainless, Titanium) to determine density. |
+| Edge Prep | Configurable V-Bevel angle and root face dimensions. |
+| Nozzles | Add nozzles with specific DN sizes and offset positions. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Geometry (H, h2, R, r) | Numeric | Full height, crown height, dish radius, and knuckle radius calculations. |
+| Weight & Volume | Numeric | Estimated finished weight and internal volume. |
+| Blank Diameter | Numeric | Theoretical flat plate diameter required for forming. |
+| QC Report | PDF/Print | A formatted sheet with nominal values and blank fields for actual measurements. |
+
+## How to use
+1. Select the manufacturing standard (e.g., DIN 28011).
+2. Enter the Outer Diameter (Da), Thickness (s), and Straight Flange (h1).
+3. Configure the material and edge preparation (bevel angle/root face) if needed.
+4. (Optional) Add nozzles by specifying size (e.g., DN50) and offset from center.
+5. Click "QC Report (PDF)" to generate the printable manufacturing sheet.
+
+**Example dataset:** Standard: DIN 28011, Da: 1000 mm, s: 8 mm, h1: 25 mm, Material: P265GH.
+- Expected output: Total Height (H) calculated, weight estimation (~25kg), and a visual profile showing the dish radius and knuckle radius.
+
+## Accuracy and verification
+- Geometry calculations follow the specific formulas for DIN 28011 (R=Da, r=0.1Da), DIN 28013, and SS 895.
+- Tolerances in the report are derived from DIN 28005-1 (Formed Heads).
+- Weight is calculated using standard densities (7.85 for Carbon Steel, 7.9 for Stainless).
+
+## FAQ
+- **Which standards are supported?** DIN 28011 (Torispherical), DIN 28013 (Ellipsoidal), and SS 895.
+- **Does it calculate the blank diameter?** Yes. It estimates blank diameter using standard factors (e.g., 1.09x or 1.14x Da) plus the straight flange.
+- **Can I configure weld preparation?** Yes. You can select between a square cut (None) or a V-Bevel with configurable angle and root face.
+- **Is the QC report customizable?** The QC report is auto-generated based on your inputs and includes DIN 28005-1 tolerances. It prints directly from the browser.
+- **Are my entries saved?** No. Close the page to clear everything; it stays in your browser memory only.
+
+## Related tools
+- [Cylindrical Shell Rolling](./cylindrical-shell-rolling)
+- [Bourdon Gauge Configurator](./bourdon-gauge)
+- [Embedding Calculators](./embedding-calculators)
+
+## Changelog
+- **v0.1.3b**: Added QC Report generation, nozzle configuration, and edge prep visualization.
+- Initial release.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `pressure-vessel-dished-end-calc` so we can reproduce the issue
