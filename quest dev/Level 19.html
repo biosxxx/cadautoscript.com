@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Level 19 - Похищение технологий</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0d14;
+        --panel: #131826;
+        --accent: #64ffda;
+        --danger: #ff5d6c;
+        --warning: #ffb347;
+        --text: #e6ecff;
+        --muted: #8f9bb7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(circle at top, #162038, #0b0d14 45%);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 20px 60px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+      }
+
+      p {
+        margin: 6px 0 0;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .status-bar strong {
+        color: var(--accent);
+      }
+
+      .btn {
+        background: var(--accent);
+        color: #0b0d14;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn.secondary {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid rgba(100, 255, 218, 0.5);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .thief {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .thief-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .badge-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .badge.danger {
+        background: rgba(255, 93, 108, 0.15);
+        color: var(--danger);
+      }
+
+      .badge.safe {
+        background: rgba(100, 255, 218, 0.12);
+        color: var(--accent);
+      }
+
+      .badge.suit {
+        background: rgba(255, 93, 108, 0.2);
+        color: #ffd1d6;
+      }
+
+      .badge.target {
+        background: rgba(255, 179, 71, 0.18);
+        color: var(--warning);
+      }
+
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .progress span {
+        display: block;
+        height: 100%;
+        background: var(--danger);
+        width: 100%;
+        transition: width 0.1s linear;
+      }
+
+      .tech-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .tech {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .tech.lost {
+        opacity: 0.4;
+        text-decoration: line-through;
+      }
+
+      .log {
+        margin-top: 10px;
+        max-height: 180px;
+        overflow: auto;
+        padding-right: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .log-entry {
+        margin-bottom: 6px;
+      }
+
+      .hud {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 900px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Level 19 - Похищение технологий</h1>
+      <p>Квест-испытание: остановите 5 похитителей в красных костюмах. Они снижают ранг зданий до 1 уровня за 3 секунды. Один из них атакует Инженерный центр и затем крадет технологии каждые 2 секунды, начиная с самых дорогих.</p>
+
+      <div class="status-bar">
+        <div>
+          Активные похитители: <strong id="activeCount">0</strong>
+          | Кредиты: <strong id="credits">0</strong>
+        </div>
+        <div>
+          <button class="btn" id="startBtn">Запустить испытание</button>
+          <button class="btn secondary" id="bribeBtn">Откуп (-1 похититель) 8 000 000</button>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top: 20px;">
+        <div class="panel">
+          <h2 style="margin: 0 0 12px; font-size: 18px;">Похитители и здания</h2>
+          <div id="thiefList" class="grid"></div>
+        </div>
+        <div class="panel">
+          <h2 style="margin: 0 0 12px; font-size: 18px;">Инженерный центр</h2>
+          <div class="hud">
+            <div>Текущий ранг: <strong id="engineeringRank">5</strong></div>
+            <div class="progress"><span id="engineeringProgress"></span></div>
+            <div>Похищаемые технологии:</div>
+            <div id="techList" class="tech-list"></div>
+            <div class="log" id="eventLog"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const startBtn = document.getElementById("startBtn");
+      const bribeBtn = document.getElementById("bribeBtn");
+      const thiefList = document.getElementById("thiefList");
+      const activeCount = document.getElementById("activeCount");
+      const creditsEl = document.getElementById("credits");
+      const engineeringRank = document.getElementById("engineeringRank");
+      const engineeringProgress = document.getElementById("engineeringProgress");
+      const techList = document.getElementById("techList");
+      const eventLog = document.getElementById("eventLog");
+
+      const BRIBE_COST = 8000000;
+      const INITIAL_CREDITS = 12000000;
+      const BUILDING_RANK_START = 5;
+      const BUILDING_RANK_END = 1;
+      const BUILDING_DROP_MS = 3000;
+      const TECH_LOSS_MS = 2000;
+
+      let credits = INITIAL_CREDITS;
+      let thieves = [];
+      let tech = [];
+      let techTimer = null;
+      let running = false;
+
+      const buildingTargets = [
+        "Литейный комплекс",
+        "Сборочная линия",
+        "Цех автоматизации",
+        "Склад компонентов",
+        "Инженерный центр",
+      ];
+
+      const initialTech = [
+        {name: "Квантовый реактор", cost: 900000, lost: false},
+        {name: "Нанополимерный каркас", cost: 850000, lost: false},
+        {name: "Серия контроллеров X9", cost: 620000, lost: false},
+        {name: "Система охлаждения A7", cost: 540000, lost: false},
+        {name: "Модуль QC-анализа", cost: 480000, lost: false},
+        {name: "Алгоритм экономии", cost: 420000, lost: false},
+        {name: "Протокол безопасности", cost: 380000, lost: false},
+      ];
+
+      function logEvent(message) {
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.textContent = message;
+        eventLog.prepend(entry);
+      }
+
+      function resetGame() {
+        running = true;
+        credits = INITIAL_CREDITS;
+        creditsEl.textContent = credits.toLocaleString("ru-RU");
+        eventLog.innerHTML = "";
+        tech = initialTech.map((item) => ({...item}));
+        renderTech();
+        thieves = buildingTargets.map((building, index) => ({
+          id: index,
+          building,
+          isEngineering: building === "Инженерный центр",
+          neutralized: false,
+          started: false,
+          progress: 1,
+          buildingRank: BUILDING_RANK_START,
+          timer: null,
+        }));
+        engineeringRank.textContent = BUILDING_RANK_START;
+        engineeringProgress.style.width = "100%";
+        if (techTimer) {
+          clearInterval(techTimer);
+        }
+        techTimer = null;
+        renderThieves();
+        updateCounts();
+        startAttacks();
+      }
+
+      function updateCounts() {
+        const active = thieves.filter((t) => !t.neutralized).length;
+        activeCount.textContent = active;
+        bribeBtn.disabled = credits < BRIBE_COST || active === 0 || !running;
+        if (active === 0 && running) {
+          running = false;
+          logEvent("Все похитители обезврежены. Испытание завершено!");
+        }
+      }
+
+      function renderTech() {
+        techList.innerHTML = "";
+        const sorted = [...tech].sort((a, b) => b.cost - a.cost);
+        sorted.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "tech" + (item.lost ? " lost" : "");
+          row.innerHTML = `<span>${item.name}</span><span>${item.cost.toLocaleString("ru-RU")}</span>`;
+          techList.appendChild(row);
+        });
+      }
+
+      function renderThieves() {
+        thiefList.innerHTML = "";
+        thieves.forEach((thief) => {
+          const card = document.createElement("div");
+          card.className = "thief";
+          card.dataset.id = thief.id;
+
+          const status = thief.neutralized ? "Обезврежен" : "Активен";
+          const badgeClass = thief.neutralized ? "safe" : "danger";
+          const progress = Math.max(0, thief.progress * 100);
+          const targetTag = thief.isEngineering ? '<span class="badge target">Ключевая цель</span>' : "";
+
+          card.innerHTML = `
+            <div class="thief-header">
+              <strong>${thief.building}</strong>
+              <div class="badge-row">
+                <span class="badge suit">Красный костюм</span>
+                ${targetTag}
+                <span class="badge ${badgeClass}">${status}</span>
+              </div>
+            </div>
+            <div>Ранг здания: <strong>${thief.buildingRank}</strong></div>
+            <div class="progress"><span style="width:${progress}%"></span></div>
+            <button class="btn secondary" ${thief.neutralized ? "disabled" : ""}>Обезвредить</button>
+          `;
+
+          card.querySelector("button").addEventListener("click", () => neutralize(thief.id));
+          thiefList.appendChild(card);
+        });
+      }
+
+      function startAttacks() {
+        thieves.forEach((thief) => {
+          thief.started = true;
+          const startTime = performance.now();
+          thief.timer = setInterval(() => {
+            if (thief.neutralized) {
+              clearInterval(thief.timer);
+              return;
+            }
+            const elapsed = performance.now() - startTime;
+            thief.progress = Math.max(0, 1 - elapsed / BUILDING_DROP_MS);
+            if (elapsed >= BUILDING_DROP_MS) {
+              thief.buildingRank = BUILDING_RANK_END;
+              thief.progress = 0;
+              clearInterval(thief.timer);
+              if (thief.isEngineering) {
+                startTechLoss();
+              }
+            } else {
+              const rankDrop = Math.floor((elapsed / BUILDING_DROP_MS) * (BUILDING_RANK_START - BUILDING_RANK_END));
+              thief.buildingRank = Math.max(BUILDING_RANK_END, BUILDING_RANK_START - rankDrop);
+            }
+            updateEngineeringHUD(thief);
+            renderThieves();
+          }, 100);
+        });
+        logEvent("Похитители в красных костюмах выдвинулись к зданиям.");
+      }
+
+      function updateEngineeringHUD(thief) {
+        if (!thief.isEngineering) {
+          return;
+        }
+        engineeringRank.textContent = thief.buildingRank;
+        engineeringProgress.style.width = `${thief.progress * 100}%`;
+      }
+
+      function startTechLoss() {
+        if (techTimer) {
+          return;
+        }
+        logEvent("Инженерный центр понижен до 1 уровня. Начинается кража технологий!");
+        techTimer = setInterval(() => {
+          const remaining = tech.filter((item) => !item.lost);
+          if (remaining.length === 0) {
+            clearInterval(techTimer);
+            techTimer = null;
+            running = false;
+            logEvent("Все технологии похищены. Испытание провалено!");
+            renderTech();
+            return;
+          }
+          const mostExpensive = remaining.sort((a, b) => b.cost - a.cost)[0];
+          mostExpensive.lost = true;
+          logEvent(`Похищена технология: ${mostExpensive.name} (${mostExpensive.cost.toLocaleString("ru-RU")}).`);
+          renderTech();
+        }, TECH_LOSS_MS);
+      }
+
+      function neutralize(id) {
+        const thief = thieves.find((t) => t.id === id);
+        if (!thief || thief.neutralized) {
+          return;
+        }
+        thief.neutralized = true;
+        if (thief.timer) {
+          clearInterval(thief.timer);
+        }
+        logEvent(`Похититель у "${thief.building}" обезврежен.`);
+        if (thief.isEngineering) {
+          if (techTimer) {
+            clearInterval(techTimer);
+            techTimer = null;
+            logEvent("Кража технологий остановлена.");
+          }
+        }
+        renderThieves();
+        updateCounts();
+      }
+
+      function useBribe() {
+        const active = thieves.filter((t) => !t.neutralized);
+        if (active.length === 0 || credits < BRIBE_COST) {
+          return;
+        }
+        credits -= BRIBE_COST;
+        creditsEl.textContent = credits.toLocaleString("ru-RU");
+        const target = active[0];
+        neutralize(target.id);
+        logEvent(`Откуп сработал: похититель у "${target.building}" исчез.`);
+      }
+
+      startBtn.addEventListener("click", resetGame);
+      bribeBtn.addEventListener("click", useBribe);
+
+      creditsEl.textContent = credits.toLocaleString("ru-RU");
+    </script>
+  </body>
+</html>
