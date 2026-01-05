@@ -61,11 +61,11 @@ function buildUrlset(urls) {
   );
 }
 
-function buildSitemapIndex(origin, sitemapNames) {
+function buildSitemapIndex(origin, sitemapNames, lastmod) {
   const entries = sitemapNames
     .map((name) => {
       const loc = `${origin}/sitemap-${name}.xml`;
-      return `  <sitemap><loc>${loc}</loc></sitemap>`;
+      return `  <sitemap><loc>${loc}</loc><lastmod>${lastmod}</lastmod></sitemap>`;
     })
     .join('\n');
   return (
@@ -100,7 +100,8 @@ function writeSitemaps(groups, origin) {
   }
 
   const indexPath = path.join(BUILD_DIR, 'sitemap-index.xml');
-  fs.writeFileSync(indexPath, buildSitemapIndex(origin, sitemapNames));
+  const lastmod = new Date().toISOString().slice(0, 10);
+  fs.writeFileSync(indexPath, buildSitemapIndex(origin, sitemapNames, lastmod));
 }
 
 function main() {
