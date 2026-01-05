@@ -1,6 +1,10 @@
 import type {ReactNode} from 'react';
 
-export type MiniGameSlug = 'engineering-blueprint-ncr' | 'flanges-memory-matrix' | 'pressure-vessel-tycoon';
+export type MiniGameSlug =
+  | 'engineering-blueprint-ncr'
+  | 'flanges-memory-matrix'
+  | 'pressure-vessel-tycoon'
+  | 'smash-bottles';
 
 export type MiniGamePageConfig = {
   slug: MiniGameSlug;
@@ -83,5 +87,24 @@ export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
     ],
     scriptType: 'module',
     reactionSlug: 'mini-pressure-vessel-tycoon',
+  },
+  'smash-bottles': {
+    slug: 'smash-bottles',
+    title: 'Railroad Bottle Smash',
+    subtitle: 'Mini game - physics sandbox for glass smashing',
+    description:
+      'Throw stones along a rail line and shatter glass bottles with Three.js + cannon-es physics in a seasonal environment.',
+    about: (
+      <>
+        A physics sandbox built with Three.js and cannon-es: target glass bottles perched along the rail line and shatter
+        them with thrown stones while the scene swaps seasons on each reset.
+        <br />
+        <br />
+        <strong>Controls:</strong> Move the mouse to aim, left-click to throw. Right-drag to orbit, middle-wheel to zoom.
+      </>
+    ),
+    tags: ['Mini game', 'Physics', 'Destruction'],
+    note: 'Runs in-browser with Three.js + cannon-es. No sign-in required.',
+    features: ['Click-to-throw stone launcher', 'Seasonal world variations', 'Glass shatter physics'],
   },
 };

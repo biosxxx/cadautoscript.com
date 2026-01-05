@@ -33,4 +33,13 @@ export const miniGames: MiniGameDescriptor[] = [
     tags: ['Factory sim', 'Automation', 'Mini game'],
     href: '/mini-games/pressure-vessel-tycoon/',
   },
+  {
+    id: 'smash-bottles',
+    name: 'Railroad Bottle Smash',
+    description:
+      'Physics sandbox: hurl stones down a rail line and shatter glass bottles across changing seasons.',
+    tech: 'Three.js + cannon-es',
+    tags: ['Mini game', 'Physics', 'Destruction'],
+    href: '/mini-games/smash-bottles/',
+  },
 ];
