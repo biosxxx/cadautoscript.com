@@ -81,8 +81,8 @@ function buildRobotsTxt(origin) {
     'User-agent: *\n' +
     'Allow: /\n' +
     'Disallow: /admin/\n' +
-    `Sitemap: ${origin}/sitemap.xml\n` +
-    `Sitemap: ${origin}/sitemap-index.xml\n`
+    `Sitemap: ${origin}/sitemap-index.xml\n` +
+    `Sitemap: ${origin}/sitemap.xml\n`
   );
 }
 
