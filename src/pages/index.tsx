@@ -10,7 +10,7 @@ import styles from './index.module.css';
 const heroStats = [
   {label: 'Live utilities', value: utilities.length.toString()},
   {label: 'Runtime', value: 'Chromium + WASM'},
-  {label: 'Formats', value: 'DXF / SVG / CSV'},
+  {label: 'Formats', value: 'DXF / SVG / CSV / PDF / JSON'},
 ];
 
 type UtilityCardProps = {
@@ -80,10 +80,12 @@ export default function Home(): ReactNode {
         <section className={styles.hero}>
           <div>
             <p className={styles.eyebrow}>CAD AutoScript</p>
-            <h1>Minimal hub for fabrication utilities</h1>
+            <h1>CAD AutoScript is a streamlined hub for fabrication automation.</h1>
             <p>
-              SolidWorks macros, DXF generators, and QA helpers live in one place. Open the calculator you
-              need, keep docs nearby, and let Chromium do the heavy lifting.
+              It handles essential design tasks - including pipe saddle visualization, DXF exports, PDF package
+              processing, and instrumentation configurators. Every tool operates locally client-side (WASM),
+              providing zero-latency performance and complete data security. Includes comprehensive documentation
+              and a mini-games arcade.
             </p>
             <div className={styles.heroActions}>
               <Link className="button button--primary" href="/docs/utilities/overview">
