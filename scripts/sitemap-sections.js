@@ -76,6 +76,16 @@ function buildSitemapIndex(origin, sitemapNames) {
   );
 }
 
+function buildRobotsTxt(origin) {
+  return (
+    'User-agent: *\n' +
+    'Allow: /\n' +
+    'Disallow: /admin/\n' +
+    `Sitemap: ${origin}/sitemap.xml\n` +
+    `Sitemap: ${origin}/sitemap-index.xml\n`
+  );
+}
+
 function writeSitemaps(groups, origin) {
   const sitemapNames = [];
 
@@ -99,6 +109,7 @@ function main() {
   const origin = getOrigin(urls);
   const groups = groupUrls(urls);
   writeSitemaps(groups, origin);
+  fs.writeFileSync(path.join(BUILD_DIR, 'robots.txt'), buildRobotsTxt(origin));
   console.log('Section sitemaps generated in build/.');
 }
 

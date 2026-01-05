@@ -50,6 +50,12 @@ const config: Config = {
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
         },
+        sitemap: {
+          changefreq: 'weekly',
+          priority: 0.5,
+          filename: 'sitemap.xml',
+          ignorePatterns: ['/admin/**'],
+        },
         theme: {
           customCss: ['./src/css/custom.css', './src/css/light-theme.css'],
         },
