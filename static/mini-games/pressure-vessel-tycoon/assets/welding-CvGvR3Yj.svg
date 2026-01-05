@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Welding">
+  
+  
+
+<defs>
+  <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0b1630" flood-opacity="0.18"/>
+  </filter>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e8eef6"/>
+    <stop offset="1" stop-color="#b7c6d8"/>
+  </linearGradient>
+  <linearGradient id="steelDark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#c7d3e3"/>
+    <stop offset="1" stop-color="#8ea2ba"/>
+  </linearGradient>
+  <linearGradient id="conveyorTop" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#3a77c6"/>
+    <stop offset="1" stop-color="#265aa5"/>
+  </linearGradient>
+  <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffb23a"/>
+    <stop offset="1" stop-color="#ff7a1a"/>
+  </linearGradient>
+  <linearGradient id="magentaGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ff5bd6"/>
+    <stop offset="1" stop-color="#c72bff"/>
+  </linearGradient>
+  <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#57f1ff"/>
+    <stop offset="1" stop-color="#18a7ff"/>
+  </linearGradient>
+</defs>
+
+<g filter="url(#softShadow)">
+  <!-- torso -->
+  <path d="M142 364 C150 308, 198 278, 256 278 C314 278, 362 308, 370 364
+           L370 400 C370 422, 354 438, 332 438 L180 438 C158 438, 142 422, 142 400 Z"
+        fill="#2b3f5b"/>
+  <path d="M168 362 C174 326, 206 306, 256 306 C306 306, 338 326, 344 362
+           L344 382 C344 396, 332 408, 318 408 L194 408 C180 408, 168 396, 168 382 Z"
+        fill="#1f2f45" opacity="0.75"/>
+  <!-- helmet -->
+  <path d="M192 206 C192 156, 226 120, 276 120 C332 120, 372 162, 368 220
+           C366 252, 348 272, 322 284 L206 284 C198 258, 192 236, 192 206 Z"
+        fill="#3c5576"/>
+  <path d="M212 204 C214 172, 236 152, 270 152 C310 152, 336 180, 336 216
+           L336 228 C336 238, 328 246, 318 246 L228 246 C218 246, 210 238, 210 228 Z"
+        fill="url(#cyanGrad)"/>
+  <path d="M214 260 L326 260" stroke="#0b1630" stroke-opacity="0.25" stroke-width="8" stroke-linecap="round"/>
+  <!-- arm + torch -->
+  <path d="M302 330 C336 326, 366 312, 396 292" stroke="#ff9d2a" stroke-width="18" stroke-linecap="round"/>
+  <path d="M388 294 l42 -26" stroke="#2b3f5b" stroke-width="14" stroke-linecap="round"/>
+  <rect x="430" y="250" width="44" height="18" rx="9" fill="#2b3f5b" transform="rotate(-32 430 250)"/>
+  <rect x="410" y="270" width="36" height="14" rx="7" fill="#163465" transform="rotate(-32 410 270)"/>
+  <!-- sparks -->
+  <g transform="translate(410,240)">
+    <circle cx="0" cy="0" r="26" fill="#ffffff"/>
+    <circle cx="0" cy="0" r="20" fill="#57f1ff"/>
+    <circle cx="0" cy="0" r="12" fill="#18a7ff"/>
+    <path d="M0 0 L70.0 0.0" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L57.8 39.5" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L25.4 65.2" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L-15.9 68.2" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L-51.6 47.3" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L-69.3 9.9" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L-62.8 -31.0" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L-34.3 -61.0" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L6.1 -69.7" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/><path d="M0 0 L44.4 -54.1" stroke="#ff8a22" stroke-width="6" stroke-linecap="round"/>
+    <path d="M0 0 L53.5 16.5" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L34.8 43.9" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L4.0 55.9" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L-28.3 48.3" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L-50.6 23.9" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L-55.3 -8.8" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L-40.7 -38.5" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L-11.8 -54.7" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/><path d="M0 0 L21.2 -51.8" stroke="#57f1ff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- glove -->
+  <circle cx="398" cy="298" r="16" fill="#ffb23a"/>
+</g>
+
+</svg>
