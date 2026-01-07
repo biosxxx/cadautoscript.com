@@ -42,4 +42,12 @@ export const miniGames: MiniGameDescriptor[] = [
     tags: ['Mini game', 'Physics', 'Destruction'],
     href: '/mini-games/smash-bottles/',
   },
+  {
+    id: 'eco-sort-game',
+    name: 'Eco Sort: Atmospheric',
+    description: 'First-person sorting game: throw items into the correct recycling bins across shifting weather.',
+    tech: 'Three.js + cannon-es',
+    tags: ['Mini game', 'Recycling', 'First-person'],
+    href: '/mini-games/eco-sort-game/',
+  },
 ];

@@ -4,7 +4,8 @@ export type MiniGameSlug =
   | 'engineering-blueprint-ncr'
   | 'flanges-memory-matrix'
   | 'pressure-vessel-tycoon'
-  | 'smash-bottles';
+  | 'smash-bottles'
+  | 'eco-sort-game';
 
 export type MiniGamePageConfig = {
   slug: MiniGameSlug;
@@ -106,5 +107,24 @@ export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
     tags: ['Mini game', 'Physics', 'Destruction'],
     note: 'Runs in-browser with Three.js + cannon-es. No sign-in required.',
     features: ['Click-to-throw stone launcher', 'Seasonal world variations', 'Glass shatter physics'],
+  },
+  'eco-sort-game': {
+    slug: 'eco-sort-game',
+    title: 'Eco Sort: Atmospheric',
+    subtitle: 'Mini game - first-person recycling drill',
+    description:
+      'Sort flying trash into the correct bins with a first-person throw mechanic under changing weather.',
+    about: (
+      <>
+        Aim and toss items into the matching bins. Weather shifts between clear, rain, and snow, while the
+        physics-driven throws stay fast and responsive.
+        <br />
+        <br />
+        <strong>Controls:</strong> WASD to move, mouse to look, left click to throw. Click to lock pointer.
+      </>
+    ),
+    tags: ['Mini game', 'Recycling', 'First-person'],
+    note: 'Runs in-browser with Three.js + cannon-es. No sign-in required.',
+    features: ['Pointer-lock movement', 'Dynamic weather effects', 'Trajectory preview and scoring'],
   },
 };

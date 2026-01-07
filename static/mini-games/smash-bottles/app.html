@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Railroad Bottle Smash (Three.js + Cannon.js)</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
+        html, body { width: 100%; height: 100%; }
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; touch-action: none; overscroll-behavior: none; }
         
         #info {
             position: absolute;
@@ -52,7 +53,6 @@
             margin: 0 2px;
         }
         
-        /* Цвет для камней, чтобы выделялся */
         #stonesVal {
             color: #FFC107; 
         }
@@ -85,6 +85,8 @@
         #resetBtn:hover {
             background: #1976D2;
         }
+
+        canvas { display: block; touch-action: none; }
     </style>
 </head>
 <body>
@@ -131,7 +133,16 @@
         let environmentObjects = []; 
         
         let score = 0;
-        let stonesLeft = 20; // Инициализация
+        let stonesLeft = 20;
+
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const TAP_MAX_DIST = 12;
+        const TAP_MAX_TIME = 350;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        let touchMoved = false;
+        let touchThrowActive = false;
         
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
@@ -145,6 +156,7 @@
         const RAIL_HEIGHT = 0.15;
         const RAIL_TOP_Y = SLEEPER_HEIGHT + RAIL_HEIGHT; 
         const WORLD_LENGTH = 400;
+        const GROUND_LEVEL = -1.5;
 
         const SEASONS = {
             SUMMER: { 
@@ -237,6 +249,13 @@
                 MIDDLE: THREE.MOUSE.DOLLY,
                 RIGHT: THREE.MOUSE.ROTATE
             };
+            if (isTouchDevice) {
+                controls.enabled = false;
+                controls.touches = {
+                    ONE: THREE.TOUCH.ROTATE,
+                    TWO: THREE.TOUCH.DOLLY_ROTATE
+                };
+            }
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
@@ -279,8 +298,12 @@
             regenerateWorld();
             
             window.addEventListener('resize', onWindowResize);
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+            renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+            renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
+            renderer.domElement.addEventListener('touchcancel', onTouchCancel, { passive: false });
             window.addEventListener('contextmenu', e => e.preventDefault());
             
             document.getElementById('resetBtn').addEventListener('click', (e) => {
@@ -293,7 +316,7 @@
             const remaining = stack.filter(obj => obj.isBottle).length;
             document.getElementById('scoreVal').innerText = score;
             document.getElementById('remainingVal').innerText = remaining;
-            document.getElementById('stonesVal').innerText = stonesLeft; // Обновляем камни
+            document.getElementById('stonesVal').innerText = stonesLeft; 
             document.getElementById('season-info').innerText = "SEASON: " + currentSeason.name;
         }
 
@@ -342,13 +365,12 @@
             pickRandomSeason();
             createEnvironment();
             spawnBottles();
-            stonesLeft = 20; // Сброс камней
+            stonesLeft = 20; 
             updateUI();
         }
 
         function createEnvironment() {
             const hasRiver = Math.random() > 0.5;
-            const hasPonds = !hasRiver && Math.random() > 0.3; 
             
             let riverZ = 0;
             let riverWidth = 0;
@@ -356,6 +378,9 @@
                 riverWidth = 8 + Math.random() * 8;
                 riverZ = (Math.random() - 0.5) * 20;
             }
+
+            const roadZ = 0;
+            const roadWidth = 0;
 
             if (!hasRiver) {
                 createLandscapeSegment(-WORLD_LENGTH/2, WORLD_LENGTH/2);
@@ -368,7 +393,7 @@
                 createLandscapeSegment(riverEnd, WORLD_LENGTH/2);
             }
 
-            generateFloraAndClouds(hasRiver, riverZ, riverWidth);
+            generateFloraAndClouds(hasRiver, riverZ, riverWidth, roadZ, roadWidth);
             generateTrack(hasRiver, riverZ, riverWidth);
         }
 
@@ -377,40 +402,64 @@
             const zCenter = (zStart + zEnd) / 2;
             const bankWidth = 4;
             const bankHeight = 2;
-            const groundLevel = -1.5; 
-            const slopeWidth = 60;
+            const groundLevel = GROUND_LEVEL; 
+            const groundWidth = 60;
+            const slopeWidth = 6;
 
             const gravelMat = new THREE.MeshStandardMaterial({ color: currentSeason.gravel, roughness: 1.0 });
             const grassMat = new THREE.MeshStandardMaterial({ color: currentSeason.ground, roughness: 1.0 });
-            const slopeMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 1.0 });
 
-            // 1. Embankment
-            const bankGeo = new THREE.BoxGeometry(bankWidth, bankHeight, length);
-            const bankMesh = new THREE.Mesh(bankGeo, gravelMat);
-            bankMesh.position.set(0, -bankHeight/2, zCenter);
+            // 1. Embankment (Gravel Bed)
+            // Instead of a plain box, use a plane with noise for the top to simulate gravel bumps
+            const segmentsZ = Math.max(2, Math.floor(length));
+            const segmentsX = 4;
+            const gravelGeo = new THREE.PlaneGeometry(bankWidth, length, segmentsX, segmentsZ);
+            
+            // Add noise to gravel
+            const pos = gravelGeo.attributes.position;
+            for(let i=0; i<pos.count; i++) {
+                // X is width, Y is length. Z is height (local)
+                const zVal = (Math.random() - 0.5) * 0.2; // Increased bumps slightly
+                pos.setZ(i, zVal);
+            }
+            gravelGeo.computeVertexNormals();
+            
+            const bankMesh = new THREE.Mesh(gravelGeo, gravelMat);
+            bankMesh.rotation.x = -Math.PI/2;
+            // Align flush with top of physics body (which is at y=0)
+            bankMesh.position.set(0, 0, zCenter); 
             bankMesh.receiveShadow = true;
             scene.add(bankMesh);
             environmentObjects.push({ mesh: bankMesh });
 
+            // Physics for embankment (solid box underneath)
             const bankShape = new CANNON.Box(new CANNON.Vec3(bankWidth/2, bankHeight/2, length/2));
             const bankBody = new CANNON.Body({ mass: 0, material: groundMaterial });
             bankBody.addShape(bankShape);
             bankBody.position.set(0, -bankHeight/2, zCenter);
             world.addBody(bankBody);
             environmentObjects.push({ body: bankBody });
+            
+            // Side walls for embankment (visual only to hide the gap)
+            const sideGeo = new THREE.BoxGeometry(bankWidth, bankHeight, length);
+            const sideMesh = new THREE.Mesh(sideGeo, gravelMat);
+            sideMesh.position.set(0, -bankHeight/2 - 0.05, zCenter);
+            scene.add(sideMesh);
+            environmentObjects.push({ mesh: sideMesh });
 
             // 2. Lower Ground
             const groundThickness = 5; 
             const groundY = groundLevel - groundThickness/2;
 
-            const leftGeo = new THREE.BoxGeometry(slopeWidth, groundThickness, length);
+            const leftGeo = new THREE.BoxGeometry(groundWidth, groundThickness, length);
             const leftMesh = new THREE.Mesh(leftGeo, grassMat);
-            leftMesh.position.set(-bankWidth/2 - slopeWidth/2, groundY, zCenter);
+            leftMesh.position.set(-bankWidth/2 - groundWidth/2, groundY, zCenter);
             leftMesh.receiveShadow = true;
+            leftMesh.visible = false;
             scene.add(leftMesh);
             environmentObjects.push({ mesh: leftMesh });
 
-            const leftShape = new CANNON.Box(new CANNON.Vec3(slopeWidth/2, groundThickness/2, length/2));
+            const leftShape = new CANNON.Box(new CANNON.Vec3(groundWidth/2, groundThickness/2, length/2));
             const leftBody = new CANNON.Body({ mass: 0, material: groundMaterial });
             leftBody.addShape(leftShape);
             leftBody.position.copy(leftMesh.position);
@@ -418,7 +467,8 @@
             environmentObjects.push({ body: leftBody });
 
             const rightMesh = leftMesh.clone();
-            rightMesh.position.set(bankWidth/2 + slopeWidth/2, groundY, zCenter);
+            rightMesh.position.set(bankWidth/2 + groundWidth/2, groundY, zCenter);
+            rightMesh.visible = false;
             scene.add(rightMesh);
             environmentObjects.push({ mesh: rightMesh });
 
@@ -428,22 +478,72 @@
             world.addBody(rightBody);
             environmentObjects.push({ body: rightBody });
 
-            // 3. Slopes
-            const slopeGeo = new THREE.PlaneGeometry(2.5, length);
-            
-            const leftSlope = new THREE.Mesh(slopeGeo, slopeMat);
-            leftSlope.position.set(-bankWidth/2 - 0.8, -0.75, zCenter);
-            leftSlope.rotation.set(-Math.PI/2, 0, -0.6);
-            leftSlope.receiveShadow = true;
-            scene.add(leftSlope);
-            environmentObjects.push({ mesh: leftSlope });
+            const slopeInnerY = 0.02;
+            const slopeOuterY = GROUND_LEVEL + 0.02;
+            createEmbankmentSlope(-bankWidth / 2, -bankWidth / 2 - slopeWidth, slopeInnerY, slopeOuterY, zCenter, length, gravelMat);
+            createEmbankmentSlope(bankWidth / 2, bankWidth / 2 + slopeWidth, slopeInnerY, slopeOuterY, zCenter, length, gravelMat);
 
-            const rightSlope = new THREE.Mesh(slopeGeo, slopeMat);
-            rightSlope.position.set(bankWidth/2 + 0.8, -0.75, zCenter);
-            rightSlope.rotation.set(-Math.PI/2, 0, 0.6);
-            rightSlope.receiveShadow = true;
-            scene.add(rightSlope);
-            environmentObjects.push({ mesh: rightSlope });
+            createTerrainRelief(-bankWidth/2 - slopeWidth - groundWidth/2, zCenter, groundWidth, length);
+            createTerrainRelief(bankWidth/2 + slopeWidth + groundWidth/2, zCenter, groundWidth, length);
+        }
+
+        function createEmbankmentSlope(xInner, xOuter, yInner, yOuter, zCenter, length, material) {
+            const half = length / 2;
+            const geometry = new THREE.BufferGeometry();
+            const vertices = new Float32Array([
+                xInner, yInner, zCenter - half,
+                xInner, yInner, zCenter + half,
+                xOuter, yOuter, zCenter + half,
+                xOuter, yOuter, zCenter - half
+            ]);
+            const indices = [0, 1, 2, 0, 2, 3];
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            environmentObjects.push({ mesh });
+        }
+
+        function createTerrainRelief(xCenter, zCenter, width, length) {
+            const segmentsX = 18;
+            const segmentsZ = Math.max(18, Math.floor(length / 14));
+            const geo = new THREE.PlaneGeometry(width, length, segmentsX, segmentsZ);
+            const pos = geo.attributes.position;
+            const seedX = Math.random() * 1000;
+            const seedZ = Math.random() * 1000;
+            const edgeFade = width * 0.2;
+
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const z = pos.getY(i);
+                const baseHeight = Math.sin((x + seedX) * 0.08) * 0.08 + Math.cos((z + seedZ) * 0.06) * 0.08;
+                const edgeDist = (width / 2) - Math.abs(x);
+                const fade = Math.min(1, Math.max(0, edgeDist / edgeFade));
+                pos.setZ(i, baseHeight * fade);
+            }
+
+            pos.needsUpdate = true;
+            geo.computeVertexNormals();
+
+            const mat = new THREE.MeshStandardMaterial({ color: currentSeason.ground, roughness: 1.0 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(xCenter, GROUND_LEVEL + 0.02, zCenter);
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            environmentObjects.push({ mesh });
+
+            const skirtDepth = 4;
+            const skirtGeo = new THREE.BoxGeometry(width, skirtDepth, length);
+            const skirtMesh = new THREE.Mesh(skirtGeo, mat);
+            skirtMesh.position.set(xCenter, GROUND_LEVEL - skirtDepth / 2, zCenter);
+            skirtMesh.receiveShadow = true;
+            scene.add(skirtMesh);
+            environmentObjects.push({ mesh: skirtMesh });
         }
 
         function createRiver(z, width) {
@@ -507,7 +607,88 @@
             });
         }
 
-        function generateFloraAndClouds(hasRiver, riverZ, riverWidth) {
+        // --- NEW SMOOTH CROSSING FUNCTION (NO CROSS SIGNS) ---
+        function createSmoothRoadCrossing(zPos, roadWidth) {
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9, side: THREE.DoubleSide });
+            const crossingMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.8 }); 
+            const postMat = new THREE.MeshStandardMaterial({ color: 0xb62b2b, roughness: 0.6 });
+
+            // 1. Central Planks
+            const crossingGeo = new THREE.BoxGeometry(2.5, 0.1, roadWidth);
+            const crossing = new THREE.Mesh(crossingGeo, crossingMat);
+            crossing.position.set(0, 0.2, zPos); 
+            crossing.receiveShadow = true;
+            scene.add(crossing);
+            environmentObjects.push({ mesh: crossing });
+
+            // 2. Smooth Road Mesh
+            const roadLength = 120; 
+            const segments = 64;
+            // Use a plane geometry but with more segments for smoothness
+            const geo = new THREE.PlaneGeometry(roadLength, roadWidth, segments, 8);
+            const pos = geo.attributes.position;
+
+            for(let i=0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                
+                let h = GROUND_LEVEL;
+                const ax = Math.abs(x);
+                
+                // Create a smooth hump over the tracks using a cosine function
+                // Center at x=0, width approx 12 units
+                if (ax < 6.0) {
+                    // Normalize t from 0 to 1 between x=0 and x=6.0
+                    const t = ax / 6.0;
+                    // Cosine interpolation: 1 -> 0
+                    const smoothT = (1 + Math.cos(t * Math.PI)) / 2;
+                    h = THREE.MathUtils.lerp(GROUND_LEVEL, 0.18, smoothT);
+                } else {
+                    h = GROUND_LEVEL + 0.05; 
+                }
+
+                // Add some noise to the road surface
+                const noise = (Math.random() - 0.5) * 0.03;
+                pos.setZ(i, h + noise); 
+            }
+            
+            geo.computeVertexNormals();
+            
+            const road = new THREE.Mesh(geo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(0, 0, zPos);
+            road.receiveShadow = true;
+            scene.add(road);
+            environmentObjects.push({ mesh: road });
+
+            // 3. Physics Ramps (Simplified)
+            const rampShape = new CANNON.Box(new CANNON.Vec3(2.5, 0.1, roadWidth/2));
+            const leftRampBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+            leftRampBody.addShape(rampShape);
+            leftRampBody.position.set(-4, -0.6, zPos);
+            leftRampBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,0,1), 0.3); 
+            world.addBody(leftRampBody);
+            environmentObjects.push({ body: leftRampBody });
+
+            const rightRampBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+            rightRampBody.addShape(rampShape);
+            rightRampBody.position.set(4, -0.6, zPos);
+            rightRampBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,0,1), -0.3); 
+            world.addBody(rightRampBody);
+            environmentObjects.push({ body: rightRampBody });
+
+            // 4. Simple Posts (NO CROSSES)
+            const postGeo = new THREE.CylinderGeometry(0.06, 0.06, 2, 8);
+            
+            [-4, 4].forEach(x => {
+                const post = new THREE.Mesh(postGeo, postMat);
+                post.position.set(x, 1, zPos + 4); // Y=1 to sit on ground
+                post.castShadow = true;
+                scene.add(post);
+                environmentObjects.push({ mesh: post });
+            });
+        }
+
+        function generateFloraAndClouds(hasRiver, riverZ, riverWidth, roadZ, roadWidth) {
             const treeCount = 150;
             const groundLevel = -1.5;
             for (let i = 0; i < treeCount; i++) {
@@ -516,7 +697,11 @@
                 const x = side * dist;
                 const z = (Math.random() - 0.5) * WORLD_LENGTH * 0.9; 
                 
+                // Skip river
                 if (hasRiver && z > riverZ - riverWidth/2 - 2 && z < riverZ + riverWidth/2 + 2) continue;
+                
+                // Skip road (with margin)
+                if (roadWidth > 0 && Math.abs(z - roadZ) < roadWidth / 2 + 4) continue;
 
                 const scale = 0.8 + Math.random() * 0.8;
                 if (Math.abs(z) < 120) {
@@ -589,11 +774,10 @@
                 environmentObjects.push({ mesh: railMesh });
 
                 // Physics Rail
-                const wideRailWidth = 0.35; // Wider for stability
+                const wideRailWidth = 0.35; 
                 const railShape = new CANNON.Box(new CANNON.Vec3(wideRailWidth / 2, RAIL_HEIGHT / 2, railLength / 2));
                 const railBody = new CANNON.Body({ mass: 0, material: railMaterial });
                 railBody.addShape(railShape);
-                // Shift physics up slightly (0.02) so bottle sits ON visual rail, not IN it
                 railBody.position.set(xPos, yPos + 0.02, 0);
                 world.addBody(railBody);
                 environmentObjects.push({ body: railBody });
@@ -836,7 +1020,7 @@
         }
 
         function throwStone() {
-            if (stonesLeft <= 0) return; // Prevent throwing if out of stones
+            if (stonesLeft <= 0) return; 
             stonesLeft--;
             updateUI();
 
@@ -884,25 +1068,96 @@
         }
 
         function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            updateAimFromClient(event.clientX, event.clientY);
+        }
+
+        function onMouseDown(event) {
+            if (event.button === 0 && !isUiTarget(event.target)) { 
+                throwStone();
+            }
+        }
+
+        function onTouchStart(event) {
+            updateControlsForTouchCount(event.touches.length);
+            if (event.touches.length !== 1) {
+                touchThrowActive = false;
+                return;
+            }
+            const touch = event.touches[0];
+            if (isUiTarget(touch.target)) {
+                touchThrowActive = false;
+                return;
+            }
+            touchThrowActive = true;
+            touchMoved = false;
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = performance.now();
+            updateAimFromClient(touch.clientX, touch.clientY);
+            event.preventDefault();
+        }
+
+        function onTouchMove(event) {
+            if (!touchThrowActive || event.touches.length !== 1) {
+                return;
+            }
+            const touch = event.touches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            if (Math.hypot(dx, dy) > TAP_MAX_DIST) {
+                touchMoved = true;
+            }
+            updateAimFromClient(touch.clientX, touch.clientY);
+            event.preventDefault();
+        }
+
+        function onTouchEnd(event) {
+            updateControlsForTouchCount(event.touches.length);
+            if (!touchThrowActive) {
+                return;
+            }
+            touchThrowActive = false;
+            const elapsed = performance.now() - touchStartTime;
+            if (touchMoved || elapsed > TAP_MAX_TIME) {
+                return;
+            }
+            const touch = event.changedTouches[0];
+            if (touch && !isUiTarget(touch.target)) {
+                updateAimFromClient(touch.clientX, touch.clientY);
+                throwStone();
+            }
+            event.preventDefault();
+        }
+
+        function onTouchCancel(event) {
+            updateControlsForTouchCount(0);
+            touchThrowActive = false;
+            event.preventDefault();
+        }
+
+        function updateAimFromClient(clientX, clientY) {
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
             plane.constant = 0; 
             
-            raycaster.ray.intersectPlane(plane, mouseIntersection);
-
-            if (aimMarker) {
+            const hit = raycaster.ray.intersectPlane(plane, mouseIntersection);
+            if (hit && aimMarker) {
                 aimMarker.position.copy(mouseIntersection);
                 aimMarker.position.y = 0.05; 
                 aimMarker.visible = true;
             }
         }
 
-        function onMouseDown(event) {
-            if (event.button === 0 && event.target.tagName !== 'BUTTON') { 
-                throwStone();
-            }
+        function isUiTarget(target) {
+            if (!target || !target.closest) return false;
+            return Boolean(target.closest('#info'));
+        }
+
+        function updateControlsForTouchCount(count) {
+            if (!isTouchDevice || !controls) return;
+            controls.enabled = count > 1;
         }
 
         function onWindowResize() {
