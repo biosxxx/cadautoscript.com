@@ -15,7 +15,7 @@ const defaultHeroLinks: HeroLink[] = [
 ];
 
 export default function MiniGameShellPage(config: MiniGamePageConfig) {
-  const {slug, title, subtitle, description, about, tags, note, features, scriptType = 'defer'} = config;
+  const {slug, title, subtitle, description, about, tags, note, features, scriptType = 'defer', stage} = config;
 
   const iframeSrc = useBaseUrl(`/mini-games/${slug}/app.html`);
   const stylesHref = useBaseUrl('/styles.css');
@@ -67,7 +67,11 @@ export default function MiniGameShellPage(config: MiniGamePageConfig) {
         </header>
         <section className="utility-main">
           <div className="utility-stage">
-            <iframe className="tool-frame" src={iframeSrc} title={title} loading="lazy" data-nobrokenlinkcheck></iframe>
+            {stage ? (
+              <div className="tool-frame">{stage}</div>
+            ) : (
+              <iframe className="tool-frame" src={iframeSrc} title={title} loading="lazy" data-nobrokenlinkcheck></iframe>
+            )}
           </div>
           <div className="utility-toolbar" role="toolbar">
             <button className="utility-toggle" type="button" aria-expanded="true">

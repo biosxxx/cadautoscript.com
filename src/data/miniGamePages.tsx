@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import EcoSortGame from '@site/src/components/EcoSortGame';
 
 export type MiniGameSlug =
   | 'engineering-blueprint-ncr'
@@ -18,6 +19,7 @@ export type MiniGamePageConfig = {
   features?: string[];
   scriptType?: 'module' | 'defer';
   reactionSlug?: string;
+  stage?: ReactNode;
 };
 
 export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
@@ -120,11 +122,12 @@ export const miniGamePageConfigs: Record<MiniGameSlug, MiniGamePageConfig> = {
         physics-driven throws stay fast and responsive.
         <br />
         <br />
-        <strong>Controls:</strong> WASD to move, mouse to look, left click to throw. Click to lock pointer.
+        <strong>Controls:</strong> WASD to move, drag to look, left click to throw.
       </>
     ),
     tags: ['Mini game', 'Recycling', 'First-person'],
-    note: 'Runs in-browser with Three.js + cannon-es. No sign-in required.',
-    features: ['Pointer-lock movement', 'Dynamic weather effects', 'Trajectory preview and scoring'],
+    note: 'Runs in-browser with Three.js + Rapier (WASM). No sign-in required.',
+    features: ['Drag-look movement', 'Dynamic weather effects', 'Trajectory preview and scoring'],
+    stage: <EcoSortGame />,
   },
 };

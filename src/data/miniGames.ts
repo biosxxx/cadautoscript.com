@@ -46,7 +46,7 @@ export const miniGames: MiniGameDescriptor[] = [
     id: 'eco-sort-game',
     name: 'Eco Sort: Atmospheric',
     description: 'First-person sorting game: throw items into the correct recycling bins across shifting weather.',
-    tech: 'Three.js + cannon-es',
+    tech: 'Three.js + Rapier (WASM)',
     tags: ['Mini game', 'Recycling', 'First-person'],
     href: '/mini-games/eco-sort-game/',
   },
