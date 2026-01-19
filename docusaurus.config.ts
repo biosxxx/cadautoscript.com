@@ -31,6 +31,28 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+  plugins: [
+    async function myPlugin(_context, _options) {
+      return {
+        name: 'docusaurus-replicad-config',
+        configureWebpack(_config, _isServer) {
+          return {
+            experiments: {
+              asyncWebAssembly: true,
+              layers: true,
+            },
+            resolve: {
+              fallback: {
+                crypto: false,
+                fs: false,
+                path: false,
+              },
+            },
+          };
+        },
+      };
+    },
+  ],
   presets: [
     [
       'classic',

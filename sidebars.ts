@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
         'utilities/cylindrical-shell-rolling',
         'utilities/pressure-vessel-dished-end-calc',
         'utilities/blind-flange-calculator',
+        'utilities/tube-sheet-generator',
         'utilities/dxf-editor',
         'utilities/file-renamer',
         'utilities/folder-structure-builder',

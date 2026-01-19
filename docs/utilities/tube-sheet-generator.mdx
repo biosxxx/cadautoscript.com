@@ -1,0 +1,31 @@
+---
+slug: /utilities/tube-sheet-generator
+title: Tube Sheet Generator
+---
+
+Generate tube sheet hole patterns for heat exchangers, preview the layout, and export DXF or STEP files directly from the browser.
+
+<a className="button button--primary" href="/utilities/tube-sheet-generator/" data-nobrokenlinkcheck>
+  Open utility
+</a>
+
+## What it does
+
+- Builds square or triangular pitch patterns inside a circular tube sheet
+- Shows a live 2D preview with optional pass partitions
+- Exports DXF for 2D layouts and STEP for 3D solids
+
+## Inputs you control
+
+- Tube sheet diameter, thickness, and edge margin
+- Tube diameter, pitch, and layout pattern
+- Pass count, partition width, and orientation (visual guide)
+
+## Output notes
+
+- DXF export includes the tube sheet outline and all tube holes.
+- STEP export runs on WebAssembly in the browser; large hole counts may take longer.
+
+## Feedback
+
+Email or DM with the slug `tube-sheet-generator` so we can reproduce any issues.

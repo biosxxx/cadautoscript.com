@@ -17,6 +17,7 @@ export type UtilityPageSlug =
   | 'magnetic-level-gauge-configurator'
   | 'bourdon-gauge-configurator'
   | 'industrial-thermometer-configurator'
+  | 'tube-sheet-generator'
   | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
@@ -275,6 +276,24 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Lower/back/adjustable mounting preview',
       'Project metadata and accessory toggles',
       'PDF datasheet export',
+    ],
+    scriptType: 'module',
+  },
+  'tube-sheet-generator': {
+    slug: 'tube-sheet-generator',
+    title: 'Tube Sheet Generator',
+    subtitle: 'Web utility - Tube layout preview with DXF/STEP export',
+    description:
+      'Generate tube sheet patterns with square or triangular pitch, visualize baffle partitions, and export DXF or STEP files locally.',
+    about:
+      'Lay out tube sheet hole patterns for heat exchangers, adjust pitch and edge margins, and visualize pass partitions before exporting DXF or STEP files. Everything runs in the browser.',
+    tags: ['Heat exchangers', 'Tube sheet', 'DXF', 'STEP'],
+    note:
+      'STEP export uses WebAssembly in the browser. Large hole counts may take longer to process.',
+    features: [
+      'Square or triangular pitch layouts',
+      'Partition preview for multi-pass designs',
+      'DXF + STEP export with local processing',
     ],
     scriptType: 'module',
   },

@@ -173,6 +173,15 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/industrial-thermometer-configurator/',
   },
   {
+    id: 'tube-sheet-generator',
+    name: 'Tube Sheet Generator',
+    description: 'Lay out tube sheet hole patterns and export DXF or STEP files locally.',
+    tech: 'Canvas + WASM',
+    standards: 'Layout + fabrication',
+    features: ['Square/triangular pitch', 'Partition preview', 'DXF + STEP export'],
+    href: '/utilities/tube-sheet-generator/',
+  },
+  {
     id: 'blind-flange-calculator',
     name: 'Blind Flange Calculator',
     description:
