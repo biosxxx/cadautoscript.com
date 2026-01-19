@@ -173,6 +173,16 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/industrial-thermometer-configurator/',
   },
   {
+    id: 'blind-flange-calculator',
+    name: 'Blind Flange Calculator',
+    description:
+      'Auto-select PN class and calculate EN 13445-3 blind flange thickness with weight estimates.',
+    tech: 'React + Calc',
+    standards: 'EN 13445-3 / EN 1092-1',
+    features: ['Auto PN selection', 'Thickness + corrosion allowance', 'Bolt circle + weight estimate'],
+    href: '/utilities/blind-flange-calculator/',
+  },
+  {
     id: 'pressure-vessel-dished-end-calc',
     name: 'Dished End (Vessel Head) Calculator',
     description:

@@ -17,6 +17,7 @@ export type UtilityPageSlug =
   | 'magnetic-level-gauge-configurator'
   | 'bourdon-gauge-configurator'
   | 'industrial-thermometer-configurator'
+  | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
 export type UtilityPageConfig = {
@@ -274,6 +275,24 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Lower/back/adjustable mounting preview',
       'Project metadata and accessory toggles',
       'PDF datasheet export',
+    ],
+    scriptType: 'module',
+  },
+  'blind-flange-calculator': {
+    slug: 'blind-flange-calculator',
+    title: 'Blind Flange Calculator',
+    subtitle: 'Web utility - EN 13445-3 blind flange sizing',
+    description:
+      'Auto-select EN 1092-1 PN class, calculate blind flange thickness, and estimate weight from DN and pressure.',
+    about:
+      'Enter DN, operating and test pressure, temperature, material, and corrosion allowance. The calculator selects the nearest PN class from EN 1092-1, computes minimum thickness per EN 13445-3, and recommends a standard plate thickness with a weight estimate.',
+    tags: ['EN 13445-3', 'EN 1092-1', 'Flanges'],
+    note:
+      'Runs entirely in the browser. Validate final flange sizing, bolt loads, and gasket selection against project specs.',
+    features: [
+      'Automatic PN selection from operating pressure',
+      'Minimum and recommended thickness outputs',
+      'Bolt circle data and weight estimate',
     ],
     scriptType: 'module',
   },

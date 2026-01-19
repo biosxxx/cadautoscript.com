@@ -1,0 +1,375 @@
+import React, {useMemo, useRef, useState} from 'react';
+import clsx from 'clsx';
+import {Download, Info, X} from 'lucide-react';
+import {APP_VERSION} from '../constants';
+import {useVesselHeadStore} from '../store';
+import {calculateGeometry, getDimensionFontSize, getNozzleDiameter} from '../utils';
+import EdgePrepPreview from './EdgePrepPreview';
+import {HeadProfile} from './HeadVisualizer';
+
+const loadScript = (src: string, globalKey: string) =>
+  new Promise<void>((resolve, reject) => {
+    if ((window as typeof window & {[key: string]: unknown})[globalKey]) {
+      resolve();
+      return;
+    }
+
+    const existing = document.querySelector(`script[data-lib="${globalKey}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve(), {once: true});
+      existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), {once: true});
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.dataset.lib = globalKey;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(script);
+  });
+
+const loadPdfLibraries = () =>
+  Promise.all([
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf'),
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'html2canvas'),
+  ]);
+
+type PrintReportProps = {
+  isVisible: boolean;
+  onClose: () => void;
+};
+
+const formatNumber = (value: number) => {
+  if (Number.isInteger(value)) {
+    return value.toString();
+  }
+  return value.toFixed(1).replace('.', '_');
+};
+
+const formatMaterial = (material: string) =>
+  material
+    .replace(/\(.*?\)/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^A-Za-z0-9-]/g, '');
+
+export default function PrintReport({isVisible, onClose}: PrintReportProps) {
+  const config = useVesselHeadStore((state) => state.config);
+  const nozzles = useVesselHeadStore((state) => state.nozzles);
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const calculated = useMemo(() => calculateGeometry(config), [config]);
+
+  const screenViewBoxSize = config.diameterOuter * 1.5;
+  const center = screenViewBoxSize / 2;
+  const printPaddingX = config.diameterOuter * 0.25;
+  const printPaddingY = config.diameterOuter * 0.2;
+  const printWidth = config.diameterOuter + printPaddingX * 2;
+  const printHeight = calculated.totalHeight + printPaddingY * 2;
+  const printMinX = center - printWidth / 2;
+  const printMinY = center - calculated.totalHeight / 2 - printPaddingY;
+  const printViewBox = `${printMinX} ${printMinY} ${printWidth} ${printHeight}`;
+  const printFontSize = getDimensionFontSize(config.diameterOuter);
+
+  const handleDownload = async () => {
+    if (!reportRef.current || isDownloading) {
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      await loadPdfLibraries();
+      const html2canvas = (window as typeof window & {html2canvas?: (el: HTMLElement, options?: object) => Promise<HTMLCanvasElement>})
+        .html2canvas;
+      const jspdf = (window as typeof window & {jspdf?: {jsPDF: new (options: object) => {addImage: (...args: unknown[]) => void; save: (name: string) => void; internal: {pageSize: {getWidth: () => number; getHeight: () => number}}}}})
+        .jspdf;
+
+      if (!html2canvas || !jspdf) {
+        return;
+      }
+
+      const canvas = await html2canvas(reportRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      const pdf = new jspdf.jsPDF({orientation: 'p', unit: 'mm', format: 'a4', compress: true});
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      let imgWidth = pageWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      if (imgHeight > pageHeight) {
+        const scale = pageHeight / imgHeight;
+        imgWidth *= scale;
+        imgHeight *= scale;
+      }
+
+      const x = (pageWidth - imgWidth) / 2;
+      const y = (pageHeight - imgHeight) / 2;
+      pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight, undefined, 'FAST');
+
+      const filename = `Dished Head_${config.standard}_Da${formatNumber(config.diameterOuter)}_S${formatNumber(
+        config.thickness,
+      )}_h1-${formatNumber(config.straightFlange)}_${formatMaterial(config.material)}`;
+      pdf.save(`${filename}.pdf`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const containerClassName = clsx(
+    isVisible ? 'fixed inset-0 z-50 overflow-y-auto' : 'hidden',
+    'print:block print:static print:overflow-visible bg-white text-black p-8 font-serif w-full h-full',
+  );
+
+  return (
+    <div className={containerClassName}>
+      <div className="print:hidden mb-6 flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <Info size={18} className="text-blue-600" />
+          <span>
+            Click <b>Download PDF</b> to save the report.
+          </span>
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm"
+          >
+            <Download size={16} /> {isDownloading ? 'Preparing...' : 'Download PDF'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-2 px-4 py-2 bg-white border text-gray-700 rounded-md text-sm"
+          >
+            <X size={16} /> Close
+          </button>
+        </div>
+      </div>
+
+      <div ref={reportRef} className="max-w-[210mm] mx-auto bg-white min-h-[290mm]">
+        <div className="border-b-2 border-black pb-4 mb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-bold uppercase tracking-wider">Manufacturing Report</h1>
+            <h2 className="text-xl mt-1 text-gray-700">Dished Head Specification &amp; QC</h2>
+          </div>
+          <div className="text-right text-sm">
+            <div>Job No: ________________</div>
+            <div>Date: {new Date().toLocaleDateString()}</div>
+            <div className="text-xs text-gray-400 mt-1">v{APP_VERSION}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-8 mb-6">
+          <div>
+            <h3 className="font-bold text-lg border-b border-gray-400 mb-2">Design Data</h3>
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">Standard</td>
+                  <td className="py-1 font-medium text-right">{config.standard}</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">Material</td>
+                  <td className="py-1 font-medium text-right">{config.material}</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">Edge Prep</td>
+                  <td className="py-1 font-medium text-right">
+                    {config.edgePrep === 'None' ? 'Square Cut' : `${config.edgePrep} ${config.bevelAngle}u`}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 className="font-bold text-lg border-b border-gray-400 mb-2">Dimensions (Nominal)</h3>
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">Da (Outer Dia)</td>
+                  <td className="py-1 font-medium text-right">{config.diameterOuter} mm</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">s (Thickness)</td>
+                  <td className="py-1 font-medium text-right">{config.thickness} mm</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">H (Total Height)</td>
+                  <td className="py-1 font-medium text-right">{calculated.totalHeight.toFixed(1)} mm</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-1 text-gray-600">Est. Weight</td>
+                  <td className="py-1 font-medium text-right">{calculated.weight.toFixed(1)} kg</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mb-6 border border-gray-300 rounded p-4 flex justify-center h-80">
+          <svg viewBox={printViewBox} className="h-full w-auto">
+            <line x1={center} y1={printMinY} x2={center} y2={printMinY + printHeight} stroke="#ccc" strokeDasharray="5,5" />
+            <line x1={printMinX} y1={center} x2={printMinX + printWidth} y2={center} stroke="#ccc" strokeDasharray="5,5" />
+            <HeadProfile
+              config={config}
+              calculated={calculated}
+              center={center}
+              fontSize={printFontSize}
+              isPrint
+            />
+            {nozzles.map((nozzle) => {
+              const nozzleWidth = getNozzleDiameter(nozzle.size);
+              const nozzleVisualWidth = Math.max(20, nozzleWidth);
+              const nozzleHeight = 60;
+              const nozzleX = center + nozzle.offset;
+              const nozzleY = center - calculated.totalHeight / 2 + config.thickness + 10;
+
+              return (
+                <rect
+                  key={nozzle.id}
+                  x={nozzleX - nozzleVisualWidth / 2}
+                  y={nozzleY - nozzleHeight}
+                  width={nozzleVisualWidth}
+                  height={nozzleHeight}
+                  fill="none"
+                  stroke="black"
+                  strokeWidth={Math.max(1, config.diameterOuter / 1000)}
+                />
+              );
+            })}
+          </svg>
+        </div>
+
+        {config.edgePrep !== 'None' ? (
+          <div className="mb-6 border border-gray-300 rounded p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-lg">Weld Edge Preparation</h3>
+              <span className="text-xs text-gray-600">
+                {config.edgePrep} · {config.edgePrepSide === 'double' ? 'Double side' : 'Single side'}
+              </span>
+            </div>
+            <EdgePrepPreview
+              edgePrep={config.edgePrep}
+              edgePrepSide={config.edgePrepSide}
+              thickness={config.thickness}
+              rootFace={config.rootFace}
+              bevelAngle={config.bevelAngle}
+              orientation="head"
+              variant="report"
+            />
+          </div>
+        ) : null}
+
+        <div className="mb-8">
+          <h3 className="font-bold text-lg border-b-2 border-black mb-3 pb-1 bg-gray-50 px-2">
+            Quality Control / Measurement Report
+          </h3>
+          <p className="text-xs text-gray-500 mb-2 italic">
+            Tolerances based on DIN 28005-1 (Formed Heads). All dimensions in mm.
+          </p>
+
+          <table className="w-full text-sm border-collapse border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 p-2 text-left w-1/4">Parameter</th>
+                <th className="border border-gray-300 p-2 text-center w-1/6">Nominal</th>
+                <th className="border border-gray-300 p-2 text-center w-1/6">Tolerance</th>
+                <th className="border border-gray-300 p-2 text-center w-1/6">Actual 1</th>
+                <th className="border border-gray-300 p-2 text-center w-1/6">Actual 2</th>
+                <th className="border border-gray-300 p-2 text-center w-1/6">Result / Dev</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 p-2 font-medium">
+                  Outer Diameter (Da) <br />
+                  <span className="text-xs font-normal text-gray-500">Measure at 0u / 90u</span>
+                </td>
+                <td className="border border-gray-300 p-2 text-center">{config.diameterOuter}</td>
+                <td className="border border-gray-300 p-2 text-center">
+                  +{calculated.tolerances.daPlus} / -{calculated.tolerances.daMinus}
+                </td>
+                <td className="border border-gray-300 p-2"></td>
+                <td className="border border-gray-300 p-2"></td>
+                <td className="border border-gray-300 p-2 bg-gray-50"></td>
+              </tr>
+
+              <tr>
+                <td className="border border-gray-300 p-2 font-medium">
+                  Ovality (u) <br />
+                  <span className="text-xs font-normal text-gray-500">Max diff (Dmax - Dmin)</span>
+                </td>
+                <td className="border border-gray-300 p-2 text-center">0</td>
+                <td className="border border-gray-300 p-2 text-center">Max {calculated.tolerances.ovality}</td>
+                <td className="border border-gray-300 p-2 bg-gray-100 text-center text-xs text-gray-400" colSpan={2}>
+                  - Calculated -
+                </td>
+                <td className="border border-gray-300 p-2"></td>
+              </tr>
+
+              <tr>
+                <td className="border border-gray-300 p-2 font-medium">Total Height (H)</td>
+                <td className="border border-gray-300 p-2 text-center">{calculated.totalHeight.toFixed(1)}</td>
+                <td className="border border-gray-300 p-2 text-center">
+                  +{calculated.tolerances.hPlus} / -{calculated.tolerances.hMinus}
+                </td>
+                <td className="border border-gray-300 p-2"></td>
+                <td className="border border-gray-300 p-2 bg-gray-100"></td>
+                <td className="border border-gray-300 p-2"></td>
+              </tr>
+
+              <tr>
+                <td className="border border-gray-300 p-2 font-medium">
+                  Wall Thickness (s) <br />
+                  <span className="text-xs font-normal text-gray-500">Min. after forming</span>
+                </td>
+                <td className="border border-gray-300 p-2 text-center">{config.thickness}</td>
+                <td className="border border-gray-300 p-2 text-center">
+                  Min {config.thickness - calculated.tolerances.thicknessMin}
+                </td>
+                <td className="border border-gray-300 p-2"></td>
+                <td className="border border-gray-300 p-2"></td>
+                <td className="border border-gray-300 p-2"></td>
+              </tr>
+
+              <tr>
+                <td className="border border-gray-300 p-2 font-medium">
+                  Edge Preparation <br />
+                  <span className="text-xs font-normal text-gray-500">{config.edgePrep} check</span>
+                </td>
+                <td className="border border-gray-300 p-2 text-center">-</td>
+                <td className="border border-gray-300 p-2 text-center">Visual</td>
+                <td className="border border-gray-300 p-2 text-center text-xs text-gray-400" colSpan={2}>
+                  Pass / Fail
+                </td>
+                <td className="border border-gray-300 p-2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid grid-cols-2 gap-12 mt-auto">
+          <div>
+            <div className="h-12 border-b border-black"></div>
+            <div className="text-xs mt-1">QC Inspector (Name &amp; Sign)</div>
+          </div>
+          <div>
+            <div className="h-12 border-b border-black"></div>
+            <div className="text-xs mt-1">Date</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

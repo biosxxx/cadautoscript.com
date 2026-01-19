@@ -10,6 +10,8 @@ import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
+type UtilityShellPageProps = UtilityPageConfig & {tool?: React.ReactNode};
+
 type HeroLink = {label: string; href: string; variant?: 'primary' | 'ghost'; external?: boolean};
 
 const defaultHeroLinks: HeroLink[] = [
@@ -17,7 +19,7 @@ const defaultHeroLinks: HeroLink[] = [
   {label: 'Macro catalog', href: '/', variant: 'primary'},
 ];
 
-export default function UtilityShellPage(config: UtilityPageConfig) {
+export default function UtilityShellPage({tool, ...config}: UtilityShellPageProps) {
   const {
     slug,
     title,
@@ -52,6 +54,13 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
 
   const heroLinks = defaultHeroLinks;
   const reactionsSlug = config.reactionSlug ?? `tool-${slug}`;
+  const toolFrame = tool ? (
+    <div className="tool-frame">
+      <div className="h-full overflow-y-auto">{tool}</div>
+    </div>
+  ) : (
+    <iframe className="tool-frame" src={iframeSrc} title={title} loading="lazy" data-nobrokenlinkcheck></iframe>
+  );
 
   return (
     <Layout title={title} description={description}>
@@ -115,13 +124,7 @@ export default function UtilityShellPage(config: UtilityPageConfig) {
                 </div>
               </div>
             ) : (
-              <iframe
-                className="tool-frame"
-                src={iframeSrc}
-                title={title}
-                loading="lazy"
-                data-nobrokenlinkcheck
-              ></iframe>
+              toolFrame
             )}
           </div>
           {!isLocked ? (
