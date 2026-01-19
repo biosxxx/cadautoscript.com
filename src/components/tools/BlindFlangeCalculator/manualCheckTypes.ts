@@ -34,7 +34,9 @@ export interface ManualThicknessSummary {
   requiredAsmeTest: number;
   requiredEnOp: number;
   requiredEnTest: number;
-  governingCode: 'ASME' | 'EN';
+  requiredPlasticity: number; // New: prevents permanent deformation
+  requiredStiffness: number;  // New: prevents excessive bowing
+  governingCode: 'ASME' | 'EN' | 'Plasticity' | 'Stiffness';
   requiredWithCA: number;
   provided: number;
   utilization: number;
@@ -88,6 +90,18 @@ export interface ManualGeometryCheck {
   notes: string[];
 }
 
+export interface ManualStressCheck {
+  stressTestMPa: number;
+  yieldAtTestMPa: number;
+  pass: boolean;
+}
+
+export interface ManualDeflectionCheck {
+  deflectionOpMm: number;
+  limitMm: number;
+  pass: boolean;
+}
+
 export interface ManualCheckResult {
   pass: boolean;
   errors: string[];
@@ -96,8 +110,10 @@ export interface ManualCheckResult {
   boltSummary?: ManualBoltSummary;
   thicknessSummary?: ManualThicknessSummary;
   gasketSummary?: ManualGasketSummary;
+  stressCheck?: ManualStressCheck;
+  deflectionCheck?: ManualDeflectionCheck;
   governingCase?: 'seating' | 'operating' | 'hydrotest';
-  governingCode?: 'ASME' | 'EN';
+  governingCode?: 'ASME' | 'EN' | 'Plasticity' | 'Stiffness';
   pressureTestUsed?: number;
   pressureTestAuto?: number;
   pressureTestBasis?: string;

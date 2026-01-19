@@ -32,6 +32,7 @@ export interface MaterialDefinition {
   name: string;
   yieldByTemp: YieldByTemperature;
   density: number;
+  modulusElasticity?: number; // E, MPa (default 200,000 if undefined)
 }
 
 export type MaterialCatalog = Record<MaterialId, MaterialDefinition>;
@@ -100,6 +101,12 @@ export interface CalculationResult {
   recommendedThickness: number;
   weight: number;
   gasketMeanDiameter: number;
+  
+  // New checks
+  deflectionMm?: number;
+  stressTestMPa?: number;
+  yieldAtTestMPa?: number;
+  isPlasticStable?: boolean;
 }
 
 export interface InputFormProps {
@@ -208,9 +215,13 @@ export interface CustomSizingDebug {
   Wm2_hydro: number;
   thicknessAsme: number;
   thicknessEn: number;
-  governingCode: 'ASME' | 'EN';
+  thicknessPlasticity: number;
+  thicknessStiffness: number;
+  governingCode: 'ASME' | 'EN' | 'Plasticity' | 'Stiffness';
   boltTorque?: BoltTorqueResult;
   boltingSummary?: BoltingSummary;
+  deflectionMm: number;
+  stressTestMPa: number;
 }
 
 export interface CustomSizingResult {

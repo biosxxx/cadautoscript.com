@@ -17,6 +17,70 @@ import {
 import {getGasketGeometry} from './gasket';
 import type {CalculationInput, CalculationResult, En1092Dimensions} from './bfTypes';
 
+const BAR_TO_MPA = 0.1;
+
+// --- Physics Formulas (Added to Standard Logic) ---
+
+// 1. Calculate max deflection at center
+const calcPlateDeflection = (
+  pressureMPa: number,
+  radiusMm: number,
+  thicknessMm: number,
+  modulusMPa: number,
+  nu: number = 0.3
+): number => {
+  if (thicknessMm <= 0 || radiusMm <= 0) return 999;
+  // Rigidity D = (E * t^3) / (12 * (1 - nu^2))
+  const D = (modulusMPa * Math.pow(thicknessMm, 3)) / (12 * (1 - Math.pow(nu, 2)));
+  // w = ((5 + nu) * P * R^4) / (64 * D * (1 + nu))
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4);
+  const den = 64 * D * (1 + nu);
+  return num / den;
+};
+
+// 2. Calculate bending stress at center
+const calcPlateStress = (
+  pressureMPa: number,
+  radiusMm: number,
+  thicknessMm: number,
+  nu: number = 0.3
+): number => {
+  if (thicknessMm <= 0 || radiusMm <= 0) return 999;
+  // Sigma = (3 * P * R^2 * (3 + nu)) / (8 * t^2)
+  return (3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * Math.pow(thicknessMm, 2));
+};
+
+// 3. Inverse: Calculate required thickness to limit stress (Plasticity check)
+const calcThickForStress = (
+  pressureMPa: number,
+  radiusMm: number,
+  limitStressMPa: number,
+  nu: number = 0.3
+): number => {
+  if (limitStressMPa <= 0 || radiusMm <= 0 || pressureMPa < 0) return 0;
+  // t = sqrt( (3 * P * R^2 * (3 + nu)) / (8 * Sigma_limit) )
+  const res = Math.sqrt((3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * limitStressMPa));
+  return isNaN(res) ? 0 : res;
+};
+
+// 4. Inverse: Calculate required thickness to limit deflection (Stiffness check)
+const calcThickForDeflection = (
+  pressureMPa: number,
+  radiusMm: number,
+  limitMm: number,
+  modulusMPa: number,
+  nu: number = 0.3
+): number => {
+  if (limitMm <= 0 || radiusMm <= 0 || pressureMPa < 0) return 0;
+  // Formula derived from w = ... solving for t
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4) * 12 * (1 - Math.pow(nu, 2));
+  const den = 64 * modulusMPa * limitMm * (1 + nu);
+  const res = Math.cbrt(num / den);
+  return isNaN(res) ? 0 : res;
+};
+
+// --- Standard Helpers ---
+
 export function getCalculatedPN(pressureBar: number): number {
   if (pressureBar <= 10) return 10;
   if (pressureBar <= 16) return 16;
@@ -64,6 +128,13 @@ export function calculateBlindFlange(input: CalculationInput): CalculationResult
 
   const fastener = resolveFastenerSelection(input);
   const material = MATERIALS[input.material];
+  
+  // Material Properties for Physics Checks
+  const yieldAt20 = material.yieldByTemp[20] ?? 200;
+  const modulusElasticity = material.modulusElasticity ?? 200000;
+  const nu = 0.3;
+  const deflectionLimitMm = 1.0;
+
   const allowableOp = getAllowableStress(material, input.temperature, 'EN', 'operating');
   const allowableTest = getAllowableStress(material, 20, 'EN', 'test');
   const hydro = getHydroTestPressure({
@@ -88,8 +159,8 @@ export function calculateBlindFlange(input: CalculationInput): CalculationResult
   const leverArm = Math.max((dims.k - gasketDiameter) / 2, 4);
 
   const pressureDiameter = gasket.id ?? gasketDiameter;
-  const forceOp = Math.PI * Math.pow(pressureDiameter / 2, 2) * input.pressureOp * 0.1;
-  const forceTest = Math.PI * Math.pow(pressureDiameter / 2, 2) * pressureTest * 0.1;
+  const forceOp = Math.PI * Math.pow(pressureDiameter / 2, 2) * input.pressureOp * BAR_TO_MPA;
+  const forceTest = Math.PI * Math.pow(pressureDiameter / 2, 2) * pressureTest * BAR_TO_MPA;
   const loads = calcRequiredBoltLoads({
     effectiveDiameter: gasket.effectiveDiameter,
     effectiveWidth: gasket.effectiveWidth,
@@ -147,13 +218,47 @@ export function calculateBlindFlange(input: CalculationInput): CalculationResult
   const momentOp = forceOp * leverArm;
   const momentTest = forceTest * leverArm;
 
+  // 1. Standard Code Calculation (Strength)
   const thicknessOp = Math.sqrt((6 * momentOp) / (Math.PI * gasketDiameter * allowableOp));
   const thicknessTest = Math.sqrt((6 * momentTest) / (Math.PI * gasketDiameter * allowableTest));
 
-  const minThickness = Math.max(thicknessOp, thicknessTest);
+  // 2. Physics Calculation (Deflection & Plasticity)
+  const radius = gasketDiameter / 2;
+  const tPlasticity = calcThickForStress(
+    Number(pressureTest) * BAR_TO_MPA,
+    radius,
+    yieldAt20,
+    nu
+  );
+  const tStiffness = calcThickForDeflection(
+    Number(input.pressureOp) * BAR_TO_MPA,
+    radius,
+    deflectionLimitMm,
+    modulusElasticity,
+    nu
+  );
+
+  // Take the governing thickness of ALL criteria
+  const minThickness = Math.max(thicknessOp, thicknessTest, tPlasticity, tStiffness);
+  
   const finalThickness = minThickness + input.corrosionAllowance;
   const recommendedThickness =
     STANDARD_THICKNESSES.find((value) => value >= finalThickness) ?? Math.ceil(finalThickness);
+
+  // Recalculate actual stats for the recommended thickness
+  const stressTestVal = calcPlateStress(
+    Number(pressureTest) * BAR_TO_MPA,
+    radius,
+    recommendedThickness,
+    nu
+  );
+  const deflectionMm = calcPlateDeflection(
+    Number(input.pressureOp) * BAR_TO_MPA,
+    radius,
+    Math.max(0, recommendedThickness - input.corrosionAllowance),
+    modulusElasticity,
+    nu
+  );
 
   const weight =
     Math.PI * Math.pow(dims.D / 2000, 2) * (recommendedThickness / 1000) * material.density * 1000;
@@ -218,5 +323,10 @@ export function calculateBlindFlange(input: CalculationInput): CalculationResult
     recommendedThickness,
     weight,
     gasketMeanDiameter: gasket.effectiveDiameter,
+    // Add physics results to output
+    deflectionMm,
+    stressTestMPa: stressTestVal,
+    yieldAtTestMPa: yieldAt20,
+    isPlasticStable: stressTestVal <= yieldAt20,
   };
 }

@@ -1,4 +1,4 @@
-import {getFastenerCatalogEntry, getFastenerEffectiveProps, getFastenerLabel, isFastenerPlaceholder} from './data';
+import {getFastenerCatalogEntry, getFastenerEffectiveProps, getFastenerLabel, isFastenerPlaceholder, MATERIALS} from './data';
 import {getAllowableStress, getHydroTestPressure} from './allowables';
 import {
   EDGE_CLEARANCE_MIN_MM,
@@ -20,6 +20,48 @@ import type {
   ManualGasketSummary,
   ManualThicknessSummary,
 } from './manualCheckTypes';
+
+// --- Physics Helper Functions ---
+
+// 1. Calculate bending stress at center (Simply supported/bolted model)
+const calcPlateStress = (pressureMPa: number, radiusMm: number, thicknessMm: number): number => {
+  const nu = 0.3; // Poisson's ratio for steel
+  // Sigma = (3 * P * R^2 * (3 + nu)) / (8 * t^2)
+  return (3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * Math.pow(thicknessMm, 2));
+};
+
+// 2. Calculate max deflection at center (Simply supported model for conservative check)
+const calcPlateDeflection = (pressureMPa: number, radiusMm: number, thicknessMm: number, modulusMPa = 200000): number => {
+  const nu = 0.3;
+  // Rigidity D = (E * t^3) / (12 * (1 - nu^2))
+  const D = (modulusMPa * Math.pow(thicknessMm, 3)) / (12 * (1 - Math.pow(nu, 2)));
+  // w = ((5 + nu) * P * R^4) / (64 * D * (1 + nu))
+  // Simplified: w approx (0.7 * P * R^4) / (E * t^3)
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4);
+  const den = 64 * D * (1 + nu);
+  return num / den;
+};
+
+// 3. Inverse: Calculate required thickness to limit stress (Plasticity check)
+const calcThickForStress = (pressureMPa: number, radiusMm: number, limitStressMPa: number): number => {
+  const nu = 0.3;
+  // t = sqrt( (3 * P * R^2 * (3 + nu)) / (8 * Sigma_limit) )
+  return Math.sqrt((3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * limitStressMPa));
+};
+
+// 4. Inverse: Calculate required thickness to limit deflection (Stiffness check)
+const calcThickForDeflection = (pressureMPa: number, radiusMm: number, limitMm: number, modulusMPa = 200000): number => {
+  if (limitMm <= 0) return 0;
+  const nu = 0.3;
+  // From w formula, isolate t^3:
+  // w = ( (5+nu) * P * R^4 ) / ( 64 * [E*t^3 / 12(1-nu^2)] * (1+nu) )
+  // w = ( (5+nu) * P * R^4 * 12 * (1-nu^2) ) / ( 64 * E * t^3 * (1+nu) )
+  // t^3 = ( (5+nu) * P * R^4 * 12 * (1-nu^2) ) / ( 64 * E * w * (1+nu) )
+  
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4) * 12 * (1 - Math.pow(nu, 2));
+  const den = 64 * modulusMPa * limitMm * (1 + nu);
+  return Math.pow(num / den, 1/3);
+};
 
 const calcGeometryChecks = (params: {
   boltCircle: number;
@@ -136,7 +178,7 @@ export function runManualCheck(
     );
   }
 
-  // Hydro test pressure (EN by default for now) - available even if geometry/bolts fail.
+  // Hydro test pressure
   const hydro = getHydroTestPressure({
     code: 'EN13445',
     P_design_bar: input.pressureOp,
@@ -178,20 +220,18 @@ export function runManualCheck(
       geometry: geometryCheck,
       manualInput: manual,
       gasketSummary: gasketSummaryBase,
-      governingCase: undefined,
-      governingCode: undefined,
-      pressureTestAuto: hydro.P_test_bar,
-      pressureTestBasis: hydro.basis,
-      pressureTestRatio: hydro.ratioUsed,
       pressureTestUsed,
-      pressureTestClamped: hydro.clampedToOp,
     };
   }
 
   // Material allowables
-  const material = input.material;
-  const allowableOp = getAllowableStress(material, input.temperature, 'EN', 'operating');
-  const allowableTest = getAllowableStress(material, 20, 'EN', 'test');
+  const materialDef = MATERIALS[input.material];
+  const allowableOp = getAllowableStress(materialDef, input.temperature, 'EN', 'operating');
+  const allowableTest = getAllowableStress(materialDef, 20, 'EN', 'test');
+  
+  // Plasticity Data
+  const yieldAt20 = materialDef.yieldByTemp[20] ?? 200; // Fallback
+  const modulusElasticity = materialDef.modulusElasticity ?? 200000;
 
   // Forces and gasket loads
   const pressureDiameter = gasket.id ?? gasket.effectiveDiameter;
@@ -200,7 +240,7 @@ export function runManualCheck(
   const forceTest = areaPressure * pressureTestUsed * 0.1;
   const leverArm = Math.max((manual.boltCircle - gasket.effectiveDiameter) / 2, 4);
 
-  // Bolting checks
+  // 1. Bolting checks
   let boltSummary: ManualBoltSummary | undefined;
   if (boltGeom.As && manual.boltCount > 0) {
     const areaCheck = fastenerPlaceholder
@@ -283,7 +323,7 @@ export function runManualCheck(
     };
   }
 
-  // Thickness
+  // 2. Thickness Checks (ASME & EN)
   const {tOp: tAsmeOp, tTest: tAsmeTest} = computeThicknessAsme(
     gasket.effectiveDiameter,
     leverArm,
@@ -300,16 +340,56 @@ export function runManualCheck(
     allowableOp,
     allowableTest,
   );
+
+  // 3. Plasticity Check (Permanent Deformation)
+  // Check stress at P_test. Must be <= Yield Strength at 20C.
+  // Using uncorroded thickness for test condition (plate is new)
+  const plateRadius = gasket.effectiveDiameter / 2;
+  const stressTestVal = calcPlateStress(pressureTestUsed * 0.1, plateRadius, manual.thickness);
+  const stressCheck: ManualStressCheck = {
+    stressTestMPa: stressTestVal,
+    allowableYieldMPa: yieldAt20,
+    pass: stressTestVal <= yieldAt20,
+  };
+  const tPlasticity = calcThickForStress(pressureTestUsed * 0.1, plateRadius, yieldAt20);
+
+  // 4. Stiffness Check (Deflection)
+  // Check deflection at P_operating. Limit usually 1.0mm.
+  // Using corroded thickness (worst case for stiffness)
+  const thickCorroded = Math.max(0, manual.thickness - corrosionAllowance);
+  const deflectionOp = calcPlateDeflection(input.pressureOp * 0.1, plateRadius, thickCorroded, modulusElasticity);
+  const deflectionLimit = 1.0; // Standard heuristic
+  const deflectionCheck: ManualDeflectionCheck = {
+    deflectionOpMm: deflectionOp,
+    limitMm: deflectionLimit,
+    pass: deflectionOp <= deflectionLimit,
+  };
+  const tStiffness = calcThickForDeflection(input.pressureOp * 0.1, plateRadius, deflectionLimit, modulusElasticity);
+
+  // Summarize Thickness Requirements
   const reqAsme = Math.max(tAsmeOp, tAsmeTest);
   const reqEn = Math.max(tEnOp, tEnTest);
-  const governingCode = reqAsme >= reqEn ? 'ASME' : 'EN';
-  const reqBase = Math.max(reqAsme, reqEn);
-  const requiredWithCA = reqBase + corrosionAllowance;
+  
+  // Determine governing code
+  const reqs = [
+    {val: reqAsme, code: 'ASME'},
+    {val: reqEn, code: 'EN'},
+    {val: tPlasticity, code: 'Plasticity'},
+    {val: tStiffness, code: 'Stiffness'},
+  ];
+  // Sort descending to find governing
+  reqs.sort((a, b) => b.val - a.val);
+  const governingCode = reqs[0].code as 'ASME' | 'EN' | 'Plasticity' | 'Stiffness';
+  
+  const requiredWithCA = reqs[0].val + corrosionAllowance; // Add CA to base requirement
+
   const thicknessSummary: ManualThicknessSummary = {
     requiredAsmeOp: tAsmeOp,
     requiredAsmeTest: tAsmeTest,
     requiredEnOp: tEnOp,
     requiredEnTest: tEnTest,
+    requiredPlasticity: tPlasticity,
+    requiredStiffness: tStiffness,
     governingCode,
     requiredWithCA,
     provided: manual.thickness,
@@ -337,9 +417,7 @@ export function runManualCheck(
     geometryCheck.edgeOk &&
     geometryCheck.spacingOk &&
     (boltSummary?.pass ?? false) &&
-    thicknessSummary.pass;
-
-  const governingCase = boltSummary?.governingCase;
+    thicknessSummary.pass; // Now includes plasticity and stiffness checks in 'pass'
 
   return {
     pass,
@@ -349,7 +427,9 @@ export function runManualCheck(
     boltSummary,
     thicknessSummary,
     gasketSummary,
-    governingCase,
+    stressCheck,
+    deflectionCheck,
+    governingCase: boltSummary?.governingCase,
     governingCode,
     pressureTestAuto: hydro.P_test_bar,
     pressureTestBasis: hydro.basis,

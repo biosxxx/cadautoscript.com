@@ -27,6 +27,7 @@ import type {
   FastenerType,
   GasketFacing,
   GasketMaterial,
+  CustomSizingDebug,
 } from './bfTypes';
 
 export type CustomPreference = 'min_weight' | 'min_bolts';
@@ -38,53 +39,9 @@ export interface CustomSizingConfig {
   preference: CustomPreference;
 }
 
-export interface CustomSizingDebug {
-  boltAllowableStress: number;
-  requiredBoltArea: number;
-  providedBoltArea: number;
-  requiredAreaSeating: number;
-  requiredAreaOper: number;
-  requiredAreaHydro: number;
-  governingCase: 'seating' | 'operating' | 'hydrotest';
-  gasketDiameter: number;
-  gasketWidth: number;
-  gasketId: number;
-  gasketOd: number;
-  gasketMaterial: GasketMaterial;
-  gasketFacing: GasketFacing;
-  gasketThickness: number;
-  leverArm: number;
-  boltCircleMinStandard?: number;
-  boltCircleClamped?: boolean;
-  fastenerStandard: FastenerStandard;
-  fastenerType: FastenerType;
-  fastenerGradeId: FastenerGradeId;
-  fastenerLabel: string;
-  fastenerProofStressMPa: number;
-  fastenerYieldStressMPa: number;
-  geometryAssumption?: string;
-  pressureTestAuto?: number;
-  pressureTestBasis?: string;
-  pressureTestRatio?: number;
-  pressureTestClamped?: boolean;
-  forceOperating: number;
-  forceTest: number;
-  Wm1: number;
-  Wm2_op: number;
-  Wm2_hydro: number;
-  thicknessAsme: number;
-  thicknessEn: number;
-  governingCode: 'ASME' | 'EN';
-  boltTorque?: BoltTorqueResult;
-  boltingSummary?: BoltingSummary;
-}
-
-export interface CustomSizingResult {
-  result: CalculationResult;
-  debug: CustomSizingDebug;
-}
-
 type FailureReason = NonNullable<BoltingSummary['failureReason']>;
+
+const BAR_TO_MPA = 0.1;
 
 const buildFailureReason = (areaCheck: {
   governingCase: 'seating' | 'operating' | 'hydrotest';
@@ -129,11 +86,73 @@ const DEFAULT_BOLT_SIZES = [
 
 const DEFAULT_BOLT_COUNTS = [4, 8, 12, 16, 20, 24, 28, 32, 36] as const;
 
+// --- Physics Formulas (Cleaned up & Parameterized) ---
+
+// 1. Calculate max deflection at center (Simply supported model for conservative check)
+const calcPlateDeflection = (
+  pressureMPa: number,
+  radiusMm: number,
+  thicknessMm: number,
+  modulusMPa: number,
+  nu: number = 0.3
+): number => {
+  if (thicknessMm <= 0 || radiusMm <= 0) return 999;
+  // Rigidity D = (E * t^3) / (12 * (1 - nu^2))
+  const D = (modulusMPa * Math.pow(thicknessMm, 3)) / (12 * (1 - Math.pow(nu, 2)));
+  // w = ((5 + nu) * P * R^4) / (64 * D * (1 + nu))
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4);
+  const den = 64 * D * (1 + nu);
+  return num / den;
+};
+
+// 2. Calculate bending stress at center
+const calcPlateStress = (
+  pressureMPa: number,
+  radiusMm: number,
+  thicknessMm: number,
+  nu: number = 0.3
+): number => {
+  if (thicknessMm <= 0 || radiusMm <= 0) return 999;
+  // Sigma = (3 * P * R^2 * (3 + nu)) / (8 * t^2)
+  return (3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * Math.pow(thicknessMm, 2));
+};
+
+// 3. Inverse: Calculate required thickness to limit stress (Plasticity check)
+const calcThickForStress = (
+  pressureMPa: number,
+  radiusMm: number,
+  limitStressMPa: number,
+  nu: number = 0.3
+): number => {
+  if (limitStressMPa <= 0 || radiusMm <= 0 || pressureMPa < 0) return 0; // Fixed: return 0 instead of 999 to avoid breaking Math.max if invalid
+  // t = sqrt( (3 * P * R^2 * (3 + nu)) / (8 * Sigma_limit) )
+  const res = Math.sqrt((3 * pressureMPa * Math.pow(radiusMm, 2) * (3 + nu)) / (8 * limitStressMPa));
+  return isNaN(res) ? 0 : res;
+};
+
+// 4. Inverse: Calculate required thickness to limit deflection (Stiffness check)
+const calcThickForDeflection = (
+  pressureMPa: number,
+  radiusMm: number,
+  limitMm: number,
+  modulusMPa: number,
+  nu: number = 0.3
+): number => {
+  if (limitMm <= 0 || radiusMm <= 0 || pressureMPa < 0) return 0;
+  // Formula derived from w = ... solving for t
+  const num = (5 + nu) * pressureMPa * Math.pow(radiusMm, 4) * 12 * (1 - Math.pow(nu, 2));
+  const den = 64 * modulusMPa * limitMm * (1 + nu);
+  const res = Math.cbrt(num / den); // Use Math.cbrt for better precision/clarity
+  return isNaN(res) ? 0 : res;
+};
+
+// --- Standard Calculation Helpers ---
+
 const computeForces = (gasket: GasketGeometry, pressureOp: number, pressureTest: number) => {
   const diameterForPressure = gasket.id ?? gasket.effectiveDiameter;
   const area = Math.PI * Math.pow(diameterForPressure / 2, 2);
-  const forceOperating = area * pressureOp * 0.1;
-  const forceTest = area * pressureTest * 0.1;
+  const forceOperating = area * pressureOp * BAR_TO_MPA;
+  const forceTest = area * pressureTest * BAR_TO_MPA;
   return {forceOperating, forceTest};
 };
 
@@ -157,8 +176,6 @@ const calcThicknessUG34 = (
   allowableOp: number,
   allowableTest: number,
 ) => {
-  // ASME VIII-1 UG-34 (bolted cover / flat head) edge moment case:
-  // M = W * h_G, t = sqrt(6 * M / (pi * G * S))
   const momentOp = forceOperating * leverArm;
   const momentTest = forceTest * leverArm;
   const thicknessOp = Math.sqrt((6 * momentOp) / (Math.PI * gasketDiameter * allowableOp));
@@ -174,8 +191,6 @@ const calcThicknessEN13445 = (
   allowableOp: number,
   allowableTest: number,
 ) => {
-  // Simplified EN 13445 flat end (bolted) approximation using a stiffness factor C_en.
-  // Uses edge moment like UG-34 but with a slightly higher bending factor.
   const C_en = 0.95;
   const momentOp = forceOperating * leverArm * C_en;
   const momentTest = forceTest * leverArm * C_en;
@@ -188,6 +203,7 @@ export function getFastenerGradeLabel(gradeId: FastenerGradeId) {
   return getFastenerLabel(gradeId);
 }
 
+// Used for "why it failed" tooltips in UI
 export function getCustomSizingFailure(
   input: CalculationInput,
   targetPN: number,
@@ -196,7 +212,16 @@ export function getCustomSizingFailure(
   const fastenerEntry = getFastenerCatalogEntry(config.fastenerGradeId);
   if (isFastenerPlaceholder(fastenerEntry)) return null;
   const minStandardBoltCircle = getMinStandardBoltCircle(input.dn);
-  const pressureTestUsed = Math.max(input.pressureTest, input.pressureOp);
+  const hydro = getHydroTestPressure({
+    code: 'EN13445',
+    P_design_bar: input.pressureOp,
+    P_op_bar: input.pressureOp,
+    T_design_C: input.temperature,
+    T_test_C: 20,
+    materialId: input.material,
+  });
+  const pressureTestUsed = Math.max(input.pressureTest > 0 ? input.pressureTest : hydro.P_test_bar, input.pressureOp);
+  
   const gasket = getGasketGeometry(
     input.dn,
     targetPN,
@@ -257,9 +282,16 @@ export function calculateCustomBlindFlange(
   if (input.pressureOp <= 0 || input.pressureTest <= 0) return null;
   if (input.corrosionAllowance < 0) return null;
 
-  const material = MATERIALS[input.material];
-  const allowableOp = getAllowableStress(material, input.temperature, 'EN', 'operating');
-  const allowableTest = getAllowableStress(material, 20, 'EN', 'test');
+  const materialDef = MATERIALS[input.material];
+  const allowableOp = getAllowableStress(materialDef, input.temperature, 'EN', 'operating');
+  const allowableTest = getAllowableStress(materialDef, 20, 'EN', 'test');
+  
+  // Plasticity & Stiffness Params (Default to standard values if missing)
+  const yieldAt20 = materialDef.yieldByTemp[20] ?? 200;
+  const modulusElasticity = materialDef.modulusElasticity ?? 200000;
+  const nu = 0.3; // Poisson's ratio for steel (standard)
+  const deflectionLimitMm = 1.0; // Hardcoded safety limit for auto-sizing
+
   const hydro = getHydroTestPressure({
     code: 'EN13445',
     P_design_bar: input.pressureOp,
@@ -336,6 +368,9 @@ export function calculateCustomBlindFlange(
         input.dn + 120,
         gasketDiameter + 100,
       );
+
+      // --- Thickness Calculations ---
+      // 1. ASME & EN (Strength based on Allowable Stress)
       const {thicknessOp: tAsmeOp, thicknessTest: tAsmeTest} = calcThicknessUG34(
         gasketDiameter,
         leverArm,
@@ -355,15 +390,61 @@ export function calculateCustomBlindFlange(
 
       const minThicknessAsme = Math.max(tAsmeOp, tAsmeTest);
       const minThicknessEn = Math.max(tEnOp, tEnTest);
-      const minThickness = Math.max(minThicknessAsme, minThicknessEn);
-      const governingCode = minThicknessAsme >= minThicknessEn ? 'ASME' : 'EN';
+
+      // 2. Plasticity & Stiffness (New Physics Checks)
+      const radius = gasketDiameter / 2;
+      
+      // Plasticity: Thickness so stress at Test Pressure <= Yield (at 20C)
+      // Note: Test pressure converted to MPa. Ensure Number() type.
+      const tPlasticity = calcThickForStress(
+        Number(pressureTestUsed) * BAR_TO_MPA, 
+        radius, 
+        yieldAt20, 
+        nu
+      );
+      
+      // Stiffness: Thickness so deflection at Operating Pressure <= Limit (1mm)
+      const tStiffness = calcThickForDeflection(
+        Number(input.pressureOp) * BAR_TO_MPA, 
+        radius, 
+        deflectionLimitMm, 
+        modulusElasticity, 
+        nu
+      );
+
+      // Select governing thickness
+      const reqs = [
+        {val: minThicknessAsme || 0, code: 'ASME'},
+        {val: minThicknessEn || 0, code: 'EN'},
+        {val: tPlasticity || 0, code: 'Plasticity'},
+        {val: tStiffness || 0, code: 'Stiffness'},
+      ];
+      // Sort descending to find the largest requirement
+      reqs.sort((a, b) => b.val - a.val);
+      const minThickness = reqs[0].val;
+      const governingCode = reqs[0].code as 'ASME' | 'EN' | 'Plasticity' | 'Stiffness';
 
       const finalThickness = minThickness + input.corrosionAllowance;
       const recommendedThickness =
         STANDARD_THICKNESSES.find((value) => value >= finalThickness) ?? Math.ceil(finalThickness);
 
+      // Recalculate actual stats for debug (using recommended thickness)
+      const stressTestVal = calcPlateStress(
+        Number(pressureTestUsed) * BAR_TO_MPA, 
+        radius, 
+        recommendedThickness, 
+        nu
+      );
+      const deflectionMm = calcPlateDeflection(
+        Number(input.pressureOp) * BAR_TO_MPA, 
+        radius, 
+        Math.max(0, recommendedThickness - input.corrosionAllowance), 
+        modulusElasticity,
+        nu
+      );
+
       const weight =
-        Math.PI * Math.pow(outerDiameter / 2000, 2) * (recommendedThickness / 1000) * material.density * 1000;
+        Math.PI * Math.pow(outerDiameter / 2000, 2) * (recommendedThickness / 1000) * materialDef.density * 1000;
 
       const requiredPreloadPerBolt =
         governingCase === 'seating'
@@ -455,7 +536,11 @@ export function calculateCustomBlindFlange(
           Wm2_hydro: loads.Wm2_hydro,
           thicknessAsme: minThicknessAsme,
           thicknessEn: minThicknessEn,
+          thicknessPlasticity: tPlasticity,
+          thicknessStiffness: tStiffness,
           governingCode,
+          deflectionMm,
+          stressTestMPa: stressTestVal,
         },
         boltTorque,
       });
@@ -499,6 +584,11 @@ export function calculateCustomBlindFlange(
       recommendedThickness,
       weight,
       gasketMeanDiameter: gasket.effectiveDiameter,
+      // New result fields
+      deflectionMm: debug.deflectionMm,
+      stressTestMPa: debug.stressTestMPa,
+      yieldAtTestMPa: yieldAt20,
+      isPlasticStable: debug.stressTestMPa <= yieldAt20,
     },
     debug: {
       ...debug,
