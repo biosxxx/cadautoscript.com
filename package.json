@@ -40,7 +40,7 @@
     "dotenv": "^17.2.3",
     "emoji-picker-react": "^4.16.1",
     "framer-motion": "^12.23.26",
-    "jspdf": "^2.5.1",
+    "jspdf": "^4.0.0",
     "lucide-react": "^0.561.0",
     "monaco-editor": "^0.55.1",
     "postprocessing": "^6.37.2",
