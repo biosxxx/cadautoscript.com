@@ -6,7 +6,7 @@ import ExportActions from './components/ExportActions';
 import {AVAILABLE_DNS, DEFAULT_FASTENER_ID, MATERIALS, getFastenerOptionsFor} from './data';
 import {getHydroTestPressure} from './allowables';
 import type {CustomSizingResult} from './custom';
-import {calculateBlindFlange, getCalculatedPN, getMaxAvailablePN} from './utils';
+import {calculateBlindFlange, findClosestStandardFromDims, getCalculatedPN, getMaxAvailablePN} from './utils';
 import type {
   FastenerGradeId,
   FastenerStandard,
@@ -14,6 +14,8 @@ import type {
   FrictionPreset,
   GasketFacing,
   GasketMaterial,
+  DesignConfiguration,
+  GeometryMode,
   MaterialId,
   TighteningMethod,
 } from './bfTypes';
@@ -31,6 +33,12 @@ export default function BlindFlangeCalculator() {
   const [gasketMaterial, setGasketMaterial] = useState<GasketMaterial>('graphite');
   const [gasketThickness, setGasketThickness] = useState(2);
   const [gasketFacing, setGasketFacing] = useState<GasketFacing>('RF');
+  const [geometryMode, setGeometryMode] = useState<GeometryMode>('standard');
+  const [customOuterDiameter, setCustomOuterDiameter] = useState<number | undefined>(undefined);
+  const [customNozzleId, setCustomNozzleId] = useState<number | undefined>(undefined);
+  const [designConfig, setDesignConfig] = useState<DesignConfiguration | null>(null);
+  const [isUserDefined, setIsUserDefined] = useState(false);
+  const [geometryMatchNote, setGeometryMatchNote] = useState<string | undefined>(undefined);
   const [frictionPreset, setFrictionPreset] = useState<FrictionPreset>('dry');
   const [tighteningMethod, setTighteningMethod] = useState<TighteningMethod>('k_factor');
   const [fastenerStandard, setFastenerStandard] = useState<FastenerStandard>('EN');
@@ -43,7 +51,7 @@ export default function BlindFlangeCalculator() {
   const calculatedPn = useMemo(() => getCalculatedPN(pressureOp), [pressureOp]);
   const maxAvailablePn = useMemo(() => getMaxAvailablePN(dn), [dn]);
   const exceedsPnCap = pressureOp > MAX_STANDARD_PN || pressureTest > MAX_STANDARD_PN;
-  const forceCustom = exceedsPnCap || (maxAvailablePn !== undefined && calculatedPn > maxAvailablePn);
+  const forceCustom = geometryMode === 'custom' ? false : exceedsPnCap || (maxAvailablePn !== undefined && calculatedPn > maxAvailablePn);
 
   const hydroAuto = useMemo(
     () =>
@@ -75,9 +83,26 @@ export default function BlindFlangeCalculator() {
     }
   }, [manualTestPressure, hydroAutoRounded, pressureOp]);
 
+  useEffect(() => {
+    if (geometryMode !== 'custom') return;
+    if (!customNozzleId || customNozzleId <= 0) return;
+    const nearestDn = AVAILABLE_DNS.reduce((closest, candidate) => {
+      if (!closest) return candidate;
+      return Math.abs(candidate - customNozzleId) < Math.abs(closest - customNozzleId)
+        ? candidate
+        : closest;
+    }, 0);
+    if (nearestDn && nearestDn !== dn) {
+      setDn(nearestDn);
+    }
+  }, [geometryMode, customNozzleId, dn]);
+
   const input = useMemo(
     () => ({
+      geometryMode,
       dn,
+      customOuterDiameter,
+      customNozzleId,
       pressureOp,
       pressureTest,
       temperature,
@@ -93,7 +118,10 @@ export default function BlindFlangeCalculator() {
       fastenerGradeId,
     }),
     [
+      geometryMode,
       dn,
+      customOuterDiameter,
+      customNozzleId,
       pressureOp,
       pressureTest,
       temperature,
@@ -110,7 +138,32 @@ export default function BlindFlangeCalculator() {
     ],
   );
 
-  const result = useMemo(() => calculateBlindFlange(input), [input]);
+  const standardResult = useMemo(() => calculateBlindFlange({...input, geometryMode: 'standard'}), [input]);
+  const autoCustomDims = useMemo(() => {
+    if (geometryMode !== 'custom') return null;
+    if (!standardResult) return null;
+    return {
+      D: customOuterDiameter ?? standardResult.dims.D,
+      k: standardResult.dims.k,
+      bolts: standardResult.dims.bolts,
+      size: standardResult.dims.size,
+      d2: standardResult.dims.d2,
+    };
+  }, [geometryMode, standardResult, customOuterDiameter]);
+
+  const calcInput = useMemo(() => {
+    if (geometryMode !== 'custom' || !autoCustomDims) return input;
+    return {
+      ...input,
+      customOuterDiameter: autoCustomDims.D,
+      customBoltCircle: autoCustomDims.k,
+      customBoltCount: autoCustomDims.bolts,
+      customBoltSize: autoCustomDims.size,
+      customBoltHoleDiameter: autoCustomDims.d2,
+    };
+  }, [geometryMode, autoCustomDims, input]);
+
+  const result = useMemo(() => calculateBlindFlange(calcInput), [calcInput]);
 
   useEffect(() => {
     if (result) {
@@ -122,6 +175,76 @@ export default function BlindFlangeCalculator() {
     }
   }, [result, forceCustom]);
 
+  useEffect(() => {
+    if (geometryMode !== 'custom') return;
+    if (!standardResult) return;
+    setCustomOuterDiameter((prev) => (prev && prev > 0 ? prev : standardResult.dims.D));
+    setCustomNozzleId((prev) => (prev && prev > 0 ? prev : standardResult.gasketId ?? dn));
+  }, [geometryMode, standardResult, dn]);
+
+  useEffect(() => {
+    if (!result) return;
+    if (isUserDefined) return;
+    const gasketId = result.gasketId ?? customNozzleId ?? dn;
+    const gasketOd = result.gasketOd ?? gasketId + 20;
+    setDesignConfig({
+      outerDiameter: result.dims.D,
+      thickness: result.recommendedThickness,
+      boltCircle: result.dims.k,
+      boltCount: result.dims.bolts,
+      boltSize: result.dims.size,
+      boltHoleDiameter: result.dims.d2,
+      gasketId,
+      gasketOd,
+    });
+  }, [result, isUserDefined, customNozzleId, dn]);
+
+  const handleGeometryModeChange = (mode: GeometryMode) => {
+    if (mode === geometryMode) return;
+    setIsUserDefined(false);
+    if (mode === 'custom') {
+      if (standardResult) {
+        setCustomOuterDiameter(standardResult.dims.D);
+        setCustomNozzleId(standardResult.gasketId ?? dn);
+      }
+      setGeometryMatchNote(undefined);
+      setGeometryMode('custom');
+      return;
+    }
+
+    const customDims = designConfig
+      ? {
+          D: designConfig.outerDiameter,
+          k: designConfig.boltCircle,
+          bolts: designConfig.boltCount,
+          size: designConfig.boltSize,
+          d2: designConfig.boltHoleDiameter,
+        }
+      : autoCustomDims
+        ? {
+            D: autoCustomDims.D,
+            k: autoCustomDims.k,
+            bolts: autoCustomDims.bolts,
+            size: autoCustomDims.size,
+            d2: autoCustomDims.d2,
+          }
+        : null;
+    if (customDims) {
+      const match = findClosestStandardFromDims(customDims);
+      if (match) {
+        setDn(match.dn);
+        setGeometryMatchNote(
+          match.exact
+            ? undefined
+            : `No exact match found. Using nearest DN ${match.dn} / PN ${match.pn} (D=${match.dims.D} mm, K=${match.dims.k} mm).`,
+        );
+      } else {
+        setGeometryMatchNote('No close EN 1092-1 match found. Standard mode reset to current DN.');
+      }
+    }
+    setGeometryMode('standard');
+  };
+
   const selectedPn = result?.selectedPN;
 
   const handleCustomResultChange = useCallback((value: CustomSizingResult | null) => {
@@ -132,6 +255,15 @@ export default function BlindFlangeCalculator() {
   const handleManualResultChange = useCallback((value: ManualCheckResult | null) => {
     setManualCheckResult(value);
     setCustomResult(null);
+  }, []);
+
+  const handleDesignConfigChange = useCallback((value: DesignConfiguration, isUser?: boolean) => {
+    setDesignConfig(value);
+    if (isUser === false) {
+      setIsUserDefined(false);
+      return;
+    }
+    if (isUser) setIsUserDefined(true);
   }, []);
 
   const exportResult = customResult?.result ?? result;
@@ -164,7 +296,10 @@ export default function BlindFlangeCalculator() {
         <div className="grid gap-6 lg:grid-cols-12">
           <div className="lg:col-span-4 space-y-6">
             <InputForm
+              geometryMode={geometryMode}
               dn={dn}
+              customOuterDiameter={customOuterDiameter}
+              customNozzleId={customNozzleId}
               pressureOp={pressureOp}
               pressureTest={pressureTest}
               temperature={temperature}
@@ -185,7 +320,11 @@ export default function BlindFlangeCalculator() {
               showTestPressureWarning={isTestBelowAuto}
               availableDns={AVAILABLE_DNS}
               materials={MATERIALS}
+              geometryMatchNote={geometryMatchNote}
+              onGeometryModeChange={handleGeometryModeChange}
               onDnChange={setDn}
+              onCustomOuterDiameterChange={setCustomOuterDiameter}
+              onCustomNozzleIdChange={setCustomNozzleId}
               onPressureOpChange={(value) => {
                 setPressureOp(value);
                 setManualTestPressure(false);
@@ -243,6 +382,8 @@ export default function BlindFlangeCalculator() {
              result={forceCustom ? null : result}
              customResult={customResult}
              manualCheckResult={manualCheckResult}
+             designConfig={designConfig}
+             isUserDefined={isUserDefined}
              dn={dn}
              pressureOp={pressureOp}
              targetPN={calculatedPn}
@@ -250,6 +391,7 @@ export default function BlindFlangeCalculator() {
              input={input}
              onCustomResultChange={handleCustomResultChange}
              onManualResultChange={handleManualResultChange}
+             onDesignConfigChange={handleDesignConfigChange}
            />
           </div>
         </div>

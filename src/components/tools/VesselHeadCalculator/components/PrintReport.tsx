@@ -32,7 +32,7 @@ const loadScript = (src: string, globalKey: string) =>
 
 const loadPdfLibraries = () =>
   Promise.all([
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf'),
+    loadScript('https://cdn.jsdelivr.net/npm/jspdf@4.0.0/dist/jspdf.umd.min.js', 'jspdf'),
     loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'html2canvas'),
   ]);
 

@@ -13,6 +13,8 @@ export type GasketGeometry = {
   y: number;
 };
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
 export function getGasketGeometry(
   dn: number,
   pn: number,
@@ -39,6 +41,33 @@ export function getGasketGeometry(
     effectiveWidth,
     id,
     od,
+    material,
+    thickness,
+    facing,
+    m: mProps.m,
+    y: mProps.y,
+  };
+}
+
+export function getCustomGasketGeometry(
+  id: number,
+  od: number,
+  facing: GasketFacing,
+  thickness: number,
+  material: GasketMaterial,
+): GasketGeometry {
+  const mProps = GASKET_OPTIONS.materials[material] ?? GASKET_OPTIONS.materials.graphite;
+  const safeId = Math.max(1, id);
+  const safeOd = Math.max(safeId + 2, od);
+  const width = (safeOd - safeId) / 2;
+  const effectiveWidth = clamp(width * 0.8, 6, 25);
+  const effectiveDiameter = (safeId + safeOd) / 2;
+
+  return {
+    effectiveDiameter,
+    effectiveWidth,
+    id: safeId,
+    od: safeOd,
     material,
     thickness,
     facing,

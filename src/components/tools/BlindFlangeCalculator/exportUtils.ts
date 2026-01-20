@@ -56,17 +56,18 @@ export async function exportPdfReport(params: {
   };
 
   const drawBar = (label: string, utilization: number, x: number, y: number, width: number) => {
-    const pct = Math.max(0, Math.min(utilization * 100, 300));
-    const barWidth = Math.min(Math.max(utilization, 0), 1) * width;
+    const normalized = Number.isFinite(utilization) ? utilization : 0;
+    const pct = Math.max(0, Math.min(normalized * 100, 300));
+    const barWidth = Math.min(Math.max(normalized, 0), 1) * width;
     const color =
       pct < 90 ? [60, 179, 113] : pct < 110 ? [255, 193, 7] : [244, 67, 54];
     doc.setFontSize(9);
     doc.setTextColor(80);
     doc.text(sanitizePdfText(label), x, y + 4);
-    doc.setDrawColor(60);
     doc.setFillColor(color[0], color[1], color[2]);
-    doc.rect(x, y + 6, width, 5);
     doc.rect(x, y + 6, barWidth, 5, 'F');
+    doc.setDrawColor(60);
+    doc.rect(x, y + 6, width, 5);
     doc.setTextColor(0);
     doc.text(sanitizePdfText(`${pct.toFixed(0)}%`), x + width, y + 4, {align: 'right'});
   };

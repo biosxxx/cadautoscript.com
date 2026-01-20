@@ -1,4 +1,4 @@
-import { jsPDF } from "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.es.min.js";
+import { jsPDF } from "https://cdn.jsdelivr.net/npm/jspdf@4.0.0/dist/jspdf.es.min.js";
 
 export async function downloadPdfReport(state, { drawingSvg, qrDataUrl } = {}) {
   // Compression = true is crucial for small file sizes

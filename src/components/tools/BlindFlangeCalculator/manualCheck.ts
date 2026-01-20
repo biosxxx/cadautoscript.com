@@ -9,7 +9,7 @@ import {
   getFastenerFeatureOD,
   getFastenerGeometry,
 } from './bolting';
-import {getGasketGeometry} from './gasket';
+import {getCustomGasketGeometry, getGasketGeometry} from './gasket';
 import {getCalculatedPN} from './utils';
 import type {CalculationInput} from './bfTypes';
 import type {
@@ -69,13 +69,19 @@ const calcGeometryChecks = (params: {
   boltCount: number;
   standard: 'EN' | 'ASME';
   boltSize: string;
+  gasketMeanDiameter: number;
+  gasketOd?: number;
 }) => {
-  const {boltCircle, outerD, boltCount, standard, boltSize} = params;
+  const {boltCircle, outerD, boltCount, standard, boltSize, gasketMeanDiameter, gasketOd} = params;
   const feature = getFastenerFeatureOD(standard, boltSize);
   const approxLabel = feature.approximated ? ' (approximated)' : '';
 
   const radius = boltCircle / 2;
   const outerRadius = outerD / 2;
+
+  const gasketOuter = gasketOd ?? gasketMeanDiameter;
+  const gasketNeed = gasketOuter + EDGE_CLEARANCE_MIN_MM * 2;
+  const gasketOk = boltCircle >= gasketNeed;
 
   const edgeNeed = radius + feature.featureOD / 2 + EDGE_CLEARANCE_MIN_MM;
   const edgeOk = edgeNeed <= outerRadius;
@@ -85,6 +91,13 @@ const calcGeometryChecks = (params: {
   const spacingOk = pitch >= pitchNeed;
 
   const notes: string[] = [];
+  if (!gasketOk) {
+    notes.push(
+      `Bolt circle too small for gasket: k=${boltCircle.toFixed(1)} mm < gasket OD + clearance = ${gasketNeed.toFixed(
+        1,
+      )} mm (gasket OD=${gasketOuter.toFixed(1)} mm, clearance=${EDGE_CLEARANCE_MIN_MM} mm).`,
+    );
+  }
   if (!edgeOk) {
     notes.push(
       `Edge check (${feature.sourceLabel}${approxLabel}): k/2 + featureOD/2 + edgeClearanceMin = ${edgeNeed.toFixed(1)} mm > OD/2 = ${outerRadius.toFixed(1)} mm (featureOD=${feature.featureOD.toFixed(1)} mm, edgeClearanceMin=${EDGE_CLEARANCE_MIN_MM} mm)`,
@@ -100,7 +113,7 @@ const calcGeometryChecks = (params: {
     notes.push(`FeatureOD approximated: ${feature.featureOD.toFixed(1)} mm via ${feature.sourceLabel}.`);
   }
 
-  return {edgeOk, spacingOk, notes};
+  return {edgeOk, spacingOk, gasketOk, notes};
 };
 
 const computeThicknessAsme = (
@@ -155,7 +168,10 @@ export function runManualCheck(
   const corrosionAllowance = manual.corrosionAllowance ?? input.corrosionAllowance ?? 0;
 
   const selectedPN = targetPN ?? getCalculatedPN(input.pressureOp);
-  const gasket = getGasketGeometry(input.dn, selectedPN, gasketFacing, gasketThickness, gasketMaterial);
+  const gasket =
+    manual.gasketId && manual.gasketOd
+      ? getCustomGasketGeometry(manual.gasketId, manual.gasketOd, gasketFacing, gasketThickness, gasketMaterial)
+      : getGasketGeometry(input.dn, selectedPN, gasketFacing, gasketThickness, gasketMaterial);
 
   const boltGeom = getFastenerGeometry(manual.boltSize, manual.fastenerStandard, manual.fastenerType);
   const geometryCheck: ManualGeometryCheck = calcGeometryChecks({
@@ -164,6 +180,8 @@ export function runManualCheck(
     boltCount: manual.boltCount,
     standard: manual.fastenerStandard,
     boltSize: manual.boltSize,
+    gasketMeanDiameter: gasket.effectiveDiameter,
+    gasketOd: gasket.od,
   });
 
   const geometryErrors = [...errors, ...geometryCheck.notes];
@@ -238,7 +256,8 @@ export function runManualCheck(
   const areaPressure = Math.PI * Math.pow(pressureDiameter / 2, 2);
   const forceOp = areaPressure * input.pressureOp * 0.1;
   const forceTest = areaPressure * pressureTestUsed * 0.1;
-  const leverArm = Math.max((manual.boltCircle - gasket.effectiveDiameter) / 2, 4);
+  const leverArmRaw = (manual.boltCircle - gasket.effectiveDiameter) / 2;
+  const leverArm = Math.max(leverArmRaw, 0);
 
   // 1. Bolting checks
   let boltSummary: ManualBoltSummary | undefined;
@@ -348,7 +367,7 @@ export function runManualCheck(
   const stressTestVal = calcPlateStress(pressureTestUsed * 0.1, plateRadius, manual.thickness);
   const stressCheck: ManualStressCheck = {
     stressTestMPa: stressTestVal,
-    allowableYieldMPa: yieldAt20,
+    yieldAtTestMPa: yieldAt20,
     pass: stressTestVal <= yieldAt20,
   };
   const tPlasticity = calcThickForStress(pressureTestUsed * 0.1, plateRadius, yieldAt20);
@@ -416,6 +435,7 @@ export function runManualCheck(
     geometryErrors.length === 0 &&
     geometryCheck.edgeOk &&
     geometryCheck.spacingOk &&
+    geometryCheck.gasketOk &&
     (boltSummary?.pass ?? false) &&
     thicknessSummary.pass; // Now includes plasticity and stiffness checks in 'pass'
 

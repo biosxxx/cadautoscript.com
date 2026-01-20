@@ -12,7 +12,7 @@ import {
 import {isFastenerPlaceholder, resolveFastenerSelection} from '../data';
 import FlangeVisualizer from './FlangeVisualizer';
 import ManualCheckPanel from './ManualCheckPanel';
-import type {CalculationInput} from '../bfTypes';
+import type {CalculationInput, DesignConfiguration} from '../bfTypes';
 import type {ManualCheckResult, ManualMode} from '../manualCheckTypes';
 
 type Props = {
@@ -95,6 +95,7 @@ export default function CustomSizingPanel({
 }: Props) {
   const [preference, setPreference] = useState<CustomPreference>('min_weight');
   const [mode, setMode] = useState<ManualMode>('auto');
+  const [manualConfig, setManualConfig] = useState<DesignConfiguration | null>(null);
   const fastenerSelection = useMemo(() => resolveFastenerSelection(input), [input]);
   const fastenerPlaceholder = isFastenerPlaceholder(fastenerSelection.entry);
   const fastenerPlaceholderNote = fastenerSelection.entry.notes ?? '';
@@ -141,6 +142,22 @@ export default function CustomSizingPanel({
       onResultChange?.(null);
     }
   }, [custom, mode, onResultChange, onManualResultChange]);
+
+  useEffect(() => {
+    if (mode !== 'manual') return;
+    if (manualConfig) return;
+    if (!custom) return;
+    setManualConfig({
+      outerDiameter: custom.result.dims.D,
+      thickness: custom.result.recommendedThickness,
+      boltCircle: custom.result.dims.k,
+      boltCount: custom.result.dims.bolts,
+      boltSize: custom.result.dims.size,
+      boltHoleDiameter: custom.result.dims.d2,
+      gasketId: custom.result.gasketId ?? input.dn,
+      gasketOd: custom.result.gasketOd ?? (custom.result.gasketId ?? input.dn) + 20,
+    });
+  }, [mode, manualConfig, custom, input.dn]);
 
   const headerCopy =
     maxAvailablePN && maxAvailablePN < targetPN
@@ -242,6 +259,21 @@ export default function CustomSizingPanel({
         <ManualCheckPanel
           input={input}
           targetPN={targetPN}
+          config={manualConfig ?? {
+            outerDiameter: input.dn + 200,
+            thickness: 40,
+            boltCircle: input.dn + 120,
+            boltCount: 8,
+            boltSize: 'M24',
+            boltHoleDiameter: 26,
+            gasketId: input.dn,
+            gasketOd: input.dn + 30,
+          }}
+          isStandard={false}
+          onConfigChange={(value) => {
+            setManualConfig(value);
+            onManualResultChange?.(null);
+          }}
           onManualResultChange={(value) => onManualResultChange?.(value)}
         />
       ) : null}

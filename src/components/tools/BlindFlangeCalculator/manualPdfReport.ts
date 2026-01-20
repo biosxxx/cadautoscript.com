@@ -76,16 +76,17 @@ export async function exportManualPdfReport(params: {
   };
 
   const drawBar = (label: string, utilization: number, x: number, y: number, width: number) => {
-    const pct = clamp(utilization * 100, 0, 300);
-    const fillWidth = clamp(utilization, 0, 1) * width;
+    const normalized = Number.isFinite(utilization) ? utilization : 0;
+    const pct = clamp(normalized * 100, 0, 300);
+    const fillWidth = clamp(normalized, 0, 1) * width;
     const color = pct < 90 ? [60, 179, 113] : pct < 110 ? [255, 193, 7] : [244, 67, 54];
     doc.setFontSize(9);
     doc.setTextColor(60);
     doc.text(sanitizePdfText(label), x, y + 4);
-    doc.setDrawColor(60);
     doc.setFillColor(color[0], color[1], color[2]);
-    doc.rect(x, y + 6, width, 5);
     doc.rect(x, y + 6, fillWidth, 5, 'F');
+    doc.setDrawColor(60);
+    doc.rect(x, y + 6, width, 5);
     doc.setTextColor(0);
     doc.text(sanitizePdfText(`${pct.toFixed(0)}%`), x + width, y + 4, {align: 'right'});
   };
@@ -391,9 +392,17 @@ export async function exportManualPdfReport(params: {
     const edgeAvail = manual.outerDiameter / 2;
     const pitch = (Math.PI * manual.boltCircle) / Math.max(1, manual.boltCount);
     const pitchNeed = feature.featureOD + FASTENER_GAP_MIN_MM;
+    const gasketOuter = gasketSummary?.gasketOd ?? gasketSummary?.gasketMeanDiameter ?? 0;
+    const gasketNeed = gasketOuter + EDGE_CLEARANCE_MIN_MM * 2;
 
     const geoRows: Array<[string, string]> = [
       ['Feature OD', `${fmt.mm(feature.featureOD, 1)} (${feature.sourceLabel}${feature.approximated ? ', approx' : ''})`],
+      [
+        'Gasket vs bolt circle',
+        gasketOuter > 0
+          ? `${fmt.mm(manual.boltCircle, 1)} >= ${fmt.mm(gasketNeed, 1)} (${manualCheck.geometry.gasketOk ? 'PASS' : 'FAIL'})`
+          : 'n/a',
+      ],
       [
         'Edge check',
         `${fmt.mm(edgeNeed, 1)} <= ${fmt.mm(edgeAvail, 1)} (${manualCheck.geometry.edgeOk ? 'PASS' : 'FAIL'})`,

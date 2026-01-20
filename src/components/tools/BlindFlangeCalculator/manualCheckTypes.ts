@@ -24,6 +24,8 @@ export interface ManualCheckInput {
   fastenerGradeId: FastenerGradeId;
   frictionPreset: FrictionPreset;
   tighteningMethod?: TighteningMethod;
+  gasketId?: number;
+  gasketOd?: number;
   gasketMaterial?: GasketMaterial;
   gasketFacing?: GasketFacing;
   gasketThickness?: number;
@@ -87,6 +89,7 @@ export interface ManualGasketSummary {
 export interface ManualGeometryCheck {
   edgeOk: boolean;
   spacingOk: boolean;
+  gasketOk: boolean;
   notes: string[];
 }
 

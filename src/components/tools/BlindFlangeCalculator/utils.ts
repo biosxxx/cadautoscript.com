@@ -12,10 +12,11 @@ import {
   calcBoltAreaChecks,
   calcBoltTorque,
   calcRequiredBoltLoads,
+  getBoltHoleDiameter,
   getFastenerGeometry,
 } from './bolting';
-import {getGasketGeometry} from './gasket';
-import type {CalculationInput, CalculationResult, En1092Dimensions} from './bfTypes';
+import {getCustomGasketGeometry, getGasketGeometry} from './gasket';
+import type {CalculationInput, CalculationResult, En1092Dimensions, GeometryMode} from './bfTypes';
 
 const BAR_TO_MPA = 0.1;
 
@@ -104,6 +105,31 @@ export const getMaxAvailablePN = (dn: number): number | undefined => {
   return availablePNs.at(-1);
 };
 
+export const findClosestStandardFromDims = (customDims: En1092Dimensions) => {
+  let best: {dn: number; pn: number; dims: En1092Dimensions; score: number; exact: boolean} | null = null;
+  for (const [dnKey, pnMap] of Object.entries(EN1092_DB)) {
+    const dn = Number(dnKey);
+    for (const [pnKey, dims] of Object.entries(pnMap)) {
+      const pn = Number(pnKey);
+      if (!dims) continue;
+      const scoreD = Math.abs(dims.D - customDims.D) / Math.max(dims.D, 1);
+      const scoreK = Math.abs(dims.k - customDims.k) / Math.max(dims.k, 1);
+      const scoreBolts = Math.abs(dims.bolts - customDims.bolts) / Math.max(dims.bolts, 1);
+      const scoreSize = dims.size === customDims.size ? 0 : 0.35;
+      const score = scoreD * 0.45 + scoreK * 0.35 + scoreBolts * 0.15 + scoreSize * 0.05;
+      const exact =
+        dims.D === customDims.D &&
+        dims.k === customDims.k &&
+        dims.bolts === customDims.bolts &&
+        dims.size === customDims.size;
+      if (!best || score < best.score) {
+        best = {dn, pn, dims, score, exact};
+      }
+    }
+  }
+  return best;
+};
+
 const pickPNClass = (
   dn: number,
   targetPN: number,
@@ -121,10 +147,29 @@ const pickPNClass = (
   return {dims, selectedPN};
 };
 
+const getCustomDims = (input: CalculationInput): En1092Dimensions | null => {
+  const D = input.customOuterDiameter ?? 0;
+  const k = input.customBoltCircle ?? 0;
+  const bolts = input.customBoltCount ?? 0;
+  const size = input.customBoltSize ?? '';
+  if (D <= 0 || k <= 0 || bolts <= 0 || !size) return null;
+  const d2 = input.customBoltHoleDiameter ?? getBoltHoleDiameter(size);
+  if (d2 <= 0) return null;
+  return {D, k, bolts, size, d2};
+};
+
+const getCustomGasketOd = (id: number, outerD: number): number => {
+  const offset = Math.min(30, Math.max(20, outerD * 0.02));
+  return id + offset;
+};
+
 export function calculateBlindFlange(input: CalculationInput): CalculationResult | null {
+  const geometryMode: GeometryMode = input.geometryMode ?? 'standard';
   const targetPN = getCalculatedPN(input.pressureOp);
-  const selection = pickPNClass(input.dn, targetPN);
-  if (!selection) return null;
+  const selection = geometryMode === 'custom' ? null : pickPNClass(input.dn, targetPN);
+  const customDims = geometryMode === 'custom' ? getCustomDims(input) : null;
+  if (geometryMode === 'custom' && !customDims) return null;
+  if (geometryMode !== 'custom' && !selection) return null;
 
   const fastener = resolveFastenerSelection(input);
   const material = MATERIALS[input.material];
@@ -147,15 +192,30 @@ export function calculateBlindFlange(input: CalculationInput): CalculationResult
   });
   const pressureTest = Math.max(input.pressureTest > 0 ? input.pressureTest : hydro.P_test_bar, input.pressureOp);
 
-  const {dims, selectedPN} = selection;
-  const gasket = getGasketGeometry(
-    input.dn,
-    selectedPN,
-    input.gasketFacing,
-    input.gasketThickness,
-    input.gasketMaterial,
-  );
+  const dims = geometryMode === 'custom' ? customDims! : selection!.dims;
+  const selectedPN = geometryMode === 'custom' ? targetPN : selection!.selectedPN;
+  const gasket =
+    geometryMode === 'custom'
+      ? getCustomGasketGeometry(
+          input.customNozzleId ?? input.dn,
+          input.customGasketOd ??
+            getCustomGasketOd(input.customNozzleId ?? input.dn, input.customOuterDiameter ?? dims.D),
+          input.gasketFacing,
+          input.gasketThickness,
+          input.gasketMaterial,
+        )
+      : getGasketGeometry(
+          input.dn,
+          selectedPN,
+          input.gasketFacing,
+          input.gasketThickness,
+          input.gasketMaterial,
+        );
   const gasketDiameter = gasket.effectiveDiameter;
+  const gasketOuter = gasket.od ?? gasketDiameter;
+  if (geometryMode === 'custom' && dims.k <= gasketOuter) {
+    return null;
+  }
   const leverArm = Math.max((dims.k - gasketDiameter) / 2, 4);
 
   const pressureDiameter = gasket.id ?? gasketDiameter;

@@ -25,6 +25,18 @@ export type BoltGrade = '8.8' | '10.9' | 'A2-70';
 export type FastenerStandard = 'EN' | 'ASME';
 export type FastenerType = 'BOLT' | 'STUD';
 export type FastenerGradeId = string;
+export type GeometryMode = 'standard' | 'custom';
+
+export type DesignConfiguration = {
+  outerDiameter: number;
+  thickness: number;
+  boltCircle: number;
+  boltCount: number;
+  boltSize: string;
+  boltHoleDiameter: number;
+  gasketId: number;
+  gasketOd: number;
+};
 
 export type YieldByTemperature = Record<number, number>;
 
@@ -62,7 +74,15 @@ export interface En1092Dimensions {
 export type En1092Database = Record<number, Record<number, En1092Dimensions>>;
 
 export interface CalculationInput {
+  geometryMode?: GeometryMode;
   dn: number;
+  customOuterDiameter?: number;
+  customNozzleId?: number;
+  customBoltCircle?: number;
+  customBoltCount?: number;
+  customBoltSize?: string;
+  customBoltHoleDiameter?: number;
+  customGasketOd?: number;
   pressureOp: number;
   pressureTest: number;
   temperature: number;
@@ -110,7 +130,11 @@ export interface CalculationResult {
 }
 
 export interface InputFormProps {
+  geometryMode: GeometryMode;
   dn: number;
+  customOuterDiameter?: number;
+  customNozzleId?: number;
+  geometryMatchNote?: string;
   pressureOp: number;
   pressureTest: number;
   temperature: number;
@@ -131,7 +155,10 @@ export interface InputFormProps {
   showTestPressureWarning?: boolean;
   availableDns: number[];
   materials: MaterialCatalog;
+  onGeometryModeChange: (value: GeometryMode) => void;
   onDnChange: (value: number) => void;
+  onCustomOuterDiameterChange: (value: number) => void;
+  onCustomNozzleIdChange: (value: number) => void;
   onPressureOpChange: (value: number) => void;
   onPressureTestChange: (value: number) => void;
   onTemperatureChange: (value: number) => void;
@@ -161,6 +188,8 @@ export interface ResultsPanelProps {
   result: CalculationResult | null;
   customResult?: CustomSizingResult | null;
   manualCheckResult?: ManualCheckResult | null;
+  designConfig?: DesignConfiguration | null;
+  isUserDefined?: boolean;
   dn: number;
   pressureOp: number;
   targetPN: number;
@@ -168,6 +197,7 @@ export interface ResultsPanelProps {
   input: CalculationInput;
   onCustomResultChange?: (value: CustomSizingResult | null) => void;
   onManualResultChange?: (value: ManualCheckResult | null) => void;
+  onDesignConfigChange?: (value: DesignConfiguration, isUser?: boolean) => void;
 }
 
 export interface ResultCardProps {

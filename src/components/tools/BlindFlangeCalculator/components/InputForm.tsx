@@ -7,6 +7,7 @@ import type {
   FrictionPreset,
   GasketFacing,
   GasketMaterial,
+  GeometryMode,
   InputFormProps,
   MaterialId,
   TighteningMethod,
@@ -31,8 +32,29 @@ const toNumber = (value: string): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const ModeToggle = ({value, onChange}: {value: GeometryMode; onChange: (value: GeometryMode) => void}) => (
+  <div className="inline-flex rounded-full border border-slate-800 bg-slate-950/60 p-1 text-xs">
+    {(['standard', 'custom'] as GeometryMode[]).map((mode) => (
+      <button
+        key={mode}
+        type="button"
+        onClick={() => onChange(mode)}
+        className={`rounded-full px-3 py-1 font-semibold transition ${
+          value === mode ? 'bg-cyan-500/20 text-cyan-100' : 'text-slate-400 hover:text-cyan-100'
+        }`}
+      >
+        {mode === 'standard' ? 'Standard (DN)' : 'Custom geometry'}
+      </button>
+    ))}
+  </div>
+);
+
 export default function InputForm({
+  geometryMode,
   dn,
+  customOuterDiameter,
+  customNozzleId,
+  geometryMatchNote,
   pressureOp,
   pressureTest,
   temperature,
@@ -53,7 +75,10 @@ export default function InputForm({
   showTestPressureWarning,
   availableDns,
   materials,
+  onGeometryModeChange,
   onDnChange,
+  onCustomOuterDiameterChange,
+  onCustomNozzleIdChange,
   onPressureOpChange,
   onPressureTestChange,
   onTemperatureChange,
@@ -90,19 +115,52 @@ export default function InputForm({
       </div>
 
       <div className="space-y-4">
-        <Field label="Diameter (DN)">
-          <select
-            className={`${inputClassName} appearance-none`}
-            value={dn}
-            onChange={(event) => onDnChange(toNumber(event.target.value))}
-          >
-            {availableDns.map((value) => (
-              <option key={value} value={value}>
-                DN {value}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Geometry mode</div>
+          <ModeToggle value={geometryMode} onChange={onGeometryModeChange} />
+        </div>
+        {geometryMatchNote ? (
+          <p className="text-xs text-amber-200">{geometryMatchNote}</p>
+        ) : null}
+
+        {geometryMode === 'standard' ? (
+          <Field label="Diameter (DN)">
+            <select
+              className={`${inputClassName} appearance-none`}
+              value={dn}
+              onChange={(event) => onDnChange(toNumber(event.target.value))}
+            >
+              {availableDns.map((value) => (
+                <option key={value} value={value}>
+                  DN {value}
+                </option>
+              ))}
+            </select>
+          </Field>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Flange outer diameter D" hint="mm">
+              <input
+                className={inputClassName}
+                type="number"
+                inputMode="decimal"
+                min={1}
+                value={customOuterDiameter ?? ''}
+                onChange={(event) => onCustomOuterDiameterChange(toNumber(event.target.value))}
+              />
+            </Field>
+            <Field label="Nozzle / pipe inner diameter ID" hint="mm">
+              <input
+                className={inputClassName}
+                type="number"
+                inputMode="decimal"
+                min={1}
+                value={customNozzleId ?? ''}
+                onChange={(event) => onCustomNozzleIdChange(toNumber(event.target.value))}
+              />
+            </Field>
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Operating pressure (bar)">

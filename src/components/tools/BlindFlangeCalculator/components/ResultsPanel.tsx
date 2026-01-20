@@ -1,7 +1,10 @@
+import {useEffect, useState} from 'react';
 import {AnimatePresence, motion} from 'framer-motion';
 import {AlertTriangle, Bolt, CircleDot, Gauge, Layers, ShieldCheck, Weight} from 'lucide-react';
 import CustomSizingPanel from './CustomSizingPanel';
 import FlangeVisualizer from './FlangeVisualizer';
+import ManualCheckPanel from './ManualCheckPanel';
+import {MATERIALS} from '../data';
 import type {ResultCardProps, ResultsPanelProps} from '../bfTypes';
 
 const formatFixed = (value: number, digits = 1) => value.toFixed(digits);
@@ -27,6 +30,7 @@ const ResultCard = ({icon, label, value, unit, subtext, highlight}: ResultCardPr
   </div>
 );
 
+
 export default function ResultsPanel({
   result,
   dn,
@@ -34,13 +38,39 @@ export default function ResultsPanel({
   targetPN,
   maxAvailablePN,
   input,
+  designConfig,
+  isUserDefined,
   onCustomResultChange,
   onManualResultChange,
+  onDesignConfigChange,
 }: ResultsPanelProps) {
   const boltFail = Boolean(result?.boltingSummary && !result.boltingSummary.pass);
   const boltFailReason = result?.boltingSummary?.failureReason;
   const fastenerPlaceholder = Boolean(result?.boltingSummary?.fastenerIsPlaceholder);
   const fastenerPlaceholderNote = result?.boltingSummary?.fastenerNotes ?? '';
+  const thicknessUsed = result?.recommendedThickness ?? 0;
+  const fallbackConfig = result
+    ? {
+        outerDiameter: result.dims.D,
+        thickness: result.recommendedThickness,
+        boltCircle: result.dims.k,
+        boltCount: result.dims.bolts,
+        boltSize: result.dims.size,
+        boltHoleDiameter: result.dims.d2,
+        gasketId: result.gasketId ?? dn,
+        gasketOd: result.gasketOd ?? (result.gasketId ?? dn) + 20,
+      }
+    : null;
+  const activeConfig = designConfig ?? fallbackConfig;
+  const [viewMode, setViewMode] = useState<'auto' | 'manual'>('auto');
+
+  useEffect(() => {
+    if (isUserDefined) {
+      setViewMode('manual');
+      return;
+    }
+    setViewMode('auto');
+  }, [result?.dims?.D, input.geometryMode, isUserDefined]);
 
   if (result && boltFail) {
     return (
@@ -99,19 +129,66 @@ export default function ResultsPanel({
           transition={{duration: 0.3}}
           className="space-y-6"
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Results view</div>
+            <div className="inline-flex rounded-full border border-slate-800 bg-slate-950/60 p-1 text-xs">
+              {(['auto', 'manual'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    if (mode === 'auto' && fallbackConfig) {
+                      onDesignConfigChange?.(fallbackConfig, false);
+                    }
+                    setViewMode(mode);
+                  }}
+                  className={`rounded-full px-3 py-1 font-semibold transition ${
+                    viewMode === mode ? 'bg-cyan-500/20 text-cyan-100' : 'text-slate-400 hover:text-cyan-100'
+                  }`}
+                >
+                  {mode === 'auto' ? 'Auto calculation' : 'Manual / Check mode'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {viewMode === 'manual' && activeConfig ? (
+            <ManualCheckPanel
+              input={input}
+              targetPN={targetPN}
+              config={activeConfig}
+              isStandard={input.geometryMode === 'standard'}
+              onConfigChange={(value, isUser) => {
+                onDesignConfigChange?.(value, isUser);
+                setViewMode('manual');
+              }}
+              onManualResultChange={onManualResultChange}
+            />
+          ) : null}
+          {viewMode === 'manual' && !activeConfig ? (
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
+              Manual configuration is not available yet.
+            </div>
+          ) : null}
+
+          {viewMode === 'auto' ? (
+            <>
+            <div className="grid gap-4 md:grid-cols-2">
             <ResultCard
               highlight
               icon={<Layers size={20} />}
               label="Recommended thickness"
-              value={formatFixed(result.recommendedThickness, 0)}
+              value={formatFixed(thicknessUsed, 0)}
               unit="mm"
               subtext={`Calculated: ${formatFixed(result.finalThickness, 2)} mm`}
             />
             <ResultCard
               icon={<Weight size={20} />}
               label="Flange weight"
-              value={formatFixed(result.weight, 1)}
+              value={formatFixed(
+                Math.PI * Math.pow(result.dims.D / 2000, 2) * (thicknessUsed / 1000) * MATERIALS[input.material].density * 1000,
+                1,
+              )}
               unit="kg"
               subtext="Based on flange OD and thickness"
             />
@@ -152,7 +229,7 @@ export default function ResultsPanel({
             dn={dn}
             dims={result.dims}
             selectedPN={result.selectedPN}
-            recommendedThickness={result.recommendedThickness}
+            recommendedThickness={thicknessUsed}
             gasketMeanDiameter={result.gasketMeanDiameter}
             gasketId={result.gasketId}
             gasketOd={result.gasketOd}
@@ -174,9 +251,11 @@ export default function ResultsPanel({
                     <td className="py-2 font-medium text-slate-200">Selected PN class</td>
                     <td className="py-2">PN {result.selectedPN}</td>
                     <td className="py-2 text-slate-400">
-                      {result.source === 'en1092'
-                        ? `Nearest standard \u2265 ${pressureOp} bar`
-                        : `Custom sizing for PN ${targetPN}`}
+                      {input.geometryMode === 'custom'
+                        ? 'Custom geometry mode'
+                        : result.source === 'en1092'
+                          ? `Nearest standard \u2265 ${pressureOp} bar`
+                          : `Custom sizing for PN ${targetPN}`}
                     </td>
                   </tr>
                   <tr className="border-t border-slate-800">
@@ -225,6 +304,8 @@ export default function ResultsPanel({
               </table>
             </div>
           </div>
+            </>
+          ) : null}
         </motion.div>
       ) : (
         <motion.div
