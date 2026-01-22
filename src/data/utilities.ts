@@ -182,6 +182,15 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/tube-sheet-generator/',
   },
   {
+    id: 'webstep-viewer',
+    name: 'WebSTEP Viewer',
+    description: 'Inspect STEP assemblies, isolate parts, and measure geometry directly in the browser.',
+    tech: 'WebGL + WASM',
+    standards: 'STEP (.stp/.step)',
+    features: ['Assembly tree + isolate', 'Measurement + geometry probes', 'CSV BOM export'],
+    href: '/utilities/webstep-viewer/',
+  },
+  {
     id: 'blind-flange-calculator',
     name: 'Blind Flange Calculator',
     description:

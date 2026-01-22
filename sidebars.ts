@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
         'utilities/pressure-vessel-dished-end-calc',
         'utilities/blind-flange-calculator',
         'utilities/tube-sheet-generator',
+        'utilities/webstep-viewer',
         'utilities/dxf-editor',
         'utilities/file-renamer',
         'utilities/folder-structure-builder',

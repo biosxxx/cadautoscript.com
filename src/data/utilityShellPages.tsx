@@ -18,6 +18,7 @@ export type UtilityPageSlug =
   | 'bourdon-gauge-configurator'
   | 'industrial-thermometer-configurator'
   | 'tube-sheet-generator'
+  | 'webstep-viewer'
   | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
@@ -294,6 +295,25 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Square or triangular pitch layouts',
       'Partition preview for multi-pass designs',
       'DXF + STEP export with local processing',
+    ],
+    scriptType: 'module',
+  },
+  'webstep-viewer': {
+    slug: 'webstep-viewer',
+    title: 'WebSTEP Viewer',
+    subtitle: 'Web utility - Inspect STEP assemblies in the browser',
+    description:
+      'Load STEP assemblies, isolate parts, and measure geometry locally with a WebAssembly viewer.',
+    about:
+      'Drop .step or .stp files to preview the assembly tree, isolate solids, and take measurements without leaving the browser.',
+    tags: ['STEP', 'Assembly', '3D'],
+    note:
+      'Large assemblies may take longer to parse. Files stay local in your browser cache unless you clear it.',
+    features: [
+      'Assembly tree with isolate/hide',
+      'Measurement and geometry probes',
+      'CSV BOM export',
+      'View modes with edge/grid toggles',
     ],
     scriptType: 'module',
   },

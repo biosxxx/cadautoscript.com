@@ -1,0 +1,80 @@
+---
+title: WebSTEP Viewer
+description: Load STEP assemblies, inspect parts, and measure geometry locally in the browser.
+slug: /utilities/webstep-viewer
+keywords:
+  - step viewer
+  - stp viewer
+  - step assembly
+  - cad inspector
+  - wasm cad
+  - geometry measurement
+---
+
+# WebSTEP Viewer
+
+Load STEP assemblies, inspect parts, and measure geometry directly in the browser.
+
+<a className="button button--primary" href="/utilities/webstep-viewer/" data-nobrokenlinkcheck>Open utility</a>
+
+## What it does
+- Parses .step / .stp files locally with WebAssembly.
+- Builds an assembly tree so you can isolate or hide parts.
+- Measures distances, radii, and angles on geometry.
+- Exports a simple BOM (CSV) from the assembly structure.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need a quick visual check of a STEP file before sending it downstream.
+- You want to isolate a part or verify assembly structure.
+- You need quick measurements without opening full CAD.
+
+**Avoid it when:**
+- You need to edit or heal geometry.
+- The model is extremely large and you need full workstation performance.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| STEP file | Upload a .step or .stp assembly. |
+| View toggles | Control edges, grid, and view mode. |
+| Measurement mode | Pick point, edge, face, or angle probes. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| On-screen viewer | UI | Inspect the model and isolate parts. |
+| Measurement readouts | On-screen | Shows values in selected units. |
+| BOM export | CSV | Basic assembly list from the tree. |
+
+## How to use
+1. Drag and drop a .step or .stp file.
+2. Use the assembly tree to expand, isolate, or hide components.
+3. Toggle measurement or geometry analysis tools as needed.
+4. Export the BOM if you need a parts list.
+
+**Example:** Open an equipment assembly, isolate the nozzle sub-assembly, measure the nozzle center-to-center distance, and export a BOM for QA notes.
+
+## Accuracy and verification
+- Measurements are based on the model data; verify units and tolerances against your source CAD.
+- Large assemblies may take longer to parse and render.
+- Files are processed locally and do not upload to a server.
+
+## FAQ
+- **Which formats are supported?** STEP files (.step / .stp).
+- **Does it upload my files?** No. Everything runs in your browser.
+- **Can I edit geometry?** No, this is a viewer and inspector only.
+- **Can I export to other formats?** The tool exports CSV BOM only.
+- **Why is it slow on big assemblies?** WebAssembly parsing and rendering can be heavy for large models.
+
+## Related tools
+- [Tube Sheet Generator](./tube-sheet-generator)
+- [WebDXF Editor](./dxf-editor)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `webstep-viewer` so we can reproduce the issue
