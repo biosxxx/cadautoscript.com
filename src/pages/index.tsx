@@ -5,6 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {utilities} from '@site/src/data/utilities';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
+import {useUtilitiesAccess} from '@site/src/hooks/useUtilitiesAccess';
 import styles from './index.module.css';
 
 const heroStats = [
@@ -18,11 +19,12 @@ type UtilityCardProps = {
   index: number;
   isAuthenticated: boolean;
   authChecked: boolean;
+  utilitiesPublicAccess: boolean;
 };
 
-function UtilityCard({utility, index, isAuthenticated, authChecked}: UtilityCardProps) {
+function UtilityCard({utility, index, isAuthenticated, authChecked, utilitiesPublicAccess}: UtilityCardProps) {
   const {openLoginModal} = useAuthModal();
-  const isLocked = authChecked && !isAuthenticated && index >= 3;
+  const isLocked = !utilitiesPublicAccess && authChecked && !isAuthenticated && index >= 3;
 
   const handleLaunch = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isLocked) {
@@ -71,6 +73,7 @@ function UtilityCard({utility, index, isAuthenticated, authChecked}: UtilityCard
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   const {isAuthenticated, authChecked} = useAuthStatus();
+  const {utilitiesPublicAccess} = useUtilitiesAccess();
 
   return (
     <Layout
@@ -123,6 +126,7 @@ export default function Home(): ReactNode {
                 index={index}
                 isAuthenticated={isAuthenticated}
                 authChecked={authChecked}
+                utilitiesPublicAccess={utilitiesPublicAccess}
               />
             ))}
           </div>

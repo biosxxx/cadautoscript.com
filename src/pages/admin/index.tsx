@@ -4,6 +4,12 @@ import {useHistory} from '@docusaurus/router';
 import type {User} from '@supabase/supabase-js';
 import Layout from '@theme/Layout';
 import {supabase} from '@site/src/lib/supabaseClient';
+import {
+  DEFAULT_UTILITIES_PUBLIC_ACCESS,
+  UTILITIES_PUBLIC_ACCESS_KEY,
+  parseBooleanSetting,
+  serializeBooleanSetting,
+} from '@site/src/utils/siteSettings';
 import styles from './index.module.css';
 
 type RoleValue = 'user' | 'author' | 'admin';
@@ -32,7 +38,7 @@ type CommentRow = {
   } | null;
 };
 
-type TabKey = 'users' | 'comments';
+type TabKey = 'users' | 'comments' | 'settings';
 
 const formatDate = (value?: string | null) =>
   value
@@ -70,6 +76,9 @@ export default function AdminPage(): JSX.Element {
   const [toast, setToast] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [utilitiesPublicAccess, setUtilitiesPublicAccess] = useState(DEFAULT_UTILITIES_PUBLIC_ACCESS);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   const loadProfiles = useCallback(async () => {
     setLoadingUsers(true);
@@ -102,6 +111,35 @@ export default function AdminPage(): JSX.Element {
 
     setData((prev) => ({...prev, profiles: merged as ProfileRow[]}));
     setLoadingUsers(false);
+  }, []);
+
+  const loadSiteSettings = useCallback(async () => {
+    setSettingsLoading(true);
+
+    try {
+      const {data, error} = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', UTILITIES_PUBLIC_ACCESS_KEY)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[Admin] Unable to load site settings', error.message);
+        setError('Unable to load site settings.');
+        return;
+      }
+
+      const parsed = parseBooleanSetting(data?.value);
+      if (parsed !== null) {
+        setUtilitiesPublicAccess(parsed);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to load site settings.';
+      console.error('[Admin] Unable to load site settings', message);
+      setError('Unable to load site settings.');
+    } finally {
+      setSettingsLoading(false);
+    }
   }, []);
 
   // Access control: fetch session + profile, redirect if not admin.
@@ -159,6 +197,14 @@ export default function AdminPage(): JSX.Element {
     }
     void loadProfiles();
   }, [loadProfiles, loadingAuth, profile?.role]);
+
+  // Fetch settings
+  useEffect(() => {
+    if (loadingAuth || profile?.role !== 'admin') {
+      return;
+    }
+    void loadSiteSettings();
+  }, [loadSiteSettings, loadingAuth, profile?.role]);
 
   // Fetch comments
   useEffect(() => {
@@ -266,6 +312,32 @@ export default function AdminPage(): JSX.Element {
     setActionState({kind: 'idle'});
   };
 
+  const handleToggleUtilitiesAccess = async () => {
+    if (settingsSaving) return;
+    setSettingsSaving(true);
+    setError(null);
+    setToast(null);
+    const nextValue = !utilitiesPublicAccess;
+
+    const {error: updateError} = await supabase
+      .from('site_settings')
+      .upsert(
+        {key: UTILITIES_PUBLIC_ACCESS_KEY, value: serializeBooleanSetting(nextValue)},
+        {onConflict: 'key'},
+      );
+
+    if (updateError) {
+      console.error('[Admin] Unable to update utilities access', updateError.message);
+      setError('Unable to update utilities access setting.');
+      setSettingsSaving(false);
+      return;
+    }
+
+    setUtilitiesPublicAccess(nextValue);
+    setSettingsSaving(false);
+    setToast('Utilities access updated');
+  };
+
   const handleInviteUser = async () => {
     if (!inviteEmail) {
       setError('Введите email для приглашения.');
@@ -327,6 +399,13 @@ export default function AdminPage(): JSX.Element {
               onClick={() => setActiveTab('comments')}
             >
               Comments
+            </button>
+            <button
+              type="button"
+              className={`${styles.tab} ${activeTab === 'settings' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('settings')}
+            >
+              Settings
             </button>
           </div>
         </div>
@@ -471,6 +550,36 @@ export default function AdminPage(): JSX.Element {
                 </tbody>
               </table>
             )}
+          </section>
+        ) : null}
+
+        {activeTab === 'settings' ? (
+          <section className={styles.panel}>
+            <div className={styles.toolbar}>
+              <div className={styles.toolbarLeft}>
+                {settingsLoading ? 'Loading settings...' : 'Utilities access'}
+              </div>
+              <div className={styles.toolbarRight}>
+                <button
+                  type="button"
+                  className={utilitiesPublicAccess ? styles.secondaryBtn : styles.primaryBtn}
+                  onClick={handleToggleUtilitiesAccess}
+                  disabled={settingsLoading || settingsSaving}
+                >
+                  {settingsSaving
+                    ? 'Saving...'
+                    : utilitiesPublicAccess
+                    ? 'Disable public access'
+                    : 'Enable public access'}
+                </button>
+              </div>
+            </div>
+            <p className={styles.muted}>
+              When enabled, all utilities open without sign-in. When disabled, only the first three are free.
+            </p>
+            <p className={styles.subtle}>
+              Status: {utilitiesPublicAccess ? 'Open to all visitors' : 'Sign-in required for most utilities'}
+            </p>
           </section>
         ) : null}
 

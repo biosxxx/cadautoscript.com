@@ -3,11 +3,13 @@ import Link from '@docusaurus/Link';
 import {utilities} from '@site/src/data/utilities';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
+import {useUtilitiesAccess} from '@site/src/hooks/useUtilitiesAccess';
 import styles from './UtilityAccessTable.module.css';
 
 export default function UtilityAccessTable(): JSX.Element {
   const {isAuthenticated, authChecked} = useAuthStatus();
   const {openLoginModal} = useAuthModal();
+  const {utilitiesPublicAccess} = useUtilitiesAccess();
 
   const handleLaunch = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -23,7 +25,9 @@ export default function UtilityAccessTable(): JSX.Element {
   return (
     <div className={styles.wrapper}>
       <p className={styles.notice}>
-        Guests can launch the first three tools. Sign in to unlock the rest of the catalog.
+        {utilitiesPublicAccess
+          ? 'All utilities are currently open. Sign-in is optional.'
+          : 'Guests can launch the first three tools. Sign in to unlock the rest of the catalog.'}
       </p>
       <table className="utilityTable">
         <thead>
@@ -36,7 +40,7 @@ export default function UtilityAccessTable(): JSX.Element {
         </thead>
         <tbody>
           {utilities.map((utility, index) => {
-            const isLocked = authChecked && !isAuthenticated && index >= 3;
+            const isLocked = !utilitiesPublicAccess && authChecked && !isAuthenticated && index >= 3;
             return (
               <tr key={utility.id}>
                 <td>{utility.name}</td>

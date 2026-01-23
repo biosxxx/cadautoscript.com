@@ -7,6 +7,7 @@ import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
 import Comments from '@site/src/components/Comments';
 import {utilities} from '@site/src/data/utilities';
 import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
+import {useUtilitiesAccess} from '@site/src/hooks/useUtilitiesAccess';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import type {UtilityPageConfig} from '@site/src/data/utilityShellPages';
 
@@ -38,6 +39,7 @@ export default function UtilityShellPage({tool, ...config}: UtilityShellPageProp
   const shellLightHref = useBaseUrl('/utilities/util-shell.light.css');
   const shellScriptSrc = useBaseUrl('/utilities/util-shell.js');
   const {isAuthenticated, authChecked} = useAuthStatus();
+  const {utilitiesPublicAccess} = useUtilitiesAccess();
   const {openLoginModal} = useAuthModal();
   React.useEffect(() => {
     document.body.classList.add('utility-shell-page');
@@ -49,8 +51,9 @@ export default function UtilityShellPage({tool, ...config}: UtilityShellPageProp
     [slug],
   );
   const isFreeUtility = utilityIndex >= 0 && utilityIndex < 3;
-  const isLocked = !isAuthenticated && !isFreeUtility;
-  const isCheckingAccess = !authChecked && !isFreeUtility;
+  const isAuthRequired = !utilitiesPublicAccess;
+  const isLocked = isAuthRequired && !isAuthenticated && !isFreeUtility;
+  const isCheckingAccess = isAuthRequired && !authChecked && !isFreeUtility;
 
   const heroLinks = defaultHeroLinks;
   const reactionsSlug = config.reactionSlug ?? `tool-${slug}`;
