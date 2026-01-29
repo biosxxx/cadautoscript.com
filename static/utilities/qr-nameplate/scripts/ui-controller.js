@@ -118,8 +118,23 @@ export class UiController {
   }
 
   setDrawingPreview(svgString) {
-    if (!this.refs.drawingPreviewEl) return;
-    this.refs.drawingPreviewEl.innerHTML = svgString;
+    const container = this.refs.drawingPreviewEl;
+    if (!container) return;
+
+    // Clear previous content
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    // Render SVG in isolated document to avoid injecting markup into the main DOM
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("title", "Drawing preview");
+    iframe.setAttribute("frameborder", "0");
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.srcdoc = svgString || "";
+
+    container.appendChild(iframe);
   }
 
   getFormState() {
