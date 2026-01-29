@@ -557,7 +557,8 @@
   }
 
   function urlJsString (url) {
-    return `'${url.replace(/'/g, "\\'")}'`;
+    // Escape backslashes first, then single quotes, to produce a safe JS string literal.
+    return `'${url.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   }
 
   let lastLoad;
