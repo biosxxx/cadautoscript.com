@@ -233,9 +233,18 @@
                         <input type="number" id="gap" value="2" step="0.1" class="input-field">
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Bend Lines</label>
-                        <input type="number" id="bendLines" value="0" min="0" step="1" class="input-field">
+                        <label class="input-label">Add Bend Lines</label>
+                        <label
+                            class="flex items-center gap-3 bg-[#1d1b20] border border-[#938f99] rounded-lg px-4 py-3 text-sm cursor-pointer">
+                            <input type="checkbox" id="bendLinesEnabled" class="accent-md-primary">
+                            <span>Enable</span>
+                        </label>
                     </div>
+                </div>
+                <div id="bend-lines-count-group" class="input-group hidden">
+                    <label class="input-label">Quantity</label>
+                    <input type="number" id="bendLinesCount" value="" min="0" step="1" class="input-field"
+                        placeholder="0">
                 </div>
             </div>
 
@@ -329,7 +338,8 @@
             thickness: 15,
             kFactor: 0.44,
             gap: 2.0,
-            bendLines: 0,
+            bendLinesEnabled: false,
+            bendLinesCount: 0,
             calc: {}, // Stores calculated results
             isValid: true
         };
@@ -343,7 +353,8 @@
                 t: document.getElementById('thickness'),
                 k: document.getElementById('k-factor'),
                 gap: document.getElementById('gap'),
-                bend: document.getElementById('bendLines'),
+                bendEnabled: document.getElementById('bendLinesEnabled'),
+                bendCount: document.getElementById('bendLinesCount'),
                 radios: document.getElementsByName('specType')
             },
             modes: {
@@ -357,7 +368,8 @@
                 resMain: document.getElementById('res-main'),
                 resCone: document.getElementById('res-cone-details'),
                 resROut: document.getElementById('res-r-out'),
-                resRIn: document.getElementById('res-r-in')
+                resRIn: document.getElementById('res-r-in'),
+                bendCountGroup: document.getElementById('bend-lines-count-group')
             },
             tabs: {
                 t3d: document.getElementById('tab-3d'),
@@ -473,37 +485,35 @@
         }
 
         // --- HELPER: Bounding Box for Cone Sector ---
-        function getConeBBox(rOut, rIn, angle) {
+        function getConeBBox(rOut, rIn, angle, rotationDeg = 0) {
             // rad: 0 deg input -> -90 deg SVG (Top)
             const rad = (deg) => (deg - 90) * Math.PI / 180;
-            const startAngle = -angle / 2;
-            const endAngle = angle / 2;
+            const startAngle = rotationDeg - angle / 2;
+            const endAngle = rotationDeg + angle / 2;
+            const norm = (deg) => {
+                const v = deg % 360;
+                return v < 0 ? v + 360 : v;
+            };
+            const angleInRange = (deg) => {
+                const s = norm(startAngle);
+                const e = norm(endAngle);
+                const t = norm(deg);
+                if (s <= e) return t >= s && t <= e;
+                return t >= s || t <= e;
+            };
+            const points = [];
+            const pushPoint = (r, deg) => {
+                points.push({ x: r * Math.cos(rad(deg)), y: r * Math.sin(rad(deg)) });
+            };
 
-            // 4 Corners
-            const points = [
-                { x: rOut * Math.cos(rad(startAngle)), y: rOut * Math.sin(rad(startAngle)) },
-                { x: rOut * Math.cos(rad(endAngle)), y: rOut * Math.sin(rad(endAngle)) },
-                { x: rIn * Math.cos(rad(endAngle)), y: rIn * Math.sin(rad(endAngle)) },
-                { x: rIn * Math.cos(rad(startAngle)), y: rIn * Math.sin(rad(startAngle)) }
-            ];
+            [rOut, rIn].forEach(r => {
+                pushPoint(r, startAngle);
+                pushPoint(r, endAngle);
+            });
 
-            // Check Top Extremum (Arc passing through 0 deg / -90 rad)
-            // This happens if the range [start, end] contains 0.
-            // Since start = -A/2 and end = A/2, it always contains 0.
-            points.push({ x: 0, y: -rOut });
-
-            // Check Side Extremums (Arc passing through 90 deg / 0 rad or -90 deg / -180 rad)
-            // SVG Right (0 rad) corresponds to Input 90 deg.
-            // SVG Left (PI rad) corresponds to Input 270 deg (or -90 deg? No, deg-90=180 => deg=270).
-            // Actually, simply:
-            // Right edge (X max) is at 0 rad (SVG). Input deg = 90.
-            // Left edge (X min) is at PI rad (SVG). Input deg = 270 (-90 is top).
-
-            // If half angle > 90, then we cross the X axis
-            if (angle / 2 >= 90) {
-                points.push({ x: rOut, y: 0 }); // Right edge of outer
-                points.push({ x: -rOut, y: 0 }); // Left edge of outer
-            }
+            [0, 90, 180, 270].forEach((deg) => {
+                if (angleInRange(deg)) pushPoint(rOut, deg);
+            });
 
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             points.forEach(p => {
@@ -525,7 +535,11 @@
             state.thickness = parseFloat(els.inputs.t.value);
             state.kFactor = parseFloat(els.inputs.k.value);
             state.gap = parseFloat(els.inputs.gap.value);
-            state.bendLines = parseInt(els.inputs.bend.value) || 0;
+            state.bendLinesEnabled = !!els.inputs.bendEnabled.checked;
+            updateBendLinesUI();
+            const bendCount = parseInt(els.inputs.bendCount.value, 10);
+            state.bendLinesCount = Number.isFinite(bendCount) ? Math.max(0, bendCount) : 0;
+            if (Number.isFinite(bendCount) && bendCount < 0) els.inputs.bendCount.value = '0';
 
             els.inputs.radios.forEach(r => { if (r.checked) state.specType = r.value; });
 
@@ -597,6 +611,11 @@
             els.ui.error.classList.remove('hidden');
         }
 
+        function updateBendLinesUI() {
+            const enabled = !!els.inputs.bendEnabled.checked;
+            els.ui.bendCountGroup.classList.toggle('hidden', !enabled);
+        }
+
         function updateUI() {
             if (!state.isValid) return;
             els.ui.resType.textContent = state.mode === 'cylinder' ? 'Cylinder' : 'Cone';
@@ -609,6 +628,46 @@
                 els.ui.resROut.textContent = state.calc.rOut.toFixed(2);
                 els.ui.resRIn.textContent = state.calc.rIn.toFixed(2);
             }
+        }
+
+        function getBendLineCount() {
+            if (!state.bendLinesEnabled) return 0;
+            const count = Number.isFinite(state.bendLinesCount) ? Math.floor(state.bendLinesCount) : 0;
+            return Math.max(0, count);
+        }
+
+        function getBendLines() {
+            const count = getBendLineCount();
+            if (count <= 0) return [];
+            if (state.mode === 'cylinder') {
+                const w = state.calc.flatLength;
+                const h = state.calc.flatWidth;
+                if (!Number.isFinite(w) || !Number.isFinite(h)) return [];
+                const step = w / (count + 1);
+                const lines = [];
+                for (let i = 1; i <= count; i++) {
+                    const x = -w / 2 + (step * i);
+                    lines.push({ x1: x, y1: -h / 2, x2: x, y2: h / 2 });
+                }
+                return lines;
+            }
+
+            const rOut = state.calc.rOut;
+            const rIn = state.calc.rIn;
+            const angle = state.calc.angle;
+            if (![rOut, rIn, angle].every(Number.isFinite)) return [];
+            const rotation = state.calc.patternRotationDeg || 0;
+            const angleStep = angle / (count + 1);
+            const startAngle = -angle / 2 + rotation;
+            const rad = (deg) => (deg - 90) * Math.PI / 180;
+            const lines = [];
+            for (let i = 1; i <= count; i++) {
+                const theta = startAngle + (angleStep * i);
+                const cos = Math.cos(rad(theta));
+                const sin = Math.sin(rad(theta));
+                lines.push({ x1: rIn * cos, y1: rIn * sin, x2: rOut * cos, y2: rOut * sin });
+            }
+            return lines;
         }
 
         function update3D() {
@@ -663,7 +722,7 @@
                 bbox.w = state.calc.flatLength;
                 bbox.h = state.calc.flatWidth;
             } else {
-                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle);
+                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle, state.calc.patternRotationDeg || 0);
                 bbox.w = cb.width;
                 bbox.h = cb.height;
             }
@@ -718,6 +777,21 @@
                 return grp;
             };
 
+            const renderBendLines = (lines) => {
+                if (!lines.length) return;
+                lines.forEach(({ x1, y1, x2, y2 }) => {
+                    const line = document.createElementNS(ns, "line");
+                    line.setAttribute("x1", x1);
+                    line.setAttribute("y1", y1);
+                    line.setAttribute("x2", x2);
+                    line.setAttribute("y2", y2);
+                    line.setAttribute("stroke", "red");
+                    line.setAttribute("stroke-dasharray", "4 4");
+                    line.setAttribute("stroke-width", "1");
+                    g.appendChild(line);
+                });
+            };
+
             if (state.mode === 'cylinder') {
                 const w = state.calc.flatLength;
                 const h = state.calc.flatWidth;
@@ -726,6 +800,7 @@
                 rect.setAttribute("width", w); rect.setAttribute("height", h);
                 rect.setAttribute("fill", "#2b2930"); rect.setAttribute("stroke", "#d0bcff"); rect.setAttribute("stroke-width", strokeWidth * 2);
                 g.appendChild(rect);
+                renderBendLines(getBendLines());
 
                 const dimOffset = fontSize * 2.5;
                 g.appendChild(createArrow(-w / 2, h / 2 + dimOffset, w / 2, h / 2 + dimOffset, `W=${w.toFixed(1)}`));
@@ -736,9 +811,10 @@
                 const rOut = state.calc.rOut;
                 const rIn = state.calc.rIn;
                 const angle = state.calc.angle;
+                const rotation = state.calc.patternRotationDeg || 0;
                 const rad = (deg) => (deg - 90) * Math.PI / 180;
-                const startAngle = -angle / 2;
-                const endAngle = angle / 2;
+                const startAngle = -angle / 2 + rotation;
+                const endAngle = angle / 2 + rotation;
 
                 const x1 = Math.cos(rad(startAngle)) * rOut;
                 const y1 = Math.sin(rad(startAngle)) * rOut;
@@ -755,9 +831,10 @@
                 path.setAttribute("d", d);
                 path.setAttribute("fill", "#2b2930"); path.setAttribute("stroke", "#d0bcff"); path.setAttribute("stroke-width", strokeWidth * 2);
                 g.appendChild(path);
+                renderBendLines(getBendLines());
 
                 // Cone Dimensions (BBox)
-                const cb = getConeBBox(rOut, rIn, angle);
+                const cb = getConeBBox(rOut, rIn, angle, rotation);
                 const dimOffset = fontSize * 3;
 
                 // Width Arrow (Bottom)
@@ -818,6 +895,7 @@
                 ["Gap", `${state.gap} mm`],
                 ["Height", `${state.h} mm`]
             ];
+            const bendLineCount = getBendLineCount();
             if (state.mode === 'cylinder') {
                 params.push(["Diameter (D1)", `${state.d1} mm`]);
                 params.push(["Flat Width", `${state.calc.flatLength.toFixed(2)} mm`]);
@@ -830,11 +908,11 @@
                 params.push(["Inner Radius", `${state.calc.rIn.toFixed(2)} mm`]);
 
                 // Add BBox info to text
-                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle);
+                const cb = getConeBBox(state.calc.rOut, state.calc.rIn, state.calc.angle, state.calc.patternRotationDeg || 0);
                 params.push(["Total Width", `${cb.width.toFixed(1)} mm`]);
                 params.push(["Total Height", `${cb.height.toFixed(1)} mm`]);
             }
-            if (state.bendLines > 0) params.push(["Bend Lines", `${state.bendLines} qty`]);
+            if (bendLineCount > 0) params.push(["Bend Lines", `${bendLineCount} qty`]);
 
             params.forEach(row => {
                 doc.text(`${row[0]}:`, startX, cursorY);
@@ -866,6 +944,20 @@
                 const dx = cx - dw / 2, dy = cy - dh / 2;
 
                 doc.rect(dx, dy, dw, dh);
+                const bendLines = getBendLines();
+                if (bendLines.length) {
+                    doc.setDrawColor(255, 0, 0);
+                    doc.setLineDashPattern([3, 3], 0);
+                    bendLines.forEach(({ x1, y1, x2, y2 }) => {
+                        const lx1 = dx + (x1 + w / 2) * scale;
+                        const ly1 = dy + (y1 + h / 2) * scale;
+                        const lx2 = dx + (x2 + w / 2) * scale;
+                        const ly2 = dy + (y2 + h / 2) * scale;
+                        doc.line(lx1, ly1, lx2, ly2);
+                    });
+                    doc.setLineDashPattern([], 0);
+                    doc.setDrawColor(0, 0, 0);
+                }
                 drawArrowPDF(dx, dy + dh + 5, dx + dw, dy + dh + 5, `W=${w.toFixed(1)}`);
 
                 // Vertical
@@ -874,7 +966,8 @@
                 doc.line(dx - 4, dy, dx - 2, dy); doc.line(dx - 4, dy + dh, dx - 2, dy + dh); // ticks
             } else {
                 const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
-                const cb = getConeBBox(rOut, rIn, angle);
+                const rotation = state.calc.patternRotationDeg || 0;
+                const cb = getConeBBox(rOut, rIn, angle, rotation);
                 const scale = Math.min(drawAreaW / cb.width, drawAreaH / cb.height) * 0.8;
 
                 const sROut = rOut * scale;
@@ -889,7 +982,9 @@
                 const rad = (deg) => (deg - 90) * Math.PI / 180;
                 const getP = (r, aDeg) => ({ x: ox + r * Math.cos(rad(aDeg)), y: oy + r * Math.sin(rad(aDeg)) });
 
-                const startA = -angle / 2, endA = angle / 2, steps = 40, dAng = angle / steps;
+                const startA = -angle / 2 + rotation;
+                const endA = angle / 2 + rotation;
+                const steps = 40, dAng = angle / steps;
                 for (let i = 0; i <= steps; i++) {
                     const p = getP(sROut, startA + i * dAng);
                     i === 0 ? doc.moveTo(p.x, p.y) : doc.lineTo(p.x, p.y);
@@ -903,6 +998,17 @@
                 const pOutStart = getP(sROut, startA);
                 doc.lineTo(pOutStart.x, pOutStart.y);
                 doc.stroke();
+
+                const bendLines = getBendLines();
+                if (bendLines.length) {
+                    doc.setDrawColor(255, 0, 0);
+                    doc.setLineDashPattern([3, 3], 0);
+                    bendLines.forEach(({ x1, y1, x2, y2 }) => {
+                        doc.line(ox + x1 * scale, oy + y1 * scale, ox + x2 * scale, oy + y2 * scale);
+                    });
+                    doc.setLineDashPattern([], 0);
+                    doc.setDrawColor(0, 0, 0);
+                }
 
                 // Dimensions
                 const scaledMinX = ox + cb.minX * scale;
@@ -940,27 +1046,73 @@
         // Keep DXF and listeners same as before...
         function generateDXF() {
             if (!state.isValid) return;
-            let content = "0\nSECTION\n2\nENTITIES\n";
+            let content = "0\nSECTION\n2\nHEADER\n0\nENDSEC\n";
+            content += "0\nSECTION\n2\nTABLES\n";
+            content += "0\nTABLE\n2\nLTYPE\n70\n2\n";
+            content += "0\nLTYPE\n2\nCONTINUOUS\n70\n0\n3\nSolid line\n72\n65\n73\n0\n40\n0.0\n";
+            content += "0\nLTYPE\n2\nDASHED\n70\n0\n3\nDashed __ __\n72\n65\n73\n2\n40\n6.0\n49\n3.0\n49\n-3.0\n";
+            content += "0\nENDTAB\n";
+            content += "0\nTABLE\n2\nLAYER\n70\n2\n";
+            content += "0\nLAYER\n2\n0\n70\n0\n62\n7\n6\nCONTINUOUS\n";
+            content += "0\nLAYER\n2\nBEND_LINES\n70\n0\n62\n1\n6\nDASHED\n";
+            content += "0\nENDTAB\n";
+            content += "0\nENDSEC\n";
+            content += "0\nSECTION\n2\nENTITIES\n";
             if (state.mode === 'cylinder') {
                 const w = state.calc.flatLength, h = state.calc.flatWidth;
                 content += dxfPoly([[0, 0], [w, 0], [w, h], [0, h], [0, 0]]);
+                const count = getBendLineCount();
+                if (count > 0) {
+                    const step = w / (count + 1);
+                    for (let i = 1; i <= count; i++) {
+                        const x = step * i;
+                        content += addBendLine(x, 0, x, h);
+                    }
+                }
             } else {
                 const rOut = state.calc.rOut, rIn = state.calc.rIn, angle = state.calc.angle;
+                const rotation = state.calc.patternRotationDeg || 0;
                 const points = [], steps = 72, rad = (deg) => deg * Math.PI / 180;
-                for (let i = 0; i <= steps; i++) points.push([Math.cos(rad(i * angle / steps)) * rOut, Math.sin(rad(i * angle / steps)) * rOut]);
-                for (let i = steps; i >= 0; i--) points.push([Math.cos(rad(i * angle / steps)) * rIn, Math.sin(rad(i * angle / steps)) * rIn]);
+                for (let i = 0; i <= steps; i++) {
+                    const theta = rotation + (i * angle / steps);
+                    points.push([Math.cos(rad(theta)) * rOut, Math.sin(rad(theta)) * rOut]);
+                }
+                for (let i = steps; i >= 0; i--) {
+                    const theta = rotation + (i * angle / steps);
+                    points.push([Math.cos(rad(theta)) * rIn, Math.sin(rad(theta)) * rIn]);
+                }
                 points.push(points[0]);
                 content += dxfPoly(points);
+                const count = getBendLineCount();
+                if (count > 0) {
+                    const angleStep = angle / (count + 1);
+                    for (let i = 1; i <= count; i++) {
+                        const theta = rotation + (angleStep * i);
+                        const cos = Math.cos(rad(theta));
+                        const sin = Math.sin(rad(theta));
+                        content += addBendLine(rIn * cos, rIn * sin, rOut * cos, rOut * sin);
+                    }
+                }
             }
             content += "0\nENDSEC\n0\nEOF\n";
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([content], { type: 'application/dxf' }));
             a.download = 'pattern.dxf'; a.click();
         }
-        function dxfPoly(points) {
-            let s = "0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n";
-            points.forEach(p => s += `0\nVERTEX\n8\n0\n10\n${p[0].toFixed(4)}\n20\n${p[1].toFixed(4)}\n30\n0.0\n`);
+        function dxfPoly(points, layer = "0") {
+            let s = `0\nPOLYLINE\n8\n${layer}\n66\n1\n70\n1\n`;
+            points.forEach(p => s += `0\nVERTEX\n8\n${layer}\n10\n${p[0].toFixed(4)}\n20\n${p[1].toFixed(4)}\n30\n0.0\n`);
             s += "0\nSEQEND\n"; return s;
+        }
+        function dxfLine(x1, y1, x2, y2, layer = "0", color = null, linetype = null) {
+            let s = `0\nLINE\n8\n${layer}\n`;
+            if (color !== null) s += `62\n${color}\n`;
+            if (linetype) s += `6\n${linetype}\n`;
+            s += `10\n${x1.toFixed(4)}\n20\n${y1.toFixed(4)}\n30\n0.0\n11\n${x2.toFixed(4)}\n21\n${y2.toFixed(4)}\n31\n0.0\n`;
+            return s;
+        }
+        function addBendLine(x1, y1, x2, y2) {
+            return dxfLine(x1, y1, x2, y2, "BEND_LINES", 1, "DASHED");
         }
 
         function setMode(m) {

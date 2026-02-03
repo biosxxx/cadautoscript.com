@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineering Prompt Catalog</title>
+
+    <style>
+      @font-face {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('./assets/fonts/roboto-400.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('./assets/fonts/roboto-500.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('./assets/fonts/roboto-700.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url('./assets/fonts/material-symbols-outlined.ttf') format('truetype');
+      }
+
+      body {
+        background-color: #141218;
+        color: #e6e1e5;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 20px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        font-variation-settings: 'OPSZ' 24, 'wght' 400, 'FILL' 0, 'GRAD' 0;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1d1b20;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #49454f;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #938f99;
+      }
+
+      #sidebar {
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .accordion-content {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.2, 0, 0, 1);
+      }
+      .accordion-content.open {
+        grid-template-rows: 1fr;
+      }
+      .accordion-inner {
+        overflow: hidden;
+      }
+
+      @keyframes slide-up-fade {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-card {
+        animation: slide-up-fade 0.35s cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      .chart-wrapper {
+        position: relative;
+        height: 240px;
+        width: 100%;
+      }
+    </style>
+
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          fontFamily: {
+            sans: ['Roboto', 'sans-serif'],
+          },
+          extend: {
+            colors: {
+              surface: '#141218',
+              'surface-container': '#1d1b20',
+              'surface-container-high': '#2b2930',
+              'surface-container-highest': '#36343b',
+              'on-surface': '#e6e1e5',
+              'on-surface-variant': '#cac4d0',
+              primary: '#a8c7fa',
+              'on-primary': '#002f65',
+              'primary-container': '#00478f',
+              'on-primary-container': '#d7e3ff',
+              secondary: '#4cd6c0',
+              'secondary-container': '#004f45',
+              outline: '#938f99',
+              'outline-variant': '#49454f',
+            },
+            borderRadius: {
+              md3: '1.25rem',
+              pill: '9999px',
+            },
+          },
+        },
+      };
+    </script>
+    <script src="./assets/tailwindcss.js"></script>
+    <script src="./assets/chart.umd.min.js"></script>
+  </head>
+  <body class="overflow-hidden">
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"
+    ></div>
+
+    <div class="flex h-screen">
+      <aside
+        id="sidebar"
+        class="w-80 bg-surface-container flex-shrink-0 flex flex-col h-full absolute lg:relative z-50 transform -translate-x-full lg:translate-x-0 border-r border-outline-variant/30"
+      >
+        <div class="p-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
+            >
+              <span class="material-symbols-outlined" style="font-size: 24px">engineering</span>
+            </div>
+            <div>
+              <h1 class="text-lg font-bold tracking-wide text-on-surface">Eng. Prompts</h1>
+              <p class="text-xs text-on-surface-variant font-medium">MD3 Pro Edition</p>
+            </div>
+          </div>
+          <button
+            id="close-sidebar-btn"
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-on-surface-variant transition"
+            type="button"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <nav id="category-nav" class="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+          <!-- Injected via JS -->
+        </nav>
+
+        <div class="p-6 mt-auto">
+          <div
+            class="bg-surface-container-high rounded-2xl p-4 flex flex-col items-center text-center border border-outline-variant/20"
+          >
+            <span class="material-symbols-outlined text-primary mb-2">rocket_launch</span>
+            <p class="text-xs text-on-surface-variant">Optimized for LLM prompting workflows.</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-1 h-full overflow-y-auto relative flex flex-col">
+        <header
+          class="sticky top-0 z-30 bg-surface/90 backdrop-blur-md px-4 py-3 md:px-8 flex items-center justify-between border-b border-outline-variant/20"
+        >
+          <div class="flex items-center gap-4">
+            <button
+              id="open-sidebar-btn"
+              class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface transition"
+              type="button"
+            >
+              <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h2 id="page-title" class="text-xl font-medium text-on-surface truncate">Dashboard</h2>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span
+              id="prompt-count"
+              class="hidden md:inline-flex px-3 py-1 bg-surface-container-high rounded-full text-xs font-medium text-primary border border-outline-variant/30"
+            >
+              Loading...
+            </span>
+            <button
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-primary-container hover:text-on-primary-container transition-colors duration-300"
+              type="button"
+            >
+              <span class="material-symbols-outlined">account_circle</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+          <section class="mb-8">
+            <div class="relative w-full max-w-2xl mx-auto mb-8 group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span
+                  class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors"
+                  >search</span
+                >
+              </div>
+              <input
+                type="text"
+                id="search-input"
+                class="w-full pl-12 pr-4 py-4 bg-surface-container-high text-on-surface rounded-pill border-none focus:ring-2 focus:ring-primary placeholder-on-surface-variant/70 transition-shadow shadow-sm hover:shadow-md"
+                placeholder="Search prompts (e.g., pressure, solidworks, valve)..."
+              />
+            </div>
+
+            <div
+              class="bg-surface-container-high rounded-[28px] p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center border border-outline-variant/10 shadow-lg"
+            >
+              <div class="flex-1 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+                  <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                  <span>AI-Powered Engineering</span>
+                </div>
+                <h2 class="text-3xl font-normal text-on-surface">Technical Prompt Library</h2>
+                <p class="text-on-surface-variant leading-relaxed max-w-lg">
+                  Professional templates for I&amp;C, Mechanical Design, and Procurement.
+                  Select a category or use the search bar to find tailored prompts for specifications,
+                  HAZOPs, and simulations.
+                </p>
+              </div>
+
+              <div
+                class="w-full md:w-64 flex flex-col items-center bg-surface-container rounded-2xl p-4 border border-outline-variant/10"
+              >
+                <div class="chart-wrapper">
+                  <canvas id="promptChart"></canvas>
+                </div>
+                <span class="text-xs text-on-surface-variant mt-2 font-medium">Distribution by Category</span>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div id="prompt-container" class="grid grid-cols-1 xl:grid-cols-2 gap-4"></div>
+
+            <div id="no-results" class="hidden flex flex-col items-center justify-center py-20 text-center">
+              <div class="w-20 h-20 bg-surface-container-high rounded-full flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-on-surface-variant text-4xl">search_off</span>
+              </div>
+              <h3 class="text-lg font-medium text-on-surface">No prompts found</h3>
+              <p class="text-on-surface-variant mt-1">Try adjusting your filters or search terms.</p>
+            </div>
+          </section>
+
+          <div class="h-20"></div>
+        </div>
+      </main>
+    </div>
+
+    <button
+      id="scroll-top"
+      class="fixed bottom-6 right-6 w-14 h-14 bg-primary-container text-on-primary-container rounded-2xl shadow-xl flex items-center justify-center hover:scale-105 transition-transform z-40 opacity-0 pointer-events-none"
+      type="button"
+    >
+      <span class="material-symbols-outlined">arrow_upward</span>
+    </button>
+
+    <div
+      id="toast"
+      class="fixed bottom-6 left-12 -translate-x-12 bg-on-surface text-surface-container px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50 min-w-[300px] justify-between"
+    >
+      <span id="toast-message" class="font-medium">Action completed</span>
+      <button onclick="hideToast()" class="text-primary hover:text-white transition-colors font-bold text-sm" type="button">
+        CLOSE
+      </button>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const prompts = [
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Instrument Selection',
+            goal: 'Pressure Transmitter Comparison',
+            text:
+              'Role: Senior I&C Engineer.\nTask: Compare pressure transmitters [Model A] vs [Model B] for steam application.\nContext: Superheated steam, [P] MPa, [T] C. Req 4-20mA HART, Ex d.\nFormat: Comparison table (Accuracy, Drift, Material, Cost) + Recommendation.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Instrument Selection',
+            goal: 'Vacuum Transmitter Specs',
+            text:
+              'Role: I&C Engineer.\nTask: Select absolute pressure transmitters for vacuum column.\nContext: Hydrocarbons + H2S. Range [Min] to [Max] kPa Abs. Diaphragm Gold-plated/Hastelloy.\nFormat: List 3 models with justification regarding H2S resistance.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Instrument Selection',
+            goal: 'API 551 Compliance',
+            text:
+              'Role: QC Specialist.\nTask: Audit [Sensor Model] against API RP 551.\nContext: Offshore platform installation.\nFormat: Compliance report identifying deviations in installation and material specs.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Valve Sizing',
+            goal: 'Control Valve Cv Calc',
+            text:
+              'Role: Valve Specialist.\nTask: Calculate Cv for superheated steam valve.\nContext: Flow [Q] kg/h, P1 [P1], P2 [P2].\nFormat: Step-by-step ISA 75.01 calculation + Trim selection.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Valve Sizing',
+            goal: 'Cavitation Analysis',
+            text:
+              'Role: Hydraulic Engineer.\nTask: Analyze cavitation risk for water valve [Model].\nContext: P1 [P1], P2 [P2], Pv [Pv], FL [FL].\nFormat: Calculate Sigma index. Propose anti-cavitation trim if needed.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Design',
+            goal: 'HAZOP Deviation List',
+            text:
+              'Role: HAZOP Scribe.\nTask: Generate deviations for Reactor Feed.\nContext: Parameter FLOW. Guidewords NO, MORE, LESS, REVERSE.\nFormat: Table - Deviation / Cause / Consequence.',
+          },
+          {
+            category: 'I&C Engineer',
+            subcategory: 'Design',
+            goal: 'Loop Diagram Description',
+            text:
+              'Role: I&C Designer.\nTask: Text description for Loop Diagram (TIC-101).\nContext: TE-101 - TT-101 - JB - Marshalling - DCS.\nFormat: Connection list From [Device/Term] To [Device/Term], Cable Type.',
+          },
+          {
+            category: 'Mechanical Engineer',
+            subcategory: 'SolidWorks',
+            goal: 'FEA Static Setup',
+            text:
+              'Role: FEA Analyst.\nTask: Checklist for static analysis of steel bracket.\nContext: Load [F] N, 4x M12 bolts.\nFormat: Steps - Material, Fixtures (Bolt connectors), Mesh controls, Solver.',
+          },
+          {
+            category: 'Mechanical Engineer',
+            subcategory: 'SolidWorks',
+            goal: 'CFD Pressure Drop',
+            text:
+              'Role: CFD Analyst.\nTask: Setup Flow Simulation for DN50 valve pressure drop.\nContext: Water @ 20C, Flow [Q].\nFormat: Domain sizing, Boundary Conditions, Goals (Static P avg).',
+          },
+          {
+            category: 'Mechanical Engineer',
+            subcategory: 'SolidWorks',
+            goal: 'GD&T Definition',
+            text:
+              'Role: Metrology Expert.\nTask: Define GD&T for Gearbox Housing.\nContext: Coaxial bearing bores, perpendicular mounting face.\nFormat: Datum A/B selection, Tolerances (Position, Perpendicularity).',
+          },
+          {
+            category: 'Mechanical Engineer',
+            subcategory: 'PDM',
+            goal: 'PDM Workflow ECO',
+            text:
+              'Role: PDM Admin.\nTask: Design ECO workflow states.\nContext: Standard approval cycle.\nFormat: States (Draft, Review, Approved) + Transitions + Permissions.',
+          },
+          {
+            category: 'Mechanical Engineer',
+            subcategory: 'PDM',
+            goal: 'VBA Mass Props',
+            text:
+              'Role: API Dev.\nTask: VBA macro for Mass/Volume/CoM.\nContext: Use swModel.Extension.CreateMassProperty.\nFormat: VBA code block.',
+          },
+          {
+            category: 'Procurement',
+            subcategory: 'RFQ',
+            goal: 'CNC Machining RFQ',
+            text:
+              'Role: Technical Procurement.\nTask: RFQ email for 50x SS316L shafts.\nContext: Require MTC 3.1 certs.\nFormat: Scope, Technical Refs, Commercial Terms, Deadline.',
+          },
+          {
+            category: 'Procurement',
+            subcategory: 'RFQ',
+            goal: 'Material Deviation',
+            text:
+              'Role: Project Engineer.\nTask: Proposal letter to change material to Super Duplex.\nContext: High chloride environment.\nFormat: Justification (PREN), Cost/Time impact request.',
+          },
+          {
+            category: 'Procurement',
+            subcategory: 'Communication',
+            goal: 'Expedite Request',
+            text:
+              'Role: Buyer.\nTask: Email challenging 20-week lead time.\nContext: Project critical path.\nFormat: Request for production schedule breakdown to identify acceleration options.',
+          },
+        ];
+
+        const state = {cat: 'All', sub: 'All', search: ''};
+        const els = {
+          container: document.getElementById('prompt-container'),
+          nav: document.getElementById('category-nav'),
+          search: document.getElementById('search-input'),
+          title: document.getElementById('page-title'),
+          count: document.getElementById('prompt-count'),
+          sidebar: document.getElementById('sidebar'),
+          overlay: document.getElementById('overlay'),
+          chart: document.getElementById('promptChart'),
+          toast: document.getElementById('toast'),
+          noResults: document.getElementById('no-results'),
+          scrollTop: document.getElementById('scroll-top'),
+          main: document.querySelector('main'),
+        };
+
+        const categories = [...new Set(prompts.map((p) => p.category))];
+        const hierarchy = categories.reduce((acc, c) => {
+          acc[c] = [...new Set(prompts.filter((p) => p.category === c).map((p) => p.subcategory))];
+          return acc;
+        }, {});
+
+        function renderSidebar() {
+          let html = `
+            <button onclick="setFilter('All')"
+              class="w-full text-left px-6 py-4 rounded-pill font-medium transition-all duration-300 mb-2 flex items-center gap-3 ${
+                state.cat === 'All'
+                  ? 'bg-primary-container text-on-primary-container'
+                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+              }"
+              type="button"
+            >
+              <span class="material-symbols-outlined">dashboard</span>
+              All Prompts
+            </button>
+          `;
+
+          for (const [cat, subs] of Object.entries(hierarchy)) {
+            const isActive = state.cat === cat;
+            const subHtml = subs
+              .map(
+                (s) => `
+                  <button onclick="setFilter('${cat}', '${s}')"
+                    class="w-full text-left pl-14 py-3 text-sm rounded-pill transition-colors flex items-center gap-2 ${
+                      isActive && state.sub === s
+                        ? 'text-primary bg-surface-container-highest font-medium'
+                        : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50'
+                    }"
+                    type="button"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full ${
+                      isActive && state.sub === s ? 'bg-primary' : 'bg-outline-variant'
+                    }"></span>
+                    ${s}
+                  </button>
+                `
+              )
+              .join('');
+
+            html += `
+              <div class="mb-1">
+                <button onclick="toggleAccordion(this)"
+                  class="w-full flex justify-between items-center px-6 py-3 rounded-pill text-left font-medium transition-colors ${
+                    isActive
+                      ? 'bg-surface-container-high text-on-surface'
+                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }"
+                  type="button"
+                >
+                  <span class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">${getIconForCat(cat)}</span>
+                    ${cat}
+                  </span>
+                  <span class="material-symbols-outlined text-sm chevron ${isActive ? 'rotate-180' : ''}">expand_more</span>
+                </button>
+                <div class="accordion-content ${isActive ? 'open' : ''}">
+                  <div class="accordion-inner pt-1 pb-2">
+                    ${subHtml}
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+
+          els.nav.innerHTML = html;
+        }
+
+        function getIconForCat(cat) {
+          if (cat.includes('Mechanical')) return 'settings';
+          if (cat.includes('Procurement')) return 'shopping_cart';
+          return 'sensors';
+        }
+
+        function renderPrompts() {
+          const q = state.search.toLowerCase();
+          const filtered = prompts.filter((p) => {
+            const cMatch = state.cat === 'All' || p.category === state.cat;
+            const sMatch = state.sub === 'All' || p.subcategory === state.sub;
+            const qMatch =
+              !q || p.goal.toLowerCase().includes(q) || p.text.toLowerCase().includes(q);
+            return cMatch && sMatch && qMatch;
+          });
+
+          els.count.textContent = `${filtered.length} Items`;
+          els.title.textContent = state.cat === 'All' ? 'Dashboard' : `${state.cat}`;
+
+          if (!filtered.length) {
+            els.container.innerHTML = '';
+            els.noResults.classList.remove('hidden');
+            return;
+          }
+
+          els.noResults.classList.add('hidden');
+          els.container.innerHTML = filtered
+            .map((p, i) => {
+              const encodedText = encodeURIComponent(p.text);
+              const encodedGoal = encodeURIComponent(p.goal);
+              return `
+                <div
+                  class="group bg-surface-container-high rounded-[24px] p-6 border border-outline-variant/10 hover:border-primary/30 transition-all duration-300 flex flex-col h-full animate-card relative overflow-hidden"
+                  style="animation-delay: ${i * 50}ms"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+
+                  <div class="relative z-10 flex flex-col h-full">
+                    <div class="flex items-start justify-between mb-4">
+                      <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container text-primary text-xs font-medium border border-outline-variant/20 mb-2">
+                          <span class="material-symbols-outlined text-[14px]">label</span>
+                          ${p.subcategory}
+                        </span>
+                        <h3 class="text-xl font-medium text-on-surface leading-snug">${p.goal}</h3>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 bg-surface-container rounded-xl p-4 border border-outline-variant/10 mb-6 font-mono text-sm text-on-surface-variant leading-relaxed overflow-hidden relative">
+                      ${formatText(p.text)}
+                    </div>
+
+                    <div class="flex gap-3 mt-auto">
+                      <button
+                        onclick="copyText(this)"
+                        data-text="${encodedText}"
+                        class="flex-1 h-10 rounded-full border border-outline-variant flex items-center justify-center gap-2 text-sm font-medium text-on-surface hover:bg-surface-container-highest transition-colors"
+                        type="button"
+                      >
+                        <span class="material-symbols-outlined text-lg">content_copy</span>
+                        Copy
+                      </button>
+                      <button
+                        onclick="downloadMd(this)"
+                        data-goal="${encodedGoal}"
+                        data-text="${encodedText}"
+                        class="flex-1 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center gap-2 text-sm font-medium hover:bg-primary transition-colors hover:text-on-primary hover:shadow-lg hover:shadow-primary/20"
+                        type="button"
+                      >
+                        <span class="material-symbols-outlined text-lg">download</span>
+                        Save MD
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+        }
+
+        function formatText(t) {
+          return t
+            .replace(/\[(.+?)\]/g, '<strong class="text-secondary">[$1]</strong>')
+            .replace(/\n/g, '<br>');
+        }
+
+        window.setFilter = (c, s = 'All') => {
+          state.cat = c;
+          state.sub = s;
+          renderSidebar();
+          renderPrompts();
+          closeSidebar();
+        };
+
+        window.toggleAccordion = (btn) => {
+          const content = btn.nextElementSibling;
+          const chevron = btn.querySelector('.chevron');
+          if (content) content.classList.toggle('open');
+          if (chevron) chevron.classList.toggle('rotate-180');
+        };
+
+        window.copyText = (btn) => {
+          const t = decodeURIComponent(btn.dataset.text || '');
+          navigator.clipboard
+            .writeText(t)
+            .then(() => showToast('Copied to clipboard'))
+            .catch(() => showToast('Clipboard unavailable'));
+        };
+
+        window.downloadMd = (btn) => {
+          const goal = decodeURIComponent(btn.dataset.goal || 'Prompt');
+          const text = decodeURIComponent(btn.dataset.text || '');
+          const content = `# ${goal}\n\n${text}\n\nGenerated by Engineering Prompt Catalog`;
+          const blob = new Blob([content], {type: 'text/markdown'});
+          const a = document.createElement('a');
+          const safeName = goal
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${safeName || 'prompt'}.md`;
+          a.click();
+          showToast('Download started');
+        };
+
+        function showToast(msg) {
+          els.toast.classList.remove('translate-y-24', 'opacity-0');
+          document.getElementById('toast-message').textContent = msg;
+          setTimeout(() => hideToast(), 3000);
+        }
+
+        window.hideToast = () => {
+          els.toast.classList.add('translate-y-24', 'opacity-0');
+        };
+
+        function initChart() {
+          const data = categories.map((c) => prompts.filter((p) => p.category === c).length);
+          new Chart(els.chart, {
+            type: 'doughnut',
+            data: {
+              labels: categories,
+              datasets: [
+                {
+                  data,
+                  backgroundColor: ['#a8c7fa', '#4cd6c0', '#f2b8b5'],
+                  borderWidth: 0,
+                  hoverOffset: 4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '80%',
+              plugins: {
+                legend: {display: false},
+                tooltip: {
+                  backgroundColor: '#2b2930',
+                  titleColor: '#e6e1e5',
+                  bodyColor: '#cac4d0',
+                  borderColor: '#49454f',
+                  borderWidth: 1,
+                  padding: 12,
+                  displayColors: true,
+                  boxPadding: 4,
+                },
+              },
+              onClick: (event, elements) => {
+                if (elements.length) {
+                  setFilter(categories[elements[0].index]);
+                }
+              },
+            },
+          });
+        }
+
+        els.search.addEventListener('input', (e) => {
+          state.search = e.target.value;
+          renderPrompts();
+        });
+
+        document.getElementById('open-sidebar-btn').addEventListener('click', () => {
+          els.sidebar.classList.remove('-translate-x-full');
+          els.overlay.classList.remove('hidden');
+        });
+
+        function closeSidebar() {
+          if (window.innerWidth < 1024) {
+            els.sidebar.classList.add('-translate-x-full');
+            els.overlay.classList.add('hidden');
+          }
+        }
+
+        document.getElementById('close-sidebar-btn').addEventListener('click', closeSidebar);
+        els.overlay.addEventListener('click', closeSidebar);
+
+        els.scrollTop.addEventListener('click', () => {
+          els.main.scrollTo({top: 0, behavior: 'smooth'});
+        });
+
+        els.main.addEventListener('scroll', () => {
+          if (els.main.scrollTop > 240) {
+            els.scrollTop.classList.remove('opacity-0', 'pointer-events-none');
+          } else {
+            els.scrollTop.classList.add('opacity-0', 'pointer-events-none');
+          }
+        });
+
+        renderSidebar();
+        renderPrompts();
+        initChart();
+      });
+    </script>
+  </body>
+</html>

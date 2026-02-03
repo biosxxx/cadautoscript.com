@@ -19,6 +19,7 @@ export type UtilityPageSlug =
   | 'industrial-thermometer-configurator'
   | 'tube-sheet-generator'
   | 'webstep-viewer'
+  | 'engineering-prompt-catalog'
   | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
@@ -314,6 +315,24 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Measurement and geometry probes',
       'CSV BOM export',
       'View modes with edge/grid toggles',
+    ],
+    scriptType: 'module',
+  },
+  'engineering-prompt-catalog': {
+    slug: 'engineering-prompt-catalog',
+    title: 'Engineering Prompt Catalog',
+    subtitle: 'Web utility - Prompt templates for technical workflows',
+    description:
+      'Browse, filter, and copy engineering prompt templates for I&C, mechanical design, and procurement.',
+    about:
+      'Search by discipline, filter by subcategory, and export any prompt as Markdown. Everything runs locally in the browser with no uploads.',
+    tags: ['Prompts', 'LLM workflows', 'Engineering'],
+    note: 'Prompts are stored locally in the page source. Copy or download templates without leaving the utility.',
+    features: [
+      'Category + subcategory navigation',
+      'Instant search and prompt count',
+      'Copy to clipboard or download Markdown',
+      'Chart-driven category overview',
     ],
     scriptType: 'module',
   },

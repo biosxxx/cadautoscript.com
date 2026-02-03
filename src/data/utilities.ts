@@ -191,6 +191,16 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/webstep-viewer/',
   },
   {
+    id: 'engineering-prompt-catalog',
+    name: 'Engineering Prompt Catalog',
+    description:
+      'Browse, filter, and export prompt templates for I&C, mechanical design, and procurement workflows.',
+    tech: 'HTML + Chart.js',
+    standards: 'Prompt library',
+    features: ['Category filters + search', 'Copy or download Markdown', 'Chart navigation'],
+    href: '/utilities/engineering-prompt-catalog/',
+  },
+  {
     id: 'blind-flange-calculator',
     name: 'Blind Flange Calculator',
     description:

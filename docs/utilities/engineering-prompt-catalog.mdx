@@ -1,0 +1,79 @@
+---
+title: Engineering Prompt Catalog
+description: Browse, filter, and export prompt templates for technical engineering workflows.
+slug: /utilities/engineering-prompt-catalog
+keywords:
+  - engineering prompts
+  - LLM templates
+  - instrumentation prompts
+  - mechanical design prompts
+  - procurement prompts
+---
+
+# Engineering Prompt Catalog
+
+Browse a curated library of prompt templates for I&C, mechanical design, and procurement work.
+
+<a className="button button--primary" href="/utilities/engineering-prompt-catalog/" data-nobrokenlinkcheck>Open utility</a>
+
+## What it does
+- Groups prompts by discipline and subcategory for quick filtering.
+- Highlights placeholders so you can swap real values in seconds.
+- Copies prompts to the clipboard or downloads them as Markdown.
+- Uses an at-a-glance chart to jump between major categories.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need a fast, consistent prompt structure for technical tasks.
+- You want to standardize how your team asks for specs, calculations, or RFQs.
+- You need a quick prompt template without opening a doc library.
+
+**Avoid it when:**
+- The work requires proprietary data that should not be placed in AI tools.
+- You need full project context or data extraction from drawings.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| Category filter | Pick I&C, Mechanical, or Procurement to narrow results. |
+| Subcategory filter | Drill into areas like Valve Sizing, SolidWorks, or RFQ. |
+| Search | Find prompts by keywords in the goal or body text. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Prompt cards | On-screen | Ready-to-copy templates with placeholders. |
+| Clipboard copy | Plain text | One click copies the full prompt. |
+| Markdown file | .md | Downloaded file uses the prompt title as the filename. |
+
+## How to use
+1. Open the utility and choose a discipline in the sidebar.
+2. Select a subcategory or type a keyword in the search bar.
+3. Click **Copy** to use the prompt, or **Save MD** to download it.
+4. Replace bracketed placeholders with project-specific values.
+
+**Example:** Filter **I&C Engineer → Valve Sizing**, copy the Cv calculation prompt, replace `[P1]`, `[P2]`, and `[Q]`, then paste into your AI tool.
+
+## Accuracy and verification
+- Prompts are templates only. Always verify outputs against your standards and calculations.
+- Remove confidential data before pasting prompts into any external system.
+- Keep unit systems consistent when filling in placeholders.
+
+## FAQ
+- **Does it run offline?** Yes. The prompt library is embedded and runs fully in the browser.
+- **Can I add my own prompts?** Not yet. This catalog is a fixed starter set.
+- **Will it store or upload my data?** No. Copying and downloads happen locally.
+- **Why are placeholders in brackets?** They are easy to scan and replace before use.
+
+## Related tools
+- [PDF Master](./pdf-master)
+- [Folder Structure Builder](./folder-structure-builder)
+- [WebDXF Editor](./dxf-editor)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `engineering-prompt-catalog` so we can reproduce the issue

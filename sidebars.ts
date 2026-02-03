@@ -37,6 +37,7 @@ const sidebars: SidebarsConfig = {
         'utilities/blind-flange-calculator',
         'utilities/tube-sheet-generator',
         'utilities/webstep-viewer',
+        'utilities/engineering-prompt-catalog',
         'utilities/dxf-editor',
         'utilities/file-renamer',
         'utilities/folder-structure-builder',
