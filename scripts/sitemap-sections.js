@@ -23,6 +23,31 @@ function extractUrls(xml) {
   return matches.map((match) => match[1]);
 }
 
+function shouldKeepUrlAsIs(url) {
+  const pathname = new URL(url).pathname;
+  if (pathname === '/' || pathname.endsWith('/')) {
+    return true;
+  }
+  const lastSegment = pathname.split('/').pop() || '';
+  return lastSegment.includes('.');
+}
+
+function ensureTrailingSlash(url) {
+  if (shouldKeepUrlAsIs(url)) {
+    return url;
+  }
+  const parsed = new URL(url);
+  parsed.pathname = `${parsed.pathname}/`;
+  return parsed.toString();
+}
+
+function normalizeSitemapXml(xml) {
+  return xml.replace(/<loc>([^<]+)<\/loc>/g, (_match, url) => {
+    const normalized = ensureTrailingSlash(url);
+    return `<loc>${normalized}</loc>`;
+  });
+}
+
 function getOrigin(urls) {
   const first = urls[0];
   if (!first) {
@@ -37,12 +62,13 @@ function groupUrls(urls) {
   groups.set('main', []);
 
   urls.forEach((url) => {
+    const normalized = ensureTrailingSlash(url);
     const pathname = new URL(url).pathname;
     const rule = SECTION_RULES.find((item) => pathname.startsWith(item.prefix));
     if (rule) {
-      groups.get(rule.name).push(url);
+      groups.get(rule.name).push(normalized);
     } else {
-      groups.get('main').push(url);
+      groups.get('main').push(normalized);
     }
   });
 
@@ -106,7 +132,9 @@ function writeSitemaps(groups, origin) {
 
 function main() {
   const xml = readSourceSitemap();
-  const urls = extractUrls(xml);
+  const normalizedXml = normalizeSitemapXml(xml);
+  fs.writeFileSync(SOURCE_SITEMAP, normalizedXml);
+  const urls = extractUrls(normalizedXml);
   const origin = getOrigin(urls);
   const groups = groupUrls(urls);
   writeSitemaps(groups, origin);
