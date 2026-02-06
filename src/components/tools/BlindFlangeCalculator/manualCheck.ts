@@ -16,8 +16,10 @@ import type {
   ManualBoltSummary,
   ManualCheckInput,
   ManualCheckResult,
+  ManualDeflectionCheck,
   ManualGeometryCheck,
   ManualGasketSummary,
+  ManualStressCheck,
   ManualThicknessSummary,
 } from './manualCheckTypes';
 

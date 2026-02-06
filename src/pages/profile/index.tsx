@@ -18,7 +18,7 @@ type Profile = {
 const shouldSilence = (message?: string | null) =>
   !message || message.toLowerCase().includes('auth session missing');
 
-export default function ProfilePage(): JSX.Element {
+export default function ProfilePage(): React.JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isEditing, setIsEditing] = useState(false);

@@ -17,7 +17,7 @@ function extractValue(code: string, key: string): number {
   return parseFloat(match[1]);
 }
 
-export function DxfCircleDemo(): JSX.Element {
+export function DxfCircleDemo(): React.JSX.Element {
   const {colorMode} = useColorMode();
   const isDark = colorMode === 'dark';
   const palette = isDark

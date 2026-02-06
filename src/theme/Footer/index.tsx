@@ -1,7 +1,9 @@
 import Footer from '@theme-original/Footer';
 import React from 'react';
 
-export default function FooterWrapper(props: Parameters<typeof Footer>[0]): JSX.Element {
+type FooterProps = React.ComponentProps<typeof Footer>;
+
+export default function FooterWrapper(props: FooterProps): React.JSX.Element {
   return (
     <>
       <Footer {...props} />

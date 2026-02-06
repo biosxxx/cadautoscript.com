@@ -6,7 +6,7 @@ import {useAuthStatus} from '@site/src/hooks/useAuthStatus';
 import {useUtilitiesAccess} from '@site/src/hooks/useUtilitiesAccess';
 import styles from './UtilityAccessTable.module.css';
 
-export default function UtilityAccessTable(): JSX.Element {
+export default function UtilityAccessTable(): React.JSX.Element {
   const {isAuthenticated, authChecked} = useAuthStatus();
   const {openLoginModal} = useAuthModal();
   const {utilitiesPublicAccess} = useUtilitiesAccess();

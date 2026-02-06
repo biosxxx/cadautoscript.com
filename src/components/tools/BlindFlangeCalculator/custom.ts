@@ -21,6 +21,7 @@ import type {
   BoltingSummary,
   CalculationInput,
   CalculationResult,
+  CustomSizingResult,
   En1092Dimensions,
   FastenerGradeId,
   FastenerStandard,
@@ -31,6 +32,7 @@ import type {
 } from './bfTypes';
 
 export type CustomPreference = 'min_weight' | 'min_bolts';
+export type {CustomSizingDebug, CustomSizingResult};
 
 export interface CustomSizingConfig {
   fastenerStandard: FastenerStandard;

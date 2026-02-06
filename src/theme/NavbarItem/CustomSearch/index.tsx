@@ -24,7 +24,7 @@ function useSearchResults(query: string) {
   }, [query]);
 }
 
-export default function CustomSearchNavbarItem({className, mobile}: Props): JSX.Element {
+export default function CustomSearchNavbarItem({className, mobile}: Props): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);

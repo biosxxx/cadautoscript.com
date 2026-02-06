@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import clsx from 'clsx';
 import {useHistory} from '@docusaurus/router';
 import type {User} from '@supabase/supabase-js';
+import DOMPurify from 'dompurify';
 import Layout from '@theme/Layout';
 import {supabase} from '@site/src/lib/supabaseClient';
 import {
@@ -21,7 +22,7 @@ type ProfileRow = {
   avatar_url: string | null;
   role: RoleValue | null;
   created_at: string | null;
-  email: string | null;
+  email?: string | null;
   last_seen_at?: string | null;
 };
 
@@ -61,7 +62,7 @@ type ActionState =
   | {kind: 'deleting'; targetId: string | null}
   | {kind: 'inviting'};
 
-export default function AdminPage(): JSX.Element {
+export default function AdminPage(): React.JSX.Element {
   const history = useHistory();
   const [sessionUser, setSessionUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
@@ -79,6 +80,19 @@ export default function AdminPage(): JSX.Element {
   const [utilitiesPublicAccess, setUtilitiesPublicAccess] = useState(DEFAULT_UTILITIES_PUBLIC_ACCESS);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
+
+  const normalizeProfile = useCallback(
+    (value: CommentRow['profiles'] | CommentRow['profiles'][] | null | undefined) =>
+      Array.isArray(value) ? value[0] ?? null : value ?? null,
+    [],
+  );
+
+  const sanitizeHtml = useCallback((value: string) => {
+    if (typeof DOMPurify.sanitize !== 'function') {
+      return value;
+    }
+    return DOMPurify.sanitize(value, {USE_PROFILES: {html: true}});
+  }, []);
 
   const loadProfiles = useCallback(async () => {
     setLoadingUsers(true);
@@ -227,7 +241,11 @@ export default function AdminPage(): JSX.Element {
         return;
       }
 
-      setData((prev) => ({...prev, comments: comments ?? []}));
+      const normalized = (comments ?? []).map((comment) => ({
+        ...comment,
+        profiles: normalizeProfile(comment.profiles),
+      }));
+      setData((prev) => ({...prev, comments: normalized}));
       setLoadingComments(false);
     };
 
@@ -459,7 +477,7 @@ export default function AdminPage(): JSX.Element {
                       <td>
                         <select
                           value={row.role || 'user'}
-                          onChange={(event) => handleRoleChange(row.id, event.target.value)}
+                          onChange={(event) => handleRoleChange(row.id, event.target.value as RoleValue)}
                           disabled={roleUpdating === row.id}
                           className={styles.roleSelect}
                         >
@@ -525,7 +543,7 @@ export default function AdminPage(): JSX.Element {
                           </div>
                         </td>
                         <td>
-                          <span dangerouslySetInnerHTML={{__html: row.content}} />
+                          <span dangerouslySetInnerHTML={{__html: sanitizeHtml(row.content)}} />
                         </td>
                         <td>{row.post_slug}</td>
                         <td>{formatDate(row.created_at)}</td>

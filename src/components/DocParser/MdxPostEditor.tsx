@@ -17,7 +17,7 @@ import remarkFrontmatter from 'remark-frontmatter';
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import clsx from 'clsx';
+import clsx, {type ClassValue} from 'clsx';
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import {
   AlertTriangle,
@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import styles from './MdxPostEditor.module.css';
 
-function cn(...values: Array<string | false | null | undefined>) {
+function cn(...values: ClassValue[]) {
   return clsx(values);
 }
 
@@ -489,6 +489,12 @@ export default function MdxPostEditor() {
         const line = model.getLineContent(position.lineNumber);
         const prefix = line.slice(0, position.column - 1);
         const suggestions: Monaco.languages.CompletionItem[] = [];
+        const range = new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column,
+        );
 
         if (prefix.includes('<') && !prefix.includes('>')) {
           const components = [
@@ -504,7 +510,7 @@ export default function MdxPostEditor() {
               kind: monaco.languages.CompletionItemKind.Class,
               insertText: comp.insert,
               insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              range: undefined,
+              range,
               detail: comp.detail,
             });
           }
@@ -517,6 +523,7 @@ export default function MdxPostEditor() {
               label: key,
               kind: monaco.languages.CompletionItemKind.Property,
               insertText: `${key}: `,
+              range,
               detail: 'Frontmatter',
             });
           }
@@ -527,6 +534,7 @@ export default function MdxPostEditor() {
             label: 'Insert image',
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: '![alt](url)',
+            range,
             detail: 'Markdown',
           },
           {
@@ -534,6 +542,7 @@ export default function MdxPostEditor() {
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: '`${1:code}`',
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            range,
             detail: 'Markdown',
           },
           {
@@ -541,6 +550,7 @@ export default function MdxPostEditor() {
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: '```$1\n$2\n```',
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            range,
             detail: 'Markdown',
           },
         );

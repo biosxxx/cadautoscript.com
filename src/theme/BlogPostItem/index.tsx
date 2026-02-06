@@ -6,7 +6,7 @@ import ReactionsBar from '@site/src/components/Reactions/ReactionsBar';
 import Comments from '@site/src/components/Comments';
 import styles from './styles.module.css';
 
-export default function BlogPostItemWrapper(props: Props): JSX.Element {
+export default function BlogPostItemWrapper(props: Props): React.JSX.Element {
   const {metadata, isBlogPostPage} = useBlogPost();
 
   return (

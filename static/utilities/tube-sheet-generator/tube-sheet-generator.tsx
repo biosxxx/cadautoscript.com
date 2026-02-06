@@ -225,13 +225,13 @@ const GeneratorContent = () => {
       try {
         // Динамический импорт Replicad
         const replicad = await import('replicad');
-        const { draw } = replicad;
+        const { drawCircle } = replicad;
 
         // 1. Создаем базовый эскиз (круг плиты)
         const boardRadius = params.boardDiameter / 2;
         const holeRadius = params.tubeDiameter / 2;
 
-        let mainSketch = draw().circle(boardRadius);
+        let mainSketch = drawCircle(boardRadius);
 
         // 2. Вычитаем отверстия на уровне 2D эскиза (быстрее, чем 3D булевы операции)
         // Для каждого отверстия создаем круг и помечаем как "hole" (вырез) внутри эскиза
@@ -249,12 +249,10 @@ const GeneratorContent = () => {
         // Рисуем базу, затем рисуем круги отверстий, затем Extrude.
         // Replicad (v0.x) обычно определяет вложенные контуры как отверстия автоматически.
         
-        let holesSketch = draw(); // Пустой эскиз для сбора отверстий
-        
         // ПРИМЕЧАНИЕ: Если отверстий очень много, можно делать батчами.
         tubeCoords.forEach(c => {
              // Добавляем круг в общий чертеж
-             const hole = draw().circle(holeRadius).translate(c.x, c.y);
+             const hole = drawCircle(holeRadius).translate(c.x, c.y);
              // "Вырезаем" этот круг из основного эскиза
              // В Replicad API: sketch.cut(otherSketch) работает для 2D
              mainSketch = mainSketch.cut(hole);

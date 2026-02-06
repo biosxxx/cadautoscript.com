@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Link from '@docusaurus/Link';
 import type {User} from '@supabase/supabase-js';
+import DOMPurify from 'dompurify';
 import {supabase} from '@site/src/lib/supabaseClient';
 import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import RichCommentInput, {type RichCommentInputHandle} from './RichCommentInput';
@@ -35,7 +36,7 @@ const formatTimestamp = (value: string) =>
     minute: '2-digit',
   });
 
-export default function Comments({slug}: Props): JSX.Element {
+export default function Comments({slug}: Props): React.JSX.Element {
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -56,6 +57,16 @@ export default function Comments({slug}: Props): JSX.Element {
     value?.full_name?.trim() ||
     'Anonymous';
 
+  const normalizeProfile = (value: Profile | Profile[] | null | undefined): Profile | null =>
+    Array.isArray(value) ? value[0] ?? null : value ?? null;
+
+  const sanitizeHtml = useCallback((value: string) => {
+    if (typeof DOMPurify.sanitize !== 'function') {
+      return value;
+    }
+    return DOMPurify.sanitize(value, {USE_PROFILES: {html: true}});
+  }, []);
+
   const fetchComments = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -75,7 +86,11 @@ export default function Comments({slug}: Props): JSX.Element {
       return;
     }
 
-    setComments(data ?? []);
+    const normalized = (data ?? []).map((comment) => ({
+      ...comment,
+      profiles: normalizeProfile(comment.profiles),
+    }));
+    setComments(normalized);
     setLoading(false);
   }, [slug]);
 
@@ -129,10 +144,11 @@ export default function Comments({slug}: Props): JSX.Element {
       return;
     }
 
-    const html = editorRef.current?.getHtml() ?? editorHtml ?? '';
-    const text = (editorRef.current?.getHtml() ?? editorHtml ?? '').replace(/<[^>]+>/g, '');
-    const hasImage = /<img/i.test(html);
-    if (!hasImage && (!text || text.trim().length === 0)) {
+    const html = editorRef.current?.getHtml?.() ?? editorHtml ?? '';
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const text = (doc.body.textContent ?? '').trim();
+    const hasImage = /<img\b/i.test(html);
+    if (!hasImage && text.length === 0) {
       setError('Please enter a comment before sending.');
       return;
     }
@@ -140,10 +156,11 @@ export default function Comments({slug}: Props): JSX.Element {
     setSubmitting(true);
     setError(null);
 
+    const sanitized = sanitizeHtml(html);
     const {error: insertError} = await supabase.from('comments').insert({
       user_id: user.id,
       post_slug: slug,
-      content: html,
+      content: sanitized,
     });
 
     if (insertError) {
@@ -288,7 +305,7 @@ export default function Comments({slug}: Props): JSX.Element {
                 </div>
                 <p
                   className={styles.content}
-                  dangerouslySetInnerHTML={{__html: rewriteQuotes(comment.content)}}
+                  dangerouslySetInnerHTML={{__html: sanitizeHtml(rewriteQuotes(comment.content))}}
                 />
               </div>
             </li>

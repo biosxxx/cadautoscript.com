@@ -19,7 +19,7 @@ const reportError = (message?: string) => {
   }
 };
 
-export default function NavbarAuth(): JSX.Element {
+export default function NavbarAuth(): React.JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);

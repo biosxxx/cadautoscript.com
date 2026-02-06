@@ -14,7 +14,7 @@ export function CirclePreview({
   background,
   border,
   textColor,
-}: Props): JSX.Element {
+}: Props): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {

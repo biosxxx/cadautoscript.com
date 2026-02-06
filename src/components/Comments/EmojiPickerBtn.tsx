@@ -1,13 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react';
-import EmojiPicker, {type CustomEmoji, type EmojiClickData} from 'emoji-picker-react';
+import EmojiPicker, {type EmojiClickData} from 'emoji-picker-react';
 import {supabase} from '@site/src/lib/supabaseClient';
 import styles from './Comments.module.css';
+
+type CustomEmoji = {
+  names: string[];
+  id: string;
+  imgUrl: string;
+};
 
 type Props = {
   onEmojiSelect: (emojiCode: string) => void;
 };
 
-export default function EmojiPickerBtn({onEmojiSelect}: Props): JSX.Element {
+export default function EmojiPickerBtn({onEmojiSelect}: Props): React.JSX.Element {
   const [customEmojis, setCustomEmojis] = useState<CustomEmoji[]>([]);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);

@@ -62,7 +62,7 @@ export function useAuthStatus(): AuthState {
 
       try {
         handledRedirect = true;
-        const {data, error} = await supabase.auth.exchangeCodeForSession({code});
+        const {data, error} = await supabase.auth.exchangeCodeForSession(code);
         if (error && !shouldSilence(error.message)) {
           console.error('[Supabase Auth] Unable to exchange code for session', error.message);
         }

@@ -5,7 +5,7 @@ import {useAuthModal} from '@site/src/contexts/AuthModalContext';
 import {getAuthRedirectUrl, rememberReturnTo} from '@site/src/utils/authRedirect';
 import styles from './LoginModal.module.css';
 
-const providers: Array<{provider: Provider; label: string; className: string; Icon: () => JSX.Element}> = [
+const providers: Array<{provider: Provider; label: string; className: string; Icon: () => React.JSX.Element}> = [
   {
     provider: 'github',
     label: 'Continue with GitHub',
@@ -46,7 +46,7 @@ const providers: Array<{provider: Provider; label: string; className: string; Ic
   },
 ];
 
-export default function LoginModal(): JSX.Element | null {
+export default function LoginModal(): React.JSX.Element | null {
   const {isOpen, closeLoginModal} = useAuthModal();
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +61,7 @@ export default function LoginModal(): JSX.Element | null {
       const redirectTo = getAuthRedirectUrl();
       const {error: signInError} = await supabase.auth.signInWithOAuth({
         provider,
-        options: {redirectTo, flowType: 'pkce'},
+        options: {redirectTo},
       });
       if (signInError) {
         throw signInError;
