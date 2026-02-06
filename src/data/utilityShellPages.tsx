@@ -20,6 +20,7 @@ export type UtilityPageSlug =
   | 'tube-sheet-generator'
   | 'webstep-viewer'
   | 'engineering-prompt-catalog'
+  | 'business-calendar-generator'
   | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
@@ -333,6 +334,25 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Instant search and prompt count',
       'Copy to clipboard or download Markdown',
       'Chart-driven category overview',
+    ],
+    scriptType: 'module',
+  },
+  'business-calendar-generator': {
+    slug: 'business-calendar-generator',
+    title: 'Business Calendar Generator',
+    subtitle: 'Web utility - Holiday-aware yearly calendar exports',
+    description:
+      'Build a yearly business calendar with country holidays, personalization, and PDF/PNG export.',
+    about:
+      'Select a country and year, set hours per day, add company branding and personal time off, and export a print-ready calendar.',
+    tags: ['Calendars', 'Planning', 'Exports'],
+    note:
+      'Runs entirely in the browser. Personalization and logos are stored locally until you clear them.',
+    features: [
+      'Country holiday presets + year selector',
+      'Personalization for vacation, sick days, and custom workdays',
+      'Company logo + theme/backdrop settings',
+      'PDF and PNG export with A-series sizes',
     ],
     scriptType: 'module',
   },

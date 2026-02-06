@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
         'utilities/tube-sheet-generator',
         'utilities/webstep-viewer',
         'utilities/engineering-prompt-catalog',
+        'utilities/business-calendar-generator',
         'utilities/dxf-editor',
         'utilities/file-renamer',
         'utilities/folder-structure-builder',

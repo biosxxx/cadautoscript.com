@@ -201,6 +201,16 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/engineering-prompt-catalog/',
   },
   {
+    id: 'business-calendar-generator',
+    name: 'Business Calendar Generator',
+    description:
+      'Generate a yearly business calendar with regional holidays, personalize time off, and export PDF or PNG.',
+    tech: 'React + PDF',
+    standards: 'Holiday-aware',
+    features: ['Country + year presets', 'Personalization + logo', 'PDF/PNG export'],
+    href: '/utilities/business-calendar-generator/',
+  },
+  {
     id: 'blind-flange-calculator',
     name: 'Blind Flange Calculator',
     description:
