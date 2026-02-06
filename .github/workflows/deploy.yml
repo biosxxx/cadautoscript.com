@@ -32,39 +32,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # for tests typecheck/lint/test
-      # - name: Typecheck
-      #   run: npm run typecheck --if-present
-      # - name: Lint
-      #   run: npm run lint --if-present
-      # - name: Test
-      #   run: npm test --if-present
-
-      - name: Build
-        run: npm run build
-
-      - name: Detect build output directory
-        id: outdir
+      - name: Create .env.local from GitHub Secrets
         shell: bash
         run: |
           set -euo pipefail
+          cat > .env.local <<'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          AUTH_REDIRECT_URL=${{ secrets.AUTH_REDIRECT_URL }}
+          EOF
 
-          # Добавь сюда свои варианты, если нужно
-          candidates=("build" "dist" "out" "public")
-
-          for d in "${candidates[@]}"; do
-            if [[ -d "$d" ]] && [[ -n "$(ls -A "$d" 2>/dev/null)" ]]; then
-              echo "Found output directory: $d"
-              echo "dir=$d" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
-
-          echo "ERROR: Build output directory not found."
-          echo "Looked for: ${candidates[*]}"
-          echo "Repo root listing:"
-          ls -la
-          exit 1
+      - name: Build
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -72,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ steps.outdir.outputs.dir }}
+          path: build
 
   deploy:
     runs-on: ubuntu-latest
