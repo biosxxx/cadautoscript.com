@@ -20,7 +20,9 @@ const sidebars: SidebarsConfig = {
       label: 'Guides',
       collapsed: false,
       items: [
-        'guides/vercel-web-analytics',
+        'guides/deploy-guide',
+        'guides/nodejs-npm-guide',
+        'guides/package-json-guide',
       ],
     },
     {
