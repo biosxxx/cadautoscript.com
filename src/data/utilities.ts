@@ -211,6 +211,16 @@ export const utilities: UtilityDescriptor[] = [
     href: '/utilities/business-calendar-generator/',
   },
   {
+    id: 'react-table-editor',
+    name: 'React Table Editor',
+    description:
+      'Open, edit, and validate tabular data in the browser with CSV/XLSX import and export workflows.',
+    tech: 'React + XLSX',
+    standards: 'Client-side data editing',
+    features: ['CSV/XLSX import', 'Inline cell editing', 'CSV/XLSX export'],
+    href: '/utilities/react-table-editor/',
+  },
+  {
     id: 'blind-flange-calculator',
     name: 'Blind Flange Calculator',
     description:

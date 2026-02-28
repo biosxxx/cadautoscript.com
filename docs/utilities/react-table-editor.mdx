@@ -1,0 +1,74 @@
+---
+title: React Table Editor
+description: Edit CSV and XLSX tables in the browser with import/export and inline validation workflows.
+slug: /utilities/react-table-editor
+keywords:
+  - table editor
+  - csv editor
+  - xlsx editor
+  - spreadsheet in browser
+  - data cleanup
+---
+
+# React Table Editor
+
+Open CSV or XLSX files, edit data inline, and export clean tables locally in the browser.
+
+<a className="button button--primary" href="/utilities/react-table-editor/" data-nobrokenlinkcheck>Open utility</a>
+
+## What it does
+- Imports tabular data from CSV and XLSX files.
+- Lets you edit cells inline and adjust rows/columns.
+- Supports client-side export back to CSV or XLSX.
+- Keeps data local without server-side upload.
+
+## When to use it (and when not to)
+**Use it when:**
+- You need quick cleanup of BOM, QA, or production tables.
+- You want to normalize spreadsheets before sharing with CAD/ERP flows.
+- You need browser-only editing without desktop office software.
+
+**Avoid it when:**
+- You need advanced spreadsheet formulas and pivots.
+- You need real-time multi-user collaboration.
+
+## Inputs and outputs
+### Inputs
+| Input | Description |
+| --- | --- |
+| CSV/XLSX file | Load one table for interactive editing. |
+| Manual edits | Update cells, column labels, and row values. |
+
+### Outputs
+| Output | Format | Notes |
+| --- | --- | --- |
+| Edited table | On-screen | Live grid preview with immediate updates. |
+| Exported file | CSV/XLSX | Save a cleaned dataset for downstream tools. |
+
+## How to use
+1. Import a CSV or XLSX file.
+2. Review the table and edit cells as needed.
+3. Add/remove rows or columns if your workflow requires restructuring.
+4. Export the final table to CSV or XLSX.
+
+## Accuracy and verification
+- Validate units, delimiters, and header names before exporting.
+- Re-open the exported file in your destination workflow to confirm compatibility.
+- Data stays in your browser session unless you export.
+
+## FAQ
+- **Does it upload my file?** No, processing runs locally in your browser.
+- **Which formats are supported?** CSV and XLSX.
+- **Can I edit formulas?** It is optimized for value editing, not advanced spreadsheet formula workflows.
+- **Can I use it offline?** If assets are cached and available locally in the browser, yes.
+
+## Related tools
+- [PDF BOM Extractor](./pdf-bom-extractor)
+- [Batch File Renamer](./file-renamer)
+
+## Changelog
+- Initial documentation.
+
+## Feedback / bug report
+- [Open a GitHub issue](https://github.com/biosxxx/cadautoscript.com/issues)
+- Email or DM with the slug `react-table-editor` so we can reproduce the issue

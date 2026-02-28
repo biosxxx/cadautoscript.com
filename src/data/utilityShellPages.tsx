@@ -21,6 +21,7 @@ export type UtilityPageSlug =
   | 'webstep-viewer'
   | 'engineering-prompt-catalog'
   | 'business-calendar-generator'
+  | 'react-table-editor'
   | 'blind-flange-calculator'
   | 'pressure-vessel-dished-end-calc';
 
@@ -354,6 +355,19 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
       'Company logo + theme/backdrop settings',
       'PDF and PNG export with A-series sizes',
     ],
+    scriptType: 'module',
+  },
+  'react-table-editor': {
+    slug: 'react-table-editor',
+    title: 'React Table Editor',
+    subtitle: 'Web utility - Edit CSV/XLSX tables directly in the browser',
+    description:
+      'Open, edit, filter, and export table data locally with CSV/XLSX support and no server upload.',
+    about:
+      'Load tabular files, update values inline, manage columns and rows, and export clean CSV or XLSX files. Useful for quick engineering logs, BOM cleanup, or QA data prep without desktop spreadsheet installs.',
+    tags: ['Tables', 'CSV/XLSX', 'Offline'],
+    note: 'Runs entirely in the browser. Imported files and edits stay local to your session.',
+    features: ['CSV/XLSX import', 'Inline cell editing', 'Column and row management', 'CSV/XLSX export'],
     scriptType: 'module',
   },
   'blind-flange-calculator': {
