@@ -72,7 +72,7 @@ export default function ConfigPanel({onOpenEdgePrep}: ConfigPanelProps) {
                 type="number"
                 value={config.diameterOuter}
                 onChange={(event) => setConfig({diameterOuter: Number(event.target.value)})}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-hidden"
               />
             </div>
 
@@ -82,7 +82,7 @@ export default function ConfigPanel({onOpenEdgePrep}: ConfigPanelProps) {
                 type="number"
                 value={config.thickness}
                 onChange={(event) => setConfig({thickness: Number(event.target.value)})}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-hidden"
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function ConfigPanel({onOpenEdgePrep}: ConfigPanelProps) {
                   setConfig({straightFlange: Number(event.target.value)});
                 }}
                 className={clsx(
-                  'w-full bg-neutral-900 border rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-none',
+                  'w-full bg-neutral-900 border rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-hidden',
                   showMinimumWarning ? 'border-amber-500/70' : 'border-neutral-700',
                 )}
               />
@@ -123,7 +123,7 @@ export default function ConfigPanel({onOpenEdgePrep}: ConfigPanelProps) {
             <select
               value={config.material}
               onChange={(event) => setConfig({material: event.target.value})}
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-hidden"
             >
               {MATERIALS.map((material) => (
                 <option key={material} value={material}>
@@ -145,7 +145,7 @@ export default function ConfigPanel({onOpenEdgePrep}: ConfigPanelProps) {
             <select
               value={config.edgePrep}
               onChange={(event) => setConfig({edgePrep: event.target.value as EdgePrep})}
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-blue-600 outline-hidden"
             >
               {EDGE_PREP_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>

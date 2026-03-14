@@ -131,7 +131,7 @@ export default function PrintReport({isVisible, onClose}: PrintReportProps) {
 
   return (
     <div className={containerClassName}>
-      <div className="print:hidden mb-6 flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-sm">
+      <div className="print:hidden mb-6 flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-xs">
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <Info size={18} className="text-blue-600" />
           <span>
@@ -217,7 +217,7 @@ export default function PrintReport({isVisible, onClose}: PrintReportProps) {
           </div>
         </div>
 
-        <div className="mb-6 border border-gray-300 rounded p-4 flex justify-center h-80">
+        <div className="mb-6 border border-gray-300 rounded-sm p-4 flex justify-center h-80">
           <svg viewBox={printViewBox} className="h-full w-auto">
             <line x1={center} y1={printMinY} x2={center} y2={printMinY + printHeight} stroke="#ccc" strokeDasharray="5,5" />
             <line x1={printMinX} y1={center} x2={printMinX + printWidth} y2={center} stroke="#ccc" strokeDasharray="5,5" />
@@ -252,7 +252,7 @@ export default function PrintReport({isVisible, onClose}: PrintReportProps) {
         </div>
 
         {config.edgePrep !== 'None' ? (
-          <div className="mb-6 border border-gray-300 rounded p-4">
+          <div className="mb-6 border border-gray-300 rounded-sm p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-lg">Weld Edge Preparation</h3>
               <span className="text-xs text-gray-600">

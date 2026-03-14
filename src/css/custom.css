@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 :root {
   --ifm-color-primary: #64ffda;
   --ifm-color-primary-dark: #39e7bb;
@@ -18,6 +18,13 @@
 body {
   background: var(--page-bg);
   color: #f3f6ff;
+}
+
+.site-container {
+  width: 100%;
+  max-width: var(--ifm-container-width);
+  margin: 0 auto;
+  padding: 0 var(--ifm-spacing-horizontal);
 }
 
 .navbar,
@@ -273,4 +280,10 @@ html[data-theme='light'] .navbar-sidebar__items .menu__link--active {
   border-radius: 20px;
   border: 1px solid var(--card-border);
   min-height: 420px;
+}
+
+@media (min-width: 1440px) {
+  .site-container {
+    max-width: var(--ifm-container-width-xl);
+  }
 }

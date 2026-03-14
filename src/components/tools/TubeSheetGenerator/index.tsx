@@ -95,7 +95,7 @@ const TubeSheetGeneratorContent = () => {
   };
 
   return (
-    <div className="container margin-vert--lg">
+    <div className="site-container margin-vert--lg">
       <div className="row">
         <div className="col col--4">
           <GeneratorForm params={params} onChange={handleChange} />

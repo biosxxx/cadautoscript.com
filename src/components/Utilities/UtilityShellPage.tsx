@@ -31,9 +31,10 @@ export default function UtilityShellPage({tool, ...config}: UtilityShellPageProp
     note,
     features,
     scriptType = 'module',
+    appPath,
   } = config;
 
-  const iframeSrc = useBaseUrl(`/utilities/${slug}/app.html`);
+  const iframeSrc = useBaseUrl(appPath ?? `/utility-apps/${slug}/app.html`);
   const stylesHref = useBaseUrl('/styles.css');
   const shellCssHref = useBaseUrl('/utilities/util-shell.css');
   const shellLightHref = useBaseUrl('/utilities/util-shell.light.css');

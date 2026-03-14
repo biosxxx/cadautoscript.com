@@ -9,7 +9,7 @@ import ManualCheckCharts from './ManualCheckCharts';
 import FlangeVisualizer from './FlangeVisualizer';
 
 const inputClass =
-  'w-full rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400';
+  'w-full rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-hidden focus:ring-1 focus:ring-cyan-400';
 
 const Field = ({
   label,

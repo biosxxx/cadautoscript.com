@@ -60,15 +60,15 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.22",
     "gh-pages": "^6.3.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.6.2"
   },
   "browserslist": {

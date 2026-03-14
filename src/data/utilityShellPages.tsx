@@ -36,6 +36,7 @@ export type UtilityPageConfig = {
   features?: string[];
   scriptType?: 'module' | 'defer';
   reactionSlug?: string;
+  appPath?: string;
 };
 
 export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
@@ -369,6 +370,7 @@ export const utilityPageConfigs: Record<UtilityPageSlug, UtilityPageConfig> = {
     note: 'Runs entirely in the browser. Imported files and edits stay local to your session.',
     features: ['CSV/XLSX import', 'Inline cell editing', 'Column and row management', 'CSV/XLSX export'],
     scriptType: 'module',
+    appPath: '/utility-apps/react-table-editor/app.html',
   },
   'blind-flange-calculator': {
     slug: 'blind-flange-calculator',

@@ -38,7 +38,7 @@ export default function NozzleManager() {
                 onChange={(event) =>
                   updateNozzle(nozzle.id, {size: event.target.value as NozzleSize})
                 }
-                className="w-full bg-neutral-800 border border-neutral-700 text-xs rounded p-1.5"
+                className="w-full bg-neutral-800 border border-neutral-700 text-xs rounded-sm p-1.5"
               >
                 {NOZZLE_SIZES.map((size) => (
                   <option key={size} value={size}>
@@ -52,13 +52,13 @@ export default function NozzleManager() {
                 type="number"
                 value={nozzle.offset}
                 onChange={(event) => updateNozzle(nozzle.id, {offset: Number(event.target.value)})}
-                className="w-full bg-neutral-800 border border-neutral-700 text-xs rounded p-1.5"
+                className="w-full bg-neutral-800 border border-neutral-700 text-xs rounded-sm p-1.5"
               />
             </div>
             <button
               type="button"
               onClick={() => removeNozzle(nozzle.id)}
-              className="p-1.5 text-red-400 hover:bg-red-400/10 rounded"
+              className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-sm"
               aria-label="Remove nozzle"
             >
               <Trash2 size={16} />

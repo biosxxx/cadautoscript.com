@@ -60,7 +60,7 @@ export default function AuthCallbackPage() {
 
   return (
     <Layout title="Completing sign in">
-      <main className="container margin-vert--lg">
+      <main className="site-container margin-vert--lg">
         {status === 'working' ? (
           <>
             <p>Completing sign in…</p>
